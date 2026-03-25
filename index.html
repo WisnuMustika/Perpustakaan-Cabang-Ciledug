@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <title>Sistem Internal Perpustakaan Ciledug 2026</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
+
+        /* --- DASHBOARD AWAL --- */
+        #dashboard {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(0,31,63,0.85), rgba(0,31,63,0.85)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover; color: white; text-align: center; padding: 20px;
+        }
+        .btn-enter { margin-top: 20px; padding: 15px 50px; background: #ff9800; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1.2rem; transition: 0.3s; }
+        .btn-enter:hover { background: #e68a00; transform: scale(1.05); }
+
+        /* --- LAYOUT UTAMA --- */
+        #app-container { display: none; height: 100vh; }
+        aside { 
+            width: 260px; background: #001f3f; height: 100vh; position: fixed; 
+            left: 0; top: 0; display: flex; flex-direction: column; padding: 20px 0;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 1000;
+        }
+        .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; color: white; text-align: center; }
+        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; }
+
+        aside button { background: none; border: none; color: #bdc3c7; padding: 15px 25px; text-align: left; cursor: pointer; font-size: 0.95rem; transition: 0.3s; width: 100%; display: flex; align-items: center; gap: 10px; }
+        aside button:hover { background: rgba(255,255,255,0.05); color: white; }
+        aside button.active { background: #ff9800; color: white; font-weight: bold; border-left: 5px solid #fff; }
+
+        main { margin-left: 260px; padding: 40px; min-height: 100vh; width: calc(100% - 260px); }
+        .page { display: none; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- KOMPONEN KARTU & TABEL --- */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; border-top: 5px solid #ff9800; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card h3 { color: #001f3f; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; }
+        
+        .section-title { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; font-weight: bold; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem; }
+        .result-box { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #001f3f; }
+
+        .table-container { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { background: #001f3f; color: white; padding: 15px; text-align: left; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        tr:hover { background-color: #f9f9f9; }
+
+        /* --- FORM INPUT --- */
+        .form-box { max-width: 550px; background: white; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #444; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: 0.3s; }
+        .form-group input:focus { border-color: #ff9800; outline: none; box-shadow: 0 0 5px rgba(255,152,0,0.2); }
+        .btn-save { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px; transition: 0.3s; }
+        .btn-save:hover { background: #218838; }
+
+        @media (max-width: 768px) { 
+            aside { width: 100%; height: auto; position: relative; } 
+            main { margin-left: 0; width: 100%; padding: 20px; } 
+            #app-container { flex-direction: column; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard">
+        <h1>SELAMAT DATANG</h1>
+        <p style="font-size: 1.2rem; letter-spacing: 2px;">PERPUSTAKAAN CABANG CILEDUG 2026</p>
+        <button class="btn-enter" onclick="startApp()">MASUK KE MENU UTAMA</button>
+    </div>
+
+    <div id="app-container">
+        <aside>
+            <div class="sidebar-header">
+                <h3>MENU UTAMA</h3>
+                <p>Created by Wisnu Mustika Adhi</p>
+            </div>
+            
+            <button onclick="switchPage('page-bulan')" id="nav-bulan">📊 Data Perbulan</button>
+            <button onclick="switchPage('page-all-staf')" id="nav-all-staf">👥 Data All Staf</button>
+            <button onclick="switchPage('page-rekap')" id="nav-rekap">📋 Rekap Laporan Harian</button>
+            <button onclick="switchPage('page-input')" id="nav-input">📝 Isi Laporan</button>
+            <button onclick="switchPage('page-monitoring')" id="nav-monitoring">🔍 Data Monitoring</button>
+            <button onclick="switchPage('page-sudah')" id="nav-sudah">✅ Sudah Di Monitoring</button>
+            <button onclick="switchPage('page-belum')" id="nav-belum">⚠️ Belum Di Monitoring</button>
+
+            <button onclick="location.reload()" style="margin-top:auto; color: #ff6b6b;">🚪 Keluar</button>
+        </aside>
+
+        <main>
+            <section id="page-bulan" class="page">
+                <h2 style="margin-bottom: 25px;">📊 Rekapitulasi Bulanan</h2>
+                <div id="grid-bulan" class="card-grid"></div>
+            </section>
+
+            <section id="page-all-staf" class="page">
+                <h2 style="margin-bottom: 25px;">👥 Performa Individual Staf</h2>
+                <div id="grid-all-staf" class="card-grid"></div>
+            </section>
+
+            <section id="page-rekap" class="page">
+                <h2 style="margin-bottom: 25px;">📋 Rekap Laporan Staf Perhari</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Staf</th>
+                                <th>Tanggal</th>
+                                <th>Kenaikan (PAR)</th>
+                                <th>Penurunan (PAR)</th>
+                                <th>Anggota Masuk</th>
+                                <th>Anggota Keluar</th>
+                                <th>Sisa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-rekap-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="page-monitoring" class="page">
+                <h2 style="margin-bottom: 25px;">🔍 Sisa Monitoring 2026</h2>
+                <div id="grid-monitoring" class="card-grid"></div>
+            </section>
+
+            <section id="page-sudah" class="page">
+                <h2 style="margin-bottom: 20px;">✅ Data Sudah Di Monitoring</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="search-sudah" onkeyup="filterSudahMonitoring()" 
+                           placeholder="Cari Nama Anggota atau Nama Staf di sini..." 
+                           style="width: 100%; padding: 12px; border: 2px solid #28a745; border-radius: 8px; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </div>
+            
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Anggota</th>
+                                <th>No.PINJAMAN</th>
+                                <th>Nama Anggota</th>
+                                <th>Center</th>
+                                <th>Kel</th>
+                                <th>Tgl Cair</th>
+                                <th>Nama Staf</th>
+                                <th>Tgl Di Monitoring</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-sudah-body">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="page-belum" class="page">
+                <h2 style="margin-bottom: 20px;">⚠️ Data Belum Di Monitoring</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="search-belum" onkeyup="filterBelumMonitoring()" 
+                           placeholder="Cari Nama Anggota atau No. Anggota di sini..." 
+                           style="width: 100%; padding: 12px; border: 2px solid #e67e22; border-radius: 8px; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                </div>
+            
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Anggota</th>
+                                <th>No. Pinjaman</th>
+                                <th>Nama Anggota</th>
+                                <th>CTR</th>
+                                <th>Tanggal Pencairan</th>
+                                <th>Nama Staf</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-belum-body">
+                            <tr><td>AGT/140/002/447-007400</td><td>PU-140-25-12-002104</td><td>KASTIYAH</td><td>447</td><td>05 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/447-010398</td><td>PU-140-25-12-002105</td><td>WARSITI</td><td>447</td><td>05 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/211-009197</td><td>PU-140-25-12-002107</td><td>SUTIJAH</td><td>211</td><td>06 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/499-010497</td><td>PU-140-25-12-002108</td><td>MARIA CEMPAKA SARI</td><td>499</td><td>06 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/383-009908</td><td>PU-140-25-12-002109</td><td>RENA</td><td>383</td><td>07 Januari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/197-005789</td><td>PU-140-25-12-002110</td><td>MAENAH</td><td>197</td><td>07 Januari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/512-009160</td><td>PU-140-25-12-002111</td><td>KOMARIYAH</td><td>512</td><td>07 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/516-010450</td><td>PU-140-26-01-000004</td><td>WADINAH</td><td>516</td><td>12 Januari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/075-008627</td><td>PU-140-26-01-000005</td><td>KUSMIATI</td><td>075</td><td>12 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/075-009395</td><td>PU-140-26-01-000006</td><td>WIWIN NURNENGSIH</td><td>075</td><td>12 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/323-010409</td><td>PU-140-26-01-000008</td><td>TARWINAH</td><td>323</td><td>14 Januari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/536-009387</td><td>PU-140-26-01-000015</td><td>SARNIAH</td><td>536</td><td>14 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/536-009391</td><td>PU-140-26-01-000016</td><td>ACIH</td><td>536</td><td>14 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/536-009393</td><td>PU-140-26-01-000017</td><td>RUMINAH</td><td>536</td><td>14 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/144-010502</td><td>PU-140-26-01-000018</td><td>UNAESIH</td><td>144</td><td>14 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/003/144-010503</td><td>PU-140-26-01-000019</td><td>ROSITA</td><td>144</td><td>14 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/491-010483</td><td>PU-140-26-01-000021</td><td>KURNIAH</td><td>491</td><td>14 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/245-010463</td><td>PU-140-26-01-000020</td><td>DARNITI</td><td>245</td><td>15 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/597-011111</td><td>PU-140-26-01-000022</td><td>YULIANTI</td><td>597</td><td>19 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/075-011112</td><td>PU-140-26-01-000023</td><td>NETI WARNETI</td><td>075</td><td>19 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/345-011113</td><td>PU-140-26-01-000024</td><td>TUTING NURHAENI</td><td>345</td><td>19 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/442-007329</td><td>PU-140-26-01-000025</td><td>WARTINI</td><td>442</td><td>19 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/345-010519</td><td>PU-140-26-01-000026</td><td>TOLIHA</td><td>345</td><td>19 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/003/547-010590</td><td>PU-140-26-01-000028</td><td>TARI</td><td>547</td><td>19 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/570-010517</td><td>PU-140-26-01-000033</td><td>ERNAWATI</td><td>570</td><td>19 Januari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/400-006532</td><td>PU-140-26-01-000029</td><td>ROHAYATI</td><td>402</td><td>20 Januari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/408-011114</td><td>PU-140-26-01-000030</td><td>DARSINAH</td><td>408</td><td>21 Januari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/383-009345</td><td>PU-140-26-01-000034</td><td>SAEMAH</td><td>383</td><td>21 Januari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/003/197-010524</td><td>PU-140-26-01-000035</td><td>MUHAESIH</td><td>197</td><td>21 Januari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/536-009390</td><td>PU-140-26-01-000036</td><td>ETIN</td><td>536</td><td>21 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/490-008437</td><td>PU-140-26-01-000040</td><td>DARKINI</td><td>149</td><td>22 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/072-010510</td><td>PU-140-26-01-000041</td><td>KHOTIMAH</td><td>072</td><td>22 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/255-009349</td><td>PU-140-26-01-000043</td><td>WIJAH</td><td>255</td><td>22 Januari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/230-008761</td><td>PU-140-26-01-000044</td><td>TUSINI</td><td>230</td><td>22 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/255-009412</td><td>PU-140-26-01-000047</td><td>TIUMAEROH</td><td>255</td><td>22 Januari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/572-011118</td><td>PU-140-26-01-000045</td><td>LILIS NURHAYATI</td><td>572</td><td>23 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/572-011119</td><td>PU-140-26-01-000046</td><td>NURHOLIDAH</td><td>572</td><td>23 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/432-011120</td><td>PU-140-26-01-000048</td><td>RUSNANI</td><td>432</td><td>26 Januari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/596-011121</td><td>PU-140-26-01-000049</td><td>ANITA </td><td>596</td><td>26 Januari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/199-011122</td><td>PU-140-26-01-000050</td><td>ERTI</td><td>199</td><td>26 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/570-011123</td><td>PU-140-26-01-000056</td><td>RATIAH</td><td>570</td><td>26 Januari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/530-010500</td><td>PU-140-26-01-000052</td><td>MUNIROH</td><td>530</td><td>27 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/530-010499</td><td>PU-140-26-01-000053</td><td>SANTI</td><td>530</td><td>27 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/611-011131</td><td>PU-140-26-01-000071</td><td>ROHANAH</td><td>611</td><td>27 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/611-011132</td><td>PU-140-26-01-000072</td><td>CARISAH</td><td>611</td><td>27 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/611-011135</td><td>PU-140-26-01-000074</td><td>RASTI</td><td>611</td><td>27 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/611-011136</td><td>PU-140-26-01-000075</td><td>CARSINAH</td><td>611</td><td>27 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/607-011124</td><td>PU-140-26-01-000054</td><td>KARISAH</td><td>607</td><td>28 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/607-011125</td><td>PU-140-26-01-000055</td><td>MUTI MUTIARA</td><td>607</td><td>28 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/584-011126</td><td>PU-140-26-01-000057</td><td>SURWI</td><td>584</td><td>28 Januari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/491-010486</td><td>PU-140-26-01-000060</td><td>RANTI</td><td>491</td><td>28 Januari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/323-005153</td><td>PU-140-26-01-000061</td><td>SUKINAH</td><td>323</td><td>28 Januari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/560-010467</td><td>PU-140-26-01-000062</td><td>TUMINI</td><td>560</td><td>28 Januari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/500-008662</td><td>PU-140-26-01-000063</td><td>LESIH</td><td>500</td><td>28 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/247-009382</td><td>PU-140-26-01-000065</td><td>MARSATI</td><td>247</td><td>29 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/497-011137</td><td>PU-140-26-01-000076</td><td>CARTINAH</td><td>497</td><td>30 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/412-007695</td><td>PMB-140-26-01-000001</td><td>RENCANA BAKTI</td><td>412</td><td>15 Januari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/596-011138</td><td>PU-140-26-01-000078</td><td>KURNIA </td><td>596</td><td>02 Februari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/570-011140</td><td>PU-140-26-01-000086</td><td>MULYATI</td><td>570</td><td>02 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/570-011141</td><td>PU-140-26-01-000087</td><td>TANENGSIH</td><td>570</td><td>02 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/570-011142</td><td>PU-140-26-01-000088</td><td>WAWA RAHMAWATI</td><td>570</td><td>02 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/597-011139</td><td>PU-140-26-01-000089</td><td>WATI</td><td>597</td><td>02 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002./128-008807</td><td>PU-140-26-01-000090</td><td>TINI WARTINI</td><td>128</td><td>02 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/075-009454</td><td>PU-140-26-01-000091</td><td>DEDE NUR IS HIDAYANI</td><td>075</td><td>02 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/370-006064</td><td>PU-140-26-01-000093</td><td>ROKMAH</td><td>370</td><td>02 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/601-010841</td><td>PU-140-26-01-000097</td><td>ROSNAENI</td><td>601</td><td>03 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/601-010837</td><td>PU-140-26-01-000098</td><td>CETI</td><td>601</td><td>03 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/402-010614</td><td>PU-140-26-01-000105</td><td>NURAENI</td><td>402</td><td>03 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/530-009244</td><td>PU-140-26-01-000106</td><td>INDAH PURNAMASARI</td><td>530</td><td>03 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/530-010498</td><td>PU-140-26-01-000107</td><td>IROH</td><td>530</td><td>03 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/530-010550</td><td>PU-140-26-01-000108</td><td>CARSINAH</td><td>530</td><td>03 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/499-008639</td><td>PU-140-26-01-000109</td><td>TARMINI</td><td>499</td><td>03 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/293-011148</td><td>PU-140-26-01-000103</td><td>CASLIAH</td><td>293</td><td>04 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/293-011149</td><td>PU-140-26-01-000104</td><td>DARYEM</td><td>293</td><td>04 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/578-011150</td><td>PU-140-26-01-000111</td><td>RIDAH</td><td>578</td><td>04 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/578-011151</td><td>PU-140-26-01-000112</td><td>RITA</td><td>578</td><td>04 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/491-010530</td><td>PU-140-26-01-000118</td><td>TASINI</td><td>491</td><td>04 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/491-010488</td><td>PU-140-26-01-000119</td><td>ECIH SUKAESIH</td><td>491</td><td>04 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/076-005294</td><td>PU-140-26-01-000122</td><td>JUHAENAH</td><td>383</td><td>04 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/322-005140</td><td>PU-140-26-01-000125</td><td>WASTIAH</td><td>323</td><td>04 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/323-010509</td><td>PU-140-26-01-000126</td><td>DASPI</td><td>323</td><td>04 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/072-009447</td><td>PU-140-26-01-000128</td><td>SARNIAH</td><td>072</td><td>05 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/450-009347</td><td>PU-140-26-01-000129</td><td>TITIN ROHENI</td><td>450</td><td>05 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/567-010478</td><td>PU-140-26-01-000132</td><td>DAHLIA</td><td>551</td><td>05 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/504-011152</td><td>PU-140-26-01-000130</td><td>SUMIYATI</td><td>504</td><td>06 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/504-008700</td><td>PU-140-26-01-000133</td><td>JUHANI</td><td>504</td><td>06 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/504-008696</td><td>PU-140-26-01-000134</td><td>KUSRINI</td><td>504</td><td>06 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/573-011153</td><td>PU-140-26-02-000135</td><td>LINTANG ARISTA</td><td>573</td><td>09 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/345-011154</td><td>PU-140-26-02-000136</td><td>TARINI</td><td>345</td><td>09 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/537-009463</td><td>PU-140-26-02-000140</td><td>LINA MARLINA</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/130-007834</td><td>PU-140-26-02-000141</td><td>MAYA SARI</td><td>130</td><td>09 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/345-008547</td><td>PU-140-26-02-000142</td><td>UMU AZIZAH</td><td>345</td><td>09 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/345-009324</td><td>PU-140-26-02-000143</td><td>FATIMAH</td><td>345</td><td>09 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/537-009460</td><td>PU-140-26-02-000144</td><td>IRAWATI</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/537-009465</td><td>PU-140-26-02-000145</td><td>EUIS ERNAWATI</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/537-009462</td><td>PU-140-26-02-000146</td><td>NOVITA DIANASARI</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/532-010545</td><td>PU-140-26-02-000147</td><td>NURUL MAHMUDAH</td><td>532</td><td>09 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/547-010514</td><td>PU-140-26-02-000148</td><td>RUSWINI</td><td>547</td><td>09 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/547-010515</td><td>PU-140-26-02-000149</td><td>MAYASARI</td><td>547</td><td>09 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/304-008973</td><td>PU-140-26-02-000150</td><td>DARWI</td><td>304</td><td>09 Februari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/570-010035</td><td>PU-140-26-02-000156</td><td>DARSINI</td><td>570</td><td>09 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/570-010040</td><td>PU-140-26-02-000157</td><td>ISKALIYANTI</td><td>570</td><td>09 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/537-009467</td><td>PU-140-26-02-000158</td><td>KARNATI</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/554-010516</td><td>PU-140-26-02-000172</td><td>CASIDAH</td><td>554</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/537-009466</td><td>PU-140-26-02-000173</td><td>CARTINI</td><td>537</td><td>09 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/211-011155</td><td>PU-140-26-02-000137</td><td>RINAH</td><td>211</td><td>10 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/583-011156</td><td>PU-140-26-02-000138</td><td>ISKI AVIANANDA PUTRI</td><td>583</td><td>10 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/583-011157</td><td>PU-140-26-02-000139</td><td>WIDIA ANDAYANI</td><td>583</td><td>10 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/530-010501</td><td>PU-140-26-02-000151</td><td>ERLYNAH</td><td>530</td><td>10 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/530-010549</td><td>PU-140-26-02-000152</td><td>LAILATUL MUNAWARATUL HASANAH</td><td>530</td><td>10 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/556-010898</td><td>PU-140-26-02-000153</td><td>WIWI ANTIKA</td><td>556</td><td>10 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/581-010522</td><td>PU-140-26-02-000181</td><td>SITI RAHMAH</td><td>581</td><td>10 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/137-011158</td><td>PU-140-26-02-000154</td><td>SAERAH</td><td>137</td><td>11 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/137-010885</td><td>PU-140-26-02-000159</td><td>SINTA</td><td>137</td><td>11 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/525-009323</td><td>PU-140-26-02-000161</td><td>RATNANINGSIH</td><td>525</td><td>11 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/612-011161</td><td>PU-140-26-02-000162</td><td>RODIAH</td><td>612</td><td>11 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/612-011162</td><td>PU-140-26-02-000163</td><td>RINDI ASMALA SARI</td><td>612</td><td>11 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/612-011163</td><td>PU-140-26-02-000164</td><td>TITIN KUSMIATIN</td><td>612</td><td>11 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/612-011165</td><td>PU-140-26-02-000165</td><td>JUNIRAH</td><td>612</td><td>11 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/612-011167</td><td>PU-140-26-02-000167</td><td>ROHANI</td><td>612</td><td>11 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/391-008469</td><td>PU-140-26-02-000168</td><td>TASMIAH</td><td>391</td><td>11 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/264-009448</td><td>PU-140-26-02-000170</td><td>YANI HERMAWATI</td><td>264</td><td>12 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/264-010555</td><td>PU-140-26-02-000171</td><td>CARINI</td><td>264</td><td>12 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/003/392-007074</td><td>PU-140-26-02-000177</td><td>PINI SEPTIPORYANTI</td><td>392</td><td>12 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/545-011168</td><td>PU-140-26-02-000176</td><td>KOWIYAH</td><td>545</td><td>13 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/497-011169</td><td>PU-140-26-02-000178</td><td>JUMATI</td><td>497</td><td>13 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/497-011170</td><td>PU-140-26-02-000179</td><td>TATI HARIYATI</td><td>497</td><td>13 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/497-011171</td><td>PU-140-26-02-000180</td><td>IRMAWATI</td><td>497</td><td>13 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/502-008677</td><td>PU-140-26-02-000182</td><td>SITI NURHASANAH</td><td>502</td><td>13 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/502-008676</td><td>PU-140-26-02-000183</td><td>ROHETI</td><td>502</td><td>13 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/597-011172</td><td>PU-140-26-02-000184</td><td>LIA</td><td>597</td><td>16 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/532-011174</td><td>PU-140-26-02-000186</td><td>TITIN CHRISTINA</td><td>532</td><td>16 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/530-009243</td><td>PU-140-26-02-000188</td><td>YANI</td><td>530</td><td>17 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/402-010613</td><td>PU-140-26-02-000189</td><td>SUANAH</td><td>402</td><td>17 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/593-010603</td><td>PU-140-26-02-000193</td><td>SRI MURNI</td><td>593</td><td>17 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/579-010521</td><td>PU-140-26-02-000194</td><td>SUCITRA KHARISMA DEWI</td><td>579</td><td>17 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/592-010599</td><td>PU-140-26-02-000195</td><td>SITI MASITOH</td><td>593</td><td>17 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/593-010602</td><td>PU-140-26-02-000196</td><td>KOKOM KOMARIAH</td><td>593</td><td>17 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/593-010600</td><td>PU-140-26-02-000197</td><td>ROHAYATI</td><td>593</td><td>17 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/211-008377</td><td>PU-140-26-02-000214</td><td>TITIN HAERIAH</td><td>211</td><td>17 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/500-011175</td><td>PU-140-26-02-000190</td><td>TARMI</td><td>500</td><td>18 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/144-010554</td><td>PU-140-26-02-000191</td><td>SUKI</td><td>144</td><td>18 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/003/144-010553</td><td>PU-140-26-02-000192</td><td>KASTIAH</td><td>144</td><td>18 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/039-010552</td><td>PU-140-26-02-000198</td><td>NURYATI</td><td>039</td><td>18 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/039-009251</td><td>PU-140-26-02-000199</td><td>DEWI ANJANI</td><td>039</td><td>18 Februari 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/123-008334</td><td>PU-140-26-02-000202</td><td>SUTENI</td><td>123</td><td>18 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/123-010617</td><td>PU-140-26-02-000203</td><td>PIPIT PITRIANI DEWI</td><td>123</td><td>18 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/123-008332</td><td>PU-140-26-02-000204</td><td>DARNATI</td><td>123</td><td>18 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/123-010616</td><td>PU-140-26-02-000205</td><td>SUTINI</td><td>123</td><td>18 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/003/197-008296</td><td>PU-140-26-02-000206</td><td>YENI UMAYENI</td><td>197</td><td>18 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/003/500-010564</td><td>PU-140-26-02-000207</td><td>SUSILAWATI</td><td>500</td><td>18 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/245-009508</td><td>PU-140-26-02-000213</td><td>ROIKAH</td><td>245</td><td>19 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/149-007986</td><td>PU-140-26-02-000216</td><td>WINARTI</td><td>149</td><td>19 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/003/414-010571</td><td>PU-140-26-02-000217</td><td>WARIAH</td><td>414</td><td>19 Februari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/473-010541</td><td>PU-140-26-02-000218</td><td>SITI KURNIASIH</td><td>473</td><td>20 Februari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/003/497-008748</td><td>PU-140-26-02-000220</td><td>ANI</td><td>497</td><td>20 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/497-008751</td><td>PU-140-26-02-000221</td><td>MUNIPAH</td><td>497</td><td>20 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/003/497-010657</td><td>PU-140-26-02-000222</td><td>HEERLINA</td><td>497</td><td>20 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/532-010544</td><td>PU-140-26-02-000226</td><td>SULISTIA ALFIAN</td><td>532</td><td>23 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/432-010639</td><td>PU-140-26-02-000235</td><td>KARSINI</td><td>432</td><td>23 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/432-010604</td><td>PU-140-26-02-000236</td><td>RUMINAH</td><td>432</td><td>23 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/357-010605</td><td>PU-140-26-02-000250</td><td>DIAN PERMATA SARI</td><td>357</td><td>23 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/092-011178</td><td>PU-140-26-02-000224</td><td>SUHIDAH</td><td>092</td><td>24 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/092-011179</td><td>PU-140-26-02-000225</td><td>KASDINAH</td><td>092</td><td>24 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/556-010320</td><td>PU-140-26-02-000229</td><td>ENDANG RAHMAH</td><td>556</td><td>24 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/559-009862</td><td>PU-140-26-02-000230</td><td>NURILAH</td><td>559</td><td>24 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/556-010974</td><td>PU-140-26-02-000237</td><td>EEM SUHEMI</td><td>556</td><td>24 Februari 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/565-011180</td><td>PU-140-26-02-000238</td><td>SUHETI</td><td>565</td><td>25 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/293-011181</td><td>PU-140-26-02-000239</td><td>RANTI</td><td>293</td><td>25 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/565-010622</td><td>PU-140-26-02-000242</td><td>JAHRO</td><td>565</td><td>25 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/021-009544</td><td>PU-140-26-02-000243</td><td>DINA ALINAYAH</td><td>021</td><td>25 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/021-009565</td><td>PU-140-26-02-000244</td><td>SRI MULYATI</td><td>021</td><td>25 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/003/197-008298</td><td>PU-140-26-02-000245</td><td>YUSKIYAH</td><td>197</td><td>25 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/003/323-009320</td><td>PU-140-26-02-000246</td><td>SILAH</td><td>323</td><td>25 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/144-010677</td><td>PU-140-26-02-000247</td><td>IDA YETI</td><td>144</td><td>25 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/391-010637</td><td>PU-140-26-02-000248</td><td>ISMI FITRIANI</td><td>391</td><td>25 Februari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/592-010578</td><td>PU-140-26-02-000267</td><td>KESIH</td><td>592</td><td>25 Februari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/454-007563</td><td>PU-140-26-02-000251</td><td>MALIKHA</td><td>454</td><td>26 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/454-007556</td><td>PU-140-26-02-000252</td><td>CUWI</td><td>454</td><td>26 Februari 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/247-009517</td><td>PU-140-26-02-000253</td><td>WIRON</td><td>247</td><td>26 Februari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/272-009311</td><td>PU-140-26-02-000254</td><td>SUMIRAH</td><td>272</td><td>26 Februari 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/003/411-006880</td><td>PU-140-26-02-000255</td><td>WARTIAH</td><td>538</td><td>26 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/538-009500</td><td>PU-140-26-02-000256</td><td>KURNIAWATI</td><td>538</td><td>26 Februari 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/473-007994</td><td>PU-140-26-02-000263</td><td>LISJANATIN</td><td>473</td><td>27 Februari 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/504-008695</td><td>PU-140-26-02-000269</td><td>RINI</td><td>504</td><td>27 Februari 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/597-011182</td><td>PU-140-26-02-000270</td><td>KANIRAH</td><td>597</td><td>02 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/501-008665</td><td>PU-140-26-02-000273</td><td>SRI HAYATI</td><td>501</td><td>02 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/537-009461</td><td>PU-140-26-02-000274</td><td>JUMYATI</td><td>537</td><td>02 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/532-010559</td><td>PU-140-26-02-000275</td><td>ENAH</td><td>532</td><td>02 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/418-006843</td><td>PU-140-26-02-000276</td><td>RUKINAH</td><td>418</td><td>02 Maret 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
+<tr><td>AGT/140/001/075-007872</td><td>PU-140-26-02-000277</td><td>RAHMANIAR</td><td>075</td><td>02 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/503-008686</td><td>PU-140-26-02-000278</td><td>CALI</td><td>503</td><td>02 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/593-011183</td><td>PU-140-26-02-000271</td><td>HENI SUHAENI</td><td>593</td><td>03 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/601-011184</td><td>PU-140-26-02-000272</td><td>UUM UMIATI</td><td>601</td><td>03 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/583-011185</td><td>PU-140-26-02-000279</td><td>JUHAERIAH</td><td>583</td><td>03 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/003/092-003342</td><td>PU-140-26-02-000280</td><td>YENI SUHESTI</td><td>092</td><td>03 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/530-009440</td><td>PU-140-26-02-000281</td><td>SARNITI</td><td>530</td><td>03 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/530-009495</td><td>PU-140-26-02-000282</td><td>WIRAH</td><td>530</td><td>03 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/355-007823</td><td>PU-140-26-02-000283</td><td>KURNAENINGSIH</td><td>355</td><td>03 Maret 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/556-010260</td><td>PU-140-26-02-000284</td><td>RONDASIH</td><td>556</td><td>03 Maret 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/556-010956</td><td>PU-140-26-02-000285</td><td>TRIANTI</td><td>556</td><td>03 Maret 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/499-010612</td><td>PU-140-26-02-000286</td><td>MARYANAH</td><td>499</td><td>03 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/002/592-010576</td><td>PU-140-26-02-000287</td><td>DEWI HARUMYATI</td><td>592</td><td>04 Maret 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/408-006696</td><td>PU-140-26-02-000288</td><td>SRI MULYANI</td><td>408</td><td>04 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/408-008442</td><td>PU-140-26-02-000289</td><td>NUR AENI</td><td>408</td><td>04 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/575-010582</td><td>PU-140-26-02-000291</td><td>ANITA SARI</td><td>575</td><td>04 Maret 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/002/575-010620</td><td>PU-140-26-02-000292</td><td>DIYAH ESTI USTAMI</td><td>575</td><td>04 Maret 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/003/144-010504</td><td>PU-140-26-02-000293</td><td>TARSINI</td><td>144</td><td>04 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/500-008737</td><td>PU-140-26-02-000294</td><td>SITI ANAH</td><td>500</td><td>04 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/536-009389</td><td>PU-140-26-02-000295</td><td>KOMARIAH</td><td>536</td><td>04 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/021-009543</td><td>PU-140-26-02-000307</td><td>SANIRI</td><td>021</td><td>04 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/212-008805</td><td>PU-140-26-02-000296</td><td>SAENI</td><td>212</td><td>05 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/247-010652</td><td>PU-140-26-02-000297</td><td>RITA</td><td>247</td><td>05 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/538-009503</td><td>PU-140-26-02-000301</td><td>SUMIYATI</td><td>538</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/538-009502</td><td>PU-140-26-02-000302</td><td>NOVITARIA</td><td>538</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/538-009499</td><td>PU-140-26-02-000303</td><td>HIDAYATI</td><td>538</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/184-010589</td><td>PU-140-26-02-000304</td><td>ECOH SUTARSIH</td><td>184</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/506-010950</td><td>PU-140-26-02-000305</td><td>SRI RUMIYATI</td><td>506</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/492-008498</td><td>PU-140-26-02-000306</td><td>UUN</td><td>506</td><td>05 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/518-009267</td><td>PU-140-26-02-000309</td><td>SAMIRAH</td><td>594</td><td>06 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/594-010628</td><td>PU-140-26-02-000310</td><td>CASMAH</td><td>594</td><td>06 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/594-010633</td><td>PU-140-26-02-000311</td><td>SUNENTI</td><td>594</td><td>06 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/594-010626</td><td>PU-140-26-02-000312</td><td>RINAH</td><td>594</td><td>06 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/545-009610</td><td>PU-140-26-02-000313</td><td>DASIAH</td><td>545</td><td>06 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/504-008701</td><td>PU-140-26-02-000314</td><td>DINI BERKAH</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/002/504-008698</td><td>PU-140-26-02-000315</td><td>RASNITI</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="page-input" class="page">
+                <div class="form-box">
+                    <h2 style="margin-bottom: 20px; border-left: 5px solid #ff9800; padding-left: 15px;">Input Laporan Baru</h2>
+                    
+                    <div class="form-group">
+                        <label>Pilih Nama Staf Pelapor</label>
+                        <select id="in-staf">
+                            <option value="" disabled selected>-- Pilih Nama Staf --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pilih Tanggal Laporan</label>
+                        <input type="date" id="in-tanggal">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Kenaikan PAR</label>
+                            <input type="number" id="in-naik" placeholder="Masukan Data">
+                        </div>
+                        <div class="form-group">
+                            <label>Penurunan PAR</label>
+                            <input type="number" id="in-turun" placeholder="Masukan Data">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Anggota Masuk</label>
+                            <input type="number" id="in-agt-masuk" placeholder="Masukan Data">
+                        </div>
+                        <div class="form-group">
+                            <label>Anggota Keluar</label>
+                            <input type="number" id="in-agt-keluar" placeholder="Masukan Data">
+                        </div>
+                    </div>
+
+                    <button class="btn-save" onclick="prosesSimpan()">SIMPAN DATA LAPORAN</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA DASAR ---
+        const daftarNamaStaf = [
+            "CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", 
+            "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", 
+            "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", 
+            "LOLA DWI SETIAWAN", "RANGGA ERLANDO"
+        ];
+
+        const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        // Database Bulanan Utama
+        let databaseBulan = [
+            { bulan: "Januari", out: 0, naik: 75067200, turun: 42660500, totalAgt: 3258, agtMasuk: 43, agtKeluar: 66, sisaMon: 44 },
+            { bulan: "Februari", out: 0, naik: 56215700, turun: 60482700, totalAgt: 3260, agtMasuk: 33, agtKeluar: 62, sisaMon: 137 }
+        ];
+
+        let databaseStaf = daftarNamaStaf.map(nama => ({
+            nama: nama,
+            laporanBulanan: daftarBulan.map(bulan => ({
+                bulan: bulan, naik: 0, turun: 0, masuk: 0, keluar: 0, out: 0
+            }))
+        }));
+
+        function isiData(namaStaf, indexBulan, data) {
+            const indexStaf = daftarNamaStaf.indexOf(namaStaf);
+            if (indexStaf !== -1) {
+                databaseStaf[indexStaf].laporanBulanan[indexBulan] = {
+                    bulan: daftarBulan[indexBulan],
+                    naik: data.naik || 0,
+                    turun: data.turun || 0,
+                    masuk: data.masuk || 0,
+                    keluar: data.keluar || 0,
+                    out: data.out || 0
+                };
+            }
+        }
+
+        // JANUARI 2026
+        isiData("CASDI", 0, { naik: 1778000, turun: 2923500, masuk: 3, keluar: 7, out: 0 });
+        isiData("NONO SUTRISNO", 0, { naik: 1722200, turun: 6377200, masuk: 2, keluar: 2, out: 0 });
+        isiData("JOKO PRASETYO", 0, { naik: 13352600, turun: 4859900, masuk: 2, keluar: 5, out: 0 });
+        isiData("ISET PANJI NUGRAHA", 0, { naik: 6046600, turun: 6239400, masuk: 4, keluar: 5, out: 0 });
+        isiData("EKA RAMADHAN", 0, { naik: 11599100, turun: 3054900, masuk: 4, keluar: 7, out: 0 });
+        isiData("PERDI IRAWAN SAPUTRA", 0, { naik: 430800, turun: 2098000, masuk: 8, keluar: 8, out: 0 });
+        isiData("HERI APRIYOGO", 0, { naik: 6670700, turun: 2842500, masuk: 2, keluar: 4, out: 0 });
+        isiData("RAFID MALIK RIZQULLAH S", 0, { naik: 15211000, turun: 5435800, masuk: 1, keluar: 2, out: 0 });
+        isiData("MUHAMMAD SANDI", 0, { naik: 6616900, turun: 2903700, masuk: 2, keluar: 10, out: 0 });
+        isiData("ELPHINA DAMAYANTI", 0, { naik: 11639300, turun: 5017500, masuk: 11, keluar: 9, out: 0 });
+        isiData("LOLA DWI SETIAWAN", 0, { naik: 0, turun: 710400, masuk: 4, keluar: 6, out: 0 });
+        isiData("RANGGA ERLANDO", 0, { naik: 0, turun: 197700, masuk: 0, keluar: 1, out: 0 });
+        
+        // FEBRUARI 2026
+        isiData("CASDI", 1, { naik: 160000, turun: 2727800, masuk: 2, keluar: 8, out: 0 });
+        isiData("NONO SUTRISNO", 1, { naik: 5335600, turun: 8060200, masuk: 4, keluar: 10, out: 0 });
+        isiData("JOKO PRASETYO", 1, { naik: 3536600, turun: 2907800, masuk: 0, keluar: 4, out: 0 });
+        isiData("ISET PANJI NUGRAHA", 1, { naik: 7585000, turun: 5659500, masuk: 5, keluar: 2, out: 0 });
+        isiData("EKA RAMADHAN", 1, { naik: 3030000, turun: 3815700, masuk: 1, keluar: 6, out: 00 });
+        isiData("PERDI IRAWAN SAPUTRA", 1, { naik: 1816000, turun: 2000600, masuk: 3, keluar: 4, out: 0 });
+        isiData("HERI APRIYOGO", 1, { naik: 6829400, turun: 754000, masuk: 0, keluar: 8, out: 21600000 });
+        isiData("RAFID MALIK RIZQULLAH S", 1, { naik: 12314200, turun: 15271600, masuk: 4, keluar: 4, out: 0 });
+        isiData("MUHAMMAD SANDI", 1, { naik: 7205200, turun: 5567200, masuk: 1, keluar: 6, out: 0 });
+        isiData("ELPHINA DAMAYANTI", 1, { naik: 2976800, turun: 5016800, masuk: 11, keluar: 6, out: 0 });
+        isiData("LOLA DWI SETIAWAN", 1, { naik: 4132900, turun: 2593800, masuk: 2, keluar: 3, out: 0 });
+        isiData("RANGGA ERLANDO", 1, { naik: 1294000, turun: 6107700, masuk: 0, keluar: 1, out: 0 });
+
+        const dataStafMon = [
+            { nama: "CASDI", cair: 28, sudah: 3, sisa: 25 },
+            { nama: "NONO SUTRISNO", cair: 30, sudah: 0, sisa: 30 },
+            { nama: "JOKO PRASETYO", cair: 9, sudah: 9, sisa: 0 },
+            { nama: "ISET PANJI NUGRAHA", cair: 29, sudah: 0, sisa: 29 },
+            { nama: "EKA RAMADHAN", cair: 32, sudah: 13, sisa: 19 },
+            { nama: "PERDI IRAWAN SAPUTRA", cair: 26, sudah: 19, sisa: 7 },
+            { nama: "HERI APRIYOGO", cair: 17, sudah: 0, sisa: 17 },
+            { nama: "RAFID MALIK RIZQULLAH S", cair: 29, sudah: 0, sisa: 29 },
+            { nama: "MUHAMMAD SANDI", cair: 19, sudah: 4, sisa: 15 },
+            { nama: "ELPHINA DAMAYANTI", cair: 41, sudah: 13, sisa: 28 },
+            { nama: "LOLA DWI SETIAWAN", cair: 32, sudah: 5, sisa: 27 },
+            { nama: "RANGGA ERLANDO", cair: 0, sudah: 0, sisa: 0 }
+        ];
+
+        const dataSudahMon = [
+            ["AGT/140/001/539-009519", "PU-140-25-12-002101", "DEWI ARUM SARI", "539", "001", "05 Jan 2026", "ELPHINA DAMAYANTI", "09 Mar 2026"],
+            ["AGT/140/002/093-010457", "PU-140-25-12-002102", "LIROSNA", "093", "002", "05 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
+            ["AGT/140/002/093-009334", "PU-140-25-12-002103", "CASTIAH", "093", "002", "05 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
+            ["AGT/140/002/493-008529", "PU-140-26-01-000002", "VERAWATI", "493", "001", "08 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
+            ["AGT/140/001/489-008400", "PU-140-26-01-000001", "EEM SUHAEMI", "489", "001", "09 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/002/130-011110", "PU-140-26-01-000003", "AYU ERNAWATI", "130", "002", "12 Jan 2026", "Eka Ramadhan", "23 Feb 2026"],
+            ["AGT/140/001/353-005671", "PU-140-26-01-000007", "DARSIH", "353", "001", "13 Jan 2026", "PERDI IRAWAN SAPUTRA", "10 Mar 2026"],
+            ["AGT/140/001/060-009184", "PU-140-26-01-000014", "ERTIN", "060", "001", "14 Jan 2026", "Joko Prasetyo", "04 Feb 2026"],
+            ["AGT/140/002/093-010558", "PU-140-26-01-000032", "WASRI", "093", "002", "19 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
+            ["AGT/140/001/414-011115", "PU-140-26-01-000037", "TATI", "414", "001", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
+            ["AGT/140/003/414-011116", "PU-140-26-01-000038", "SHESIL DWI APRILIANI", "414", "003", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
+            ["AGT/140/003/414-011117", "PU-140-26-01-000039", "SITI AISAH", "414", "003", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
+            ["AGT/140/001/255-009410", "PU-140-26-01-000042", "NURUL AINI", "255", "001", "22 Jan 2026", "MUHAMMAD SANDI", "26 Feb 2026"],
+            ["AGT/140/001/611-011130", "PU-140-26-01-000070", "YOYOH YULYANA", "611", "001", "27 Jan 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
+            ["AGT/140/002/611-011134", "PU-140-26-01-000073", "MARLINAH", "611", "002", "27 Jan 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
+            ["AGT/140/002/172-010505", "PU-140-26-01-000059", "DANIRAH", "172", "002", "28 Jan 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/265-009436", "PU-140-26-01-000064", "SURNI", "265", "003", "29 Jan 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
+            ["AGT/140/001/489-011127", "PU-140-26-01-000068", "CRISTIN CRISTIAN", "489", "001", "30 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Feb 2026"],
+            ["AGT/140/001/489-011128", "PU-140-26-01-000069", "SRI MURHATUN", "489", "001", "30 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Feb 2026"],
+            ["AGT/140/002/278-011143", "PU-140-26-01-000083", "MELINA", "278", "002", "02 Feb 2026", "PERDI IRAWAN SAPUTRA", "09 Mar 2026"],
+            ["AGT/140/002/130-009201", "PU-140-26-01-000092", "DESI REFENA", "130", "002", "02 Feb 2026", "Eka Ramadhan", "16 Feb 2026"],
+            ["AGT/140/001/595-011144", "PU-140-26-01-000084", "DESI SUSILAWATI", "595", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
+            ["AGT/140/002/595-011145", "PU-140-26-01-000085", "DESI ARISANDI", "595", "002", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
+            ["AGT/140/001/576-010543", "PU-140-26-01-000094", "NOPI SUPRIYATIN", "576", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
+            ["AGT/140/001/576-010562", "PU-140-26-01-000095", "RISKA WIDIANINGSIH", "576", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
+            ["AGT/140/002/576-010542", "PU-140-26-01-000096", "TITI SARI", "576", "002", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
+            ["AGT/140/001/611-011129", "PU-140-26-01-000101", "KHOLIFAH", "611", "001", "03 Feb 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
+            ["AGT/140/002/611-011133", "PU-140-26-01-000102", "DEVI FITRIYANI", "611", "002", "03 Feb 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
+            ["AGT/140/001/118-011146", "PU-140-26-01-000099", "WARSINAH", "118", "001", "04 Feb 2026", "Joko Prasetyo", "25 Feb 2026"],
+            ["AGT/140/002/118-011147", "PU-140-26-01-000100", "YULITA", "118", "002", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
+            ["AGT/140/001/118-009397", "PU-140-26-01-000113", "DERENI", "118", "001", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
+            ["AGT/140/001/118-009398", "PU-140-26-01-000114", "SUTARI", "118", "001", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
+            ["AGT/140/001/385-010490", "PU-140-26-01-000115", "RIWEN", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
+            ["AGT/140/001/385-010489", "PU-140-26-01-000116", "RENTI", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
+            ["AGT/140/001/385-010529", "PU-140-26-01-000117", "CASNI", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
+            ["AGT/140/002/582-010527", "PU-140-26-01-000120", "HARTATI", "582", "002", "04 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/172-008391", "PU-140-26-01-000121", "WIDYANINGSIH", "172", "001", "04 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/592-010575", "PU-140-26-01-000123", "WARNIAH", "592", "001", "04 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/001/100-009685", "PU-140-26-01-000124", "WALIYAH", "100", "001", "04 Feb 2026", "Joko Prasetyo", "24 Feb 2026"],
+            ["AGT/140/002/512-010455", "PU-140-26-01-000131", "YULIANAH", "512", "003", "04 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/001/172-011159", "PU-140-26-02-000155", "KASTINI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/172-009430", "PU-140-26-02-000160", "RASTINI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/002/612-011166", "PU-140-26-02-000166", "RAHOENI", "612", "002", "11 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/001/172-009431", "PU-140-26-02-000169", "ROYATI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/278-011173", "PU-140-26-02-000185", "DASTEM", "278", "001", "16 Feb 2026", "PERDI IRAWAN SAPUTRA", "09 Mar 2026"],
+            ["AGT/140/002/592-010577", "PU-140-26-02-000200", "KEMI", "592", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/002/592-010579", "PU-140-26-02-000201", "DINA", "592", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/001/612-011160", "PU-140-26-02-000208", "SANTI", "612", "001", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/002/612-011164", "PU-140-26-02-000209", "ROKAYAH", "612", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
+            ["AGT/140/002/440-007297", "PU-140-26-02-000211", "CALON WAHYUNI", "412", "003", "19 Feb 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
+            ["AGT/140/002/440-007298", "PU-140-26-02-000212", "BUNGAH CANTIK", "412", "003", "19 Feb 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
+            ["AGT/140/002/473-011176", "PU-140-26-02-000215", "ATIN JATININGSIH", "473", "002", "20 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/002/489-008406", "PU-140-26-02-000219", "PATIMAH", "489", "002", "20 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/002/304-011177", "PU-140-26-02-000223", "RUSKI", "304", "002", "23 Feb 2026", "PERDI IRAWAN SAPUTRA", "02 Mar 2026"],
+            ["AGT/140/001/304-009541", "PU-140-26-02-000227", "RASINAH", "304", "003", "23 Feb 2026", "PERDI IRAWAN SAPUTRA", "02 Mar 2026"],
+            ["AGT/140/001/013-008372", "PU-140-26-02-000228", "KUSTERI", "013", "001", "24 Feb 2026", "PERDI IRAWAN SAPUTRA", "03 Mar 2026"],
+            ["AGT/140/001/383-008803", "PU-140-26-02-000240", "ROSITA WATI DEWI", "383", "001", "25 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/383-009346", "PU-140-26-02-000241", "NOK LOKARI", "383", "003", "25 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
+            ["AGT/140/001/473-007987", "PU-140-26-02-000261", "NOVIYANTI", "473", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/001/473-007991", "PU-140-26-02-000262", "MEGA AGUSTIANI", "489", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/001/473-007989", "PU-140-26-02-000264", "SUMIYATI", "473", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/002/473-007993", "PU-140-26-02-000265", "MARSASIH", "473", "002", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
+            ["AGT/140/002/355-005998", "PU-140-26-02-000308", "SARTINAH", "355", "001", "03 Mar 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
+            ["AGT/140/002/277-004346", "PU-140-26-02-000298", "TARSIYAH", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"],
+            ["AGT/140/002/277-004348", "PU-140-26-02-000299", "MITI BT SUKRAD", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"],
+            ["AGT/140/001/277-005987", "PU-140-26-02-000300", "MUNIKAH", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"]
+        ];
+
+        // --- CORE FUNCTIONS ---
+
+        function populateStafDropdown() {
+            const select = document.getElementById('in-staf');
+            if (select.options.length > 1) return; 
+
+            daftarNamaStaf.forEach(nama => {
+                let opt = document.createElement('option');
+                opt.value = nama;
+                opt.innerHTML = nama;
+                select.appendChild(opt);
+            });
+        }
+
+        function startApp() {
+            populateStafDropdown();
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('app-container').style.display = 'flex';
+            switchPage('page-bulan');
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+            document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('active'));
+            
+            if(pageId === 'page-bulan') renderBulan();
+            if(pageId === 'page-all-staf') renderAllStaf();
+            if(pageId === 'page-monitoring') renderMonitoring();
+            if(pageId === 'page-rekap') renderTabelRekap();
+            if(pageId === 'page-sudah') renderSudahMonitoring();
+            
+            const navId = 'nav-' + pageId.replace('page-', '');
+            const navBtn = document.getElementById(navId);
+            if(navBtn) navBtn.classList.add('active');
+        }
+
+        // Fungsi Filter untuk "Sudah Di Monitoring"
+        function filterSudahMonitoring() {
+            let input = document.getElementById('search-sudah');
+            let filter = input.value.toLowerCase();
+            let tbody = document.getElementById('tabel-sudah-body');
+            let tr = tbody.getElementsByTagName('tr');
+
+            for (let i = 0; i < tr.length; i++) {
+                let textContent = tr[i].textContent || tr[i].innerText;
+                if (textContent.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function filterBelumMonitoring() {
+            let input = document.getElementById('search-belum');
+            let filter = input.value.toLowerCase();
+            let tbody = document.getElementById('tabel-belum-body');
+            let tr = tbody.getElementsByTagName('tr');
+
+            for (let i = 0; i < tr.length; i++) {
+                let textContent = tr[i].textContent || tr[i].innerText;
+                if (textContent.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+
+        function renderBulan() {
+            const container = document.getElementById('grid-bulan');
+            container.innerHTML = "";
+            databaseBulan.forEach(item => {
+                const netPAR = item.naik - item.turun;
+                const netAgt = item.agtMasuk - item.agtKeluar;
+                container.innerHTML += `
+                    <div class="card">
+                        <h3>Rekap ${item.bulan} 2026</h3>
+                        <div class="section-title">💰 Outsanding (PAR)</div>
+                        <div class="data-row"><span>Kenaikan:</span> <span style="color:red">+${item.naik.toLocaleString('id-ID')}</span></div>
+                        <div class="data-row"><span>Penurunan:</span> <span style="color:green">-${item.turun.toLocaleString('id-ID')}</span></div>
+                        <div class="data-row" style="border-top: 1px dashed #ccc; padding-top: 5px; font-weight: bold;">
+                            <span>Hasil (Net):</span> <span style="color: ${netPAR >= 0 ? 'blue' : 'orange'};">${netPAR >= 0 ? '+' : ''}${netPAR.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div class="result-box"><small>Outstanding Akhir:</small><br><b>Rp ${item.out.toLocaleString('id-ID')}</b></div>
+                        <div class="section-title">👥 ANGGOTA</div>
+                        <div class="data-row"><span>Masuk:</span> <span style="color:red">+${item.agtMasuk}</span></div>
+                        <div class="data-row"><span>Keluar:</span> <span style="color:green">-${item.agtKeluar}</span></div>
+                        <div class="data-row" style="border-top: 1px dashed #ccc; padding-top: 5px; font-weight: bold;">
+                            <span>Hasil (Net):</span> <span style="color: ${netAgt >= 0 ? 'blue' : 'orange'};">${netAgt >= 0 ? '+' : ''}${netAgt} Orang</span>
+                        </div>
+                        <div class="result-box" style="border-left-color: #ff9800;"><small>Total Anggota Akhir:</small><br><b>${item.totalAgt} Orang</b></div>
+                    </div>`;
+            });
+        }
+
+        function renderAllStaf() {
+            const container = document.getElementById('grid-all-staf');
+            container.innerHTML = ""; 
+            databaseStaf.forEach(staf => {
+                let htmlBulanan = "";
+                staf.laporanBulanan.slice(0, 2).forEach(item => { // Only show Jan & Feb
+                    const netPAR = item.naik - item.turun;
+                    const netAgt = item.masuk - item.keluar;
+                    htmlBulanan += `
+                        <div style="border: 1px solid #e0e0e0; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #fff;">
+                            <div style="font-weight: bold; color: #001f3f; border-bottom: 2px solid #ff9800; margin-bottom: 12px; padding-bottom: 5px;">📅 ${item.bulan} 2026</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem;">
+                                <div>
+                                    <div style="font-weight: bold; color: #888; margin-bottom: 5px; font-size: 0.7rem; text-transform: uppercase;">Outsanding:</div>
+                                    <div style="color: #d9534f; margin-bottom: 4px;">+ ${item.naik.toLocaleString('id-ID')}</div>
+                                    <div style="color: #5cb85c; margin-bottom: 8px;">- ${item.turun.toLocaleString('id-ID')}</div>
+                                    <div style="font-weight: bold; border-top: 1px dashed #ddd; padding-top: 5px; color: ${netPAR >= 0 ? '#001f3f' : '#ff9800'};">Rp ${netPAR.toLocaleString('id-ID')}</div>
+                                    <div style="font-size: 0.75rem; margin-top:5px;">Outstanding: <b>Rp ${item.out.toLocaleString('id-ID')}</b></div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; color: #888; margin-bottom: 5px; font-size: 0.7rem; text-transform: uppercase;">ANGGOTA:</div>
+                                    <div style="margin-bottom: 4px;">Masuk : ${item.masuk}</div>
+                                    <div style="margin-bottom: 8px;">Keluar : ${item.keluar}</div>
+                                    <div style="font-weight: bold; border-top: 1px dashed #ddd; padding-top: 5px; color: ${netAgt >= 0 ? '#007bff' : '#ff9800'};">${netAgt >= 0 ? '+' : ''}${netAgt} Agt</div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML += `
+                    <div class="card" style="display: flex; flex-direction: column; height: 550px; border-top: 6px solid #001f3f;">
+                        <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;"><h3 style="margin: 0; color: #001f3f;">👤 ${staf.nama}</h3></div>
+                        <div style="padding: 15px; overflow-y: auto; flex-grow: 1;">${htmlBulanan}</div>
+                    </div>`;
+            });
+        }
+
+        function renderMonitoring() {
+            const container = document.getElementById('grid-monitoring');
+            container.innerHTML = "";
+            dataStafMon.forEach(item => {
+                container.innerHTML += `
+                    <div class="card" style="border: 2px solid #2ecc71; border-top: 8px solid #2ecc71; border-radius: 12px;">
+                        <h3 style="background: #f4fbf7; padding: 12px; margin: -25px -25px 15px -25px; border-radius: 10px 10px 0 0; border-bottom: 2px solid #2ecc71; text-align: center;">👤 ${item.nama}</h3>
+                        <div style="display: flex; justify-content: space-between; gap: 8px;">
+                            <div style="flex: 1; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;"><p style="font-size: 0.65rem; color: #777;">TOTAL PENCAIRAN</p><b>${item.cair}</b></div>
+                            <div style="flex: 1; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;"><p style="font-size: 0.65rem; color: #777;">PENCAIRAN YANG DI MONITORING</p><b style="color: #28a745;">${item.sudah}</b></div>
+                            <div style="flex: 1; padding: 10px; border: 2px solid #2ecc71; border-radius: 8px; text-align: center; background: #fafffb;"><p style="font-size: 0.65rem; color: #777;">SISA</p><b style="color: #e67e22;">${item.sisa}</b></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderSudahMonitoring() {
+            const tbody = document.getElementById('tabel-sudah-body');
+            tbody.innerHTML = ""; // Bersihkan tabel
+            
+            dataSudahMon.forEach(row => {
+                let tr = document.createElement('tr');
+                row.forEach(cell => {
+                    let td = document.createElement('td');
+                    td.innerHTML = cell;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function prosesSimpan() {
+            const stafNama = document.getElementById('in-staf').value;
+            const tgl = document.getElementById('in-tanggal').value;
+            if(!stafNama || !tgl) return alert("⚠️ Nama Staf dan Tanggal wajib diisi!");
+
+            const dataBaru = {
+                staf: stafNama,
+                tanggal: tgl,
+                naik: parseInt(document.getElementById('in-naik').value) || 0,
+                turun: parseInt(document.getElementById('in-turun').value) || 0,
+                masuk: parseInt(document.getElementById('in-agt-masuk').value) || 0,
+                keluar: parseInt(document.getElementById('in-agt-keluar').value) || 0
+            };
+
+            let rekapLokal = JSON.parse(localStorage.getItem('rekapHarian')) || [];
+            rekapLokal.push(dataBaru);
+            localStorage.setItem('rekapHarian', JSON.stringify(rekapLokal));
+
+            alert("✅ Laporan Tersimpan!");
+            
+            document.getElementById('in-tanggal').value = "";
+            document.getElementById('in-naik').value = "";
+            document.getElementById('in-turun').value = "";
+            document.getElementById('in-agt-masuk').value = "";
+            document.getElementById('in-agt-keluar').value = "";
+
+            switchPage('page-rekap');
+        }
+
+        function renderTabelRekap() {
+            const tbody = document.getElementById('tabel-rekap-body');
+            if (!tbody) return; 
+
+            let listLaporan = JSON.parse(localStorage.getItem('rekapHarian')) || [];
+            const hariIni = new Date().toISOString().split('T')[0]; 
+            const dataHariIni = listLaporan.filter(data => data.tanggal === hariIni);
+
+            tbody.innerHTML = ""; 
+            dataHariIni.reverse().forEach((data) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${data.staf}</b></td>
+                        <td>${data.tanggal}</td>
+                        <td style="color:red">+${(data.naik).toLocaleString('id-ID')}</td>
+                        <td style="color:green">-${(data.turun).toLocaleString('id-ID')}</td>
+                        <td>${data.masuk}</td>
+                        <td>${data.keluar}</td>
+                        <td><span style="color:green">● Terkirim</span></td>
+                    </tr>`;
+            });
+        }
+    </script>
+</body>
+</html>
