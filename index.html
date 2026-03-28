@@ -3,184 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <title>Sistem Internal Perpustakaan Ciledug 2026</title>
+    <title>Sistem Internal Perpustakaan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; color: #333; overflow-x: hidden; }
-
-        /* --- DASHBOARD AWAL --- */
-        #dashboard {
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: linear-gradient(rgba(0,31,63,0.85), rgba(0,31,63,0.85)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1350&q=80');
-            background-size: cover; color: white; text-align: center; padding: 20px;
+        :root {
+            --primary-blue: #193d80;
+            --secondary-blue: #04396f;
+            --orange-accent: #f39c12;
+            --red-text: #e74c3c;
+            --green-text: #27ae60;
+            --bg-light: #f4f7f9;
         }
-        .btn-enter { margin-top: 20px; padding: 15px 50px; background: #ff9800; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1.2rem; transition: 0.3s; }
-        .btn-enter:hover { background: #e68a00; transform: scale(1.05); }
 
-        /* --- LAYOUT UTAMA --- */
-        #app-container { display: none; height: 100vh; }
-        aside { 
-            width: 260px; background: #001f3f; height: 100vh; position: fixed; 
-            left: 0; top: 0; display: flex; flex-direction: column; padding: 20px 0;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 1000;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-light); color: #333333; overflow: hidden; }
+
+        /* LANDING PAGE */
+        #landing-page {
+            position: fixed; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #2a5298 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; z-index: 9999; text-align: center;
         }
-        .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; color: white; text-align: center; }
-        .sidebar-header p { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; }
+        .btn-masuk {
+            padding: 15px 45px; font-size: 18px; cursor: pointer; border: none;
+            border-radius: 30px; background: var(--orange-accent); color: white;
+            font-weight: bold; margin-top: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s;
+        }
 
-        aside button { background: none; border: none; color: #bdc3c7; padding: 15px 25px; text-align: left; cursor: pointer; font-size: 0.95rem; transition: 0.3s; width: 100%; display: flex; align-items: center; gap: 10px; }
-        aside button:hover { background: rgba(255,255,255,0.05); color: white; }
-        aside button.active { background: #ff9800; color: white; font-weight: bold; border-left: 5px solid #fff; }
-
-        main { margin-left: 260px; padding: 40px; min-height: 100vh; width: calc(100% - 260px); }
-        .page { display: none; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- KOMPONEN KARTU & TABEL --- */
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: 15px; border-top: 5px solid #ff9800; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        .card h3 { color: #001f3f; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; }
+        /* DASHBOARD LAYOUT */
+        #main-container { display: none; height: 100vh; width: 100%; }
         
-        .section-title { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; font-weight: bold; }
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95rem; }
-        .result-box { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #001f3f; }
+        .sidebar {
+            width: 280px; min-width: 280px; background: var(--secondary-blue); color: white;
+            display: flex; flex-direction: column; z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar-header { padding: 25px; background: #023e76; font-weight: bold; font-size: 14px; text-align: center; letter-spacing: 1px; }
+        .sidebar-header p { font-size: 10px; font-weight: normal; opacity: 0.7; margin-top: 5px; }
+        
+        .menu-list { flex: 1; overflow-y: auto; padding-top: 10px; }
+        .menu-item {
+            padding: 14px 25px; display: flex; align-items: center; color: #bdc3c7;
+            text-decoration: none; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent;
+        }
+        .menu-item:hover { background: #34495e; color: white; }
+        .menu-item.active { background: #34495e; color: white; border-left-color: var(--orange-accent); }
+        .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
 
-        .table-container { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { background: #001f3f; color: white; padding: 15px; text-align: left; font-size: 0.85rem; text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        tr:hover { background-color: #f9f9f9; }
+        .sidebar-footer { padding: 15px 25px; background: #1a252f; border-top: 1px solid #34495e; }
+        .btn-logout {
+            width: 100%; padding: 12px; background: var(--red-text); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
 
-        /* --- FORM INPUT --- */
-        .form-box { max-width: 550px; background: white; padding: 35px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin: 0 auto; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: #444; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; transition: 0.3s; }
-        .form-group input:focus { border-color: #ff9800; outline: none; box-shadow: 0 0 5px rgba(255,152,0,0.2); }
-        .btn-save { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; margin-top: 10px; transition: 0.3s; }
-        .btn-save:hover { background: #218838; }
+        .content-area { flex-grow: 1; overflow-y: auto; padding: 20px; height: 100vh; background: #f8f9fa; }
+        .page-header { display: flex; align-items: center; margin-bottom: 20px; font-size: 24px; color: #333; font-weight: bold; }
 
-        @media (max-width: 768px) { 
-            aside { width: 100%; height: auto; position: relative; } 
-            main { margin-left: 0; width: 100%; padding: 20px; } 
-            #app-container { flex-direction: column; } 
+        /* DATA MONITORING STYLE */
+        .monitor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .monitor-card { background: white; border-radius: 12px; border: 2px solid var(--green-text); overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .monitor-card-header { padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; font-weight: bold; color: #333; }
+        .monitor-stats-container { display: flex; padding: 15px; gap: 10px; justify-content: space-between; }
+        .stat-box { flex: 1; border: 1px solid #eee; border-radius: 8px; padding: 10px; text-align: center; }
+        .stat-box.highlight { border: 2px solid var(--green-text); }
+        .stat-label { font-size: 8px; color: #999; text-transform: uppercase; display: block; margin-bottom: 5px; line-height: 1.2; }
+        .stat-value { font-size: 16px; font-weight: bold; color: #333; }
+        .stat-value.sisa { color: var(--orange-accent); }
+
+        /* TABLE STYLE FOR "SUDAH DI MONITORING" */
+        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .custom-table { width: 100%; border-collapse: collapse; min-width: 800px; font-size: 13px; }
+        .custom-table th { background: var(--secondary-blue); color: white; padding: 12px 15px; text-align: left; text-transform: uppercase; font-size: 11px; position: sticky; top: 0; }
+        .custom-table td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #444; }
+        .custom-table tr:hover { background: #f9f9f9; }
+
+        /* HOME GRID STYLE */
+        .home-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto; text-align: left; }
+        .home-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; align-items: flex-start; transition: 0.3s; border: 1px solid transparent; }
+        .home-card:hover { transform: translateY(-3px); border-color: var(--orange-accent); }
+        .home-card i { font-size: 24px; margin-right: 20px; margin-top: 5px; min-width: 30px; text-align: center; }
+        .card-text strong { display: block; font-size: 16px; color: var(--secondary-blue); margin-bottom: 4px; }
+        .card-text p { font-size: 13px; color: #7f8c8d; line-height: 1.4; }
+
+        /* STYLE DATA PER STAF */
+        .staf-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .staf-card { background: white; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; border-top: 5px solid var(--primary-blue); }
+        .staf-header { padding: 15px 20px; background: #fcfcfc; border-bottom: 1px solid #eee; font-weight: bold; color: var(--primary-blue); display: flex; align-items: center; }
+        .staf-scroll-area { max-height: 380px; overflow-y: auto; padding: 15px; }
+        .staf-month-card { border: 1px solid #f0f0f0; border-radius: 10px; padding: 12px; margin-bottom: 15px; background: #fff; }
+        .staf-month-title { font-weight: bold; color: var(--navy-accent); border-bottom: 1px solid #f0f0f0; padding-bottom: 5px; margin-bottom: 10px; font-size: 14px; }
+        .data-grid-staf { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .label-staf { font-size: 10px; font-weight: bold; color: #999; text-transform: uppercase; display: block; }
+        .hasil-staf { margin-top: 10px; padding-top: 10px; border-top: 1px dotted #ddd; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+        .search-container { margin-bottom: 20px; }
+        .search-bar { width: 100%; padding: 12px 20px; border-radius: 30px; border: 1px solid #ddd; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+
+        /* FORM ISI LAPORAN STYLE */
+        .form-laporan-container { display:none; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px; border-top: 6px solid var(--orange-accent); }
+        .input-mini { width: 100%; padding: 12px; border: 1.5px solid #eee; border-radius: 10px; font-size: 14px; margin-top: 5px; outline: none; transition: 0.3s; }
+        .input-mini:focus { border-color: var(--orange-accent); background: #fffcf5; }
+        .label-form { font-size: 12px; font-weight: bold; color: var(--secondary-blue); text-transform: uppercase; }
+
+        /* DATA PERBULAN STYLE */
+        .rekap-container { display: flex; flex-direction: column; gap: 25px; max-width: 800px; margin: 0 auto; }
+        .rekap-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 6px solid var(--orange-accent); }
+        .rekap-body { padding: 25px; }
+        .month-title { font-size: 22px; color: var(--primary-blue); font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .section-label { font-size: 11px; font-weight: bold; color: #999; margin-top: 18px; display: flex; align-items: center; text-transform: uppercase; }
+        .section-label i { margin-right: 8px; color: #3498db; }
+        .data-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 15px; }
+        .data-row.net { border-top: 1px dotted #ddd; margin-top: 5px; padding-top: 8px; font-weight: bold; }
+        .highlight-box { background: #f8fafc; border-radius: 10px; padding: 12px; margin-top: 10px; border-left: 5px solid var(--primary-blue); }
+        .highlight-box strong { font-size: 18px; display: block; margin-top: 4px; }
+        .monitoring-box { background: #f0f7ff; border-radius: 10px; padding: 12px; margin-top: 15px; border-left: 5px solid var(--green-text); }
+        .monitoring-box strong { font-size: 22px; display: block; margin-top: 4px; }
+
+        .val-red { color: var(--red-text); }
+        .val-green { color: var(--green-text); }
+        .val-orange { color: var(--orange-accent); }
+        .val-blue { color: var(--primary-blue); }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; min-width: 70px; }
+            .sidebar span, .sidebar-header, .btn-logout span { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div id="dashboard">
-        <h1>SELAMAT DATANG</h1>
-        <p style="font-size: 1.2rem; letter-spacing: 2px;">PERPUSTAKAAN CABANG CILEDUG 2026</p>
-        <button class="btn-enter" onclick="startApp()">MASUK KE MENU UTAMA</button>
+    <div id="landing-page">
+        <i class="fas fa-university fa-4x" style="margin-bottom: 20px;"></i>
+        <h2>SELAMAT DATANG DI SISTEM INTERNAL</h2>
+        <p>Database Cabang Ciledug 2026</p>
+        <button class="btn-masuk" onclick="startupSistem()">MASUK KE SISTEM</button>
     </div>
 
-    <div id="app-container">
-        <aside>
+    <div id="main-container">
+        <div class="sidebar">
             <div class="sidebar-header">
-                <h3>MENU UTAMA</h3>
+                MENU UTAMA
                 <p>Created by Wisnu Mustika Adhi</p>
             </div>
+            <div class="menu-list">
+                <div class="menu-item active" onclick="loadPage('Home', this)"><i class="fas fa-home"></i><span>Home</span></div>
+                <div class="menu-item" onclick="loadPage('Data Perbulan', this)"><i class="fas fa-calendar-alt"></i><span>Data Perbulan</span></div>
+                <div class="menu-item" onclick="loadPage('Data Per Staf', this)"><i class="fas fa-user-tie"></i><span>Data Per Staf</span></div>
+                <div class="menu-item" onclick="loadPage('Isi Laporan', this)"><i class="fas fa-edit"></i><span>Isi Laporan</span></div>
+                <div class="menu-item" onclick="loadPage('Data Monitoring', this)"><i class="fas fa-desktop"></i><span>Data Monitoring</span></div>
+                <div class="menu-item" onclick="loadPage('Sudah Di Monitoring', this)"><i class="fas fa-check-circle"></i><span>Sudah Di Monitoring</span></div>
+                <div class="menu-item" onclick="loadPage('Belum Di Monitoring', this)"><i class="fas fa-hourglass-start"></i><span>Belum Di Monitoring</span></div>
+                <div class="menu-item" onclick="loadPage('Par Baru', this)"><i class="fas fa-plus-square"></i><span>Par Baru</span></div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="location.reload()">
+                    <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div id="content-target"></div>
+        </div>
+    </div>
+
+    <script>
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzaTdqGz7LeyIILfIO-11YVdy1xQzP_C6hjkZw_KeQhueirLyab4ENtBp1XzKPB3ihE/exec";
+
+        const dataMonitoringStaf = [
+            { nama: "CASDI", cair: 28, sudah: 3, sisa: 25 },
+            { nama: "NONO SUTRISNO", cair: 30, sudah: 0, sisa: 30 },
+            { nama: "JOKO PRASETYO", cair: 9, sudah: 9, sisa: 0 },
+            { nama: "ISET PANJI NUGRAHA", cair: 29, sudah: 0, sisa: 29 },
+            { nama: "EKA RAMADHAN", cair: 32, sudah: 13, sisa: 19 },
+            { nama: "PERDI IRAWAN SAPUTRA", cair: 26, sudah: 19, sisa: 7 },
+            { nama: "HERI APRIYOGO", cair: 17, sudah: 0, sisa: 17 },
+            { nama: "RAFID MALIK RIZQULLAH S", cair: 29, sudah: 0, sisa: 29 },
+            { nama: "MUHAMMAD SANDI", cair: 19, sudah: 4, sisa: 15 },
+            { nama: "ELPHINA DAMAYANTI", cair: 41, sudah: 13, sisa: 28 },
+            { nama: "LOLA DWI SETIAWAN", cair: 32, sudah: 5, sisa: 27 },
+            { nama: "RANGGA ERLANDO", cair: 0, sudah: 0, sisa: 0 }
+        ];
+
+        const listSudahMonitoring = [
+            { id: "AGT/140/001/539-009519", pinjaman: "PU-140-25-12-002101", anggota: "DEWI ARUM SARI", center: "539", kel: "001", tglCair: "05 Jan 2026", staf: "ELPHINA DAMAYANTI", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/002/093-010457", pinjaman: "PU-140-25-12-002102", anggota: "LIROSNA", center: "093", kel: "002", tglCair: "05 Jan 2026", staf: "EKA RAMADHAN", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/002/093-009334", pinjaman: "PU-140-25-12-002103", anggota: "CASTIAH", center: "093", kel: "002", tglCair: "05 Jan 2026", staf: "EKA RAMADHAN", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/002/493-008529", pinjaman: "PU-140-26-01-000002", anggota: "VERAWATI", center: "493", kel: "001", tglCair: "08 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "05 Feb 2026" },
+            { id: "AGT/140/001/489-008400", pinjaman: "PU-140-26-01-000001", anggota: "EEM SUHAEMI", center: "489", kel: "001", tglCair: "09 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/002/130-011110", pinjaman: "PU-140-26-01-000003", anggota: "AYU ERNAWATI", center: "130", kel: "002", tglCair: "12 Jan 2026", staf: "EKA RAMADHAN", tglMon: "23 Feb 2026" },
+            { id: "AGT/140/001/353-005671", pinjaman: "PU-140-26-01-000007", anggota: "DARSIH", center: "353", kel: "001", tglCair: "13 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/001/060-009184", pinjaman: "PU-140-26-01-000014", anggota: "ERTIN", center: "060", kel: "001", tglCair: "14 Jan 2026", staf: "JOKO PRASETYO", tglMon: "04 Feb 2026" },
+            { id: "AGT/140/002/093-010558", pinjaman: "PU-140-26-01-000032", anggota: "WASRI", center: "093", kel: "002", tglCair: "19 Jan 2026", staf: "EKA RAMADHAN", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/001/414-011115", pinjaman: "PU-140-26-01-000037", anggota: "TATI", center: "414", kel: "001", tglCair: "22 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "05 Feb 2026" },
+            { id: "AGT/140/003/414-011116", pinjaman: "PU-140-26-01-000038", anggota: "SHESIL DWI APRILIANI", center: "414", kel: "003", tglCair: "22 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "05 Feb 2026" },
+            { id: "AGT/140/003/414-011117", pinjaman: "PU-140-26-01-000039", anggota: "SITI AISAH", center: "414", kel: "003", tglCair: "22 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "05 Feb 2026" },
+            { id: "AGT/140/001/255-009410", pinjaman: "PU-140-26-01-000042", anggota: "NURUL AINI", center: "255", kel: "001", tglCair: "22 Jan 2026", staf: "MUHAMMAD SANDI", tglMon: "26 Feb 2026" },
+            { id: "AGT/140/001/611-011130", pinjaman: "PU-140-26-01-000070", anggota: "YOYOH YULYANA", center: "611", kel: "001", tglCair: "27 Jan 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/611-011134", pinjaman: "PU-140-26-01-000073", anggota: "MARLINAH", center: "611", kel: "002", tglCair: "27 Jan 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/172-010505", pinjaman: "PU-140-26-01-000059", anggota: "DANIRAH", center: "172", kel: "002", tglCair: "28 Jan 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/265-009436", pinjaman: "PU-140-26-01-000064", anggota: "SURNI", center: "265", kel: "003", tglCair: "29 Jan 2026", staf: "MUHAMMAD SANDI", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/001/489-011127", pinjaman: "PU-140-26-01-000068", anggota: "CRISTIN CRISTIAN", center: "489", kel: "001", tglCair: "30 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Feb 2026" },
+            { id: "AGT/140/001/489-011128", pinjaman: "PU-140-26-01-000069", anggota: "SRI MURHATUN", center: "489", kel: "001", tglCair: "30 Jan 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Feb 2026" },
+            { id: "AGT/140/002/278-011143", pinjaman: "PU-140-26-01-000083", anggota: "MELINA", center: "278", kel: "002", tglCair: "02 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/002/130-009201", pinjaman: "PU-140-26-01-000092", anggota: "DESI REFENA", center: "130", kel: "002", tglCair: "02 Feb 2026", staf: "EKA RAMADHAN", tglMon: "16 Feb 2026" },
+            { id: "AGT/140/001/595-011144", pinjaman: "PU-140-26-01-000084", anggota: "DESI SUSILAWATI", center: "595", kel: "001", tglCair: "03 Feb 2026", staf: "LOLA DWI SETIAWAN", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/595-011145", pinjaman: "PU-140-26-01-000085", anggota: "DESI ARISANDI", center: "595", kel: "002", tglCair: "03 Feb 2026", staf: "LOLA DWI SETIAWAN", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/001/576-010543", pinjaman: "PU-140-26-01-000094", anggota: "NOPI SUPRIYATIN", center: "576", kel: "001", tglCair: "03 Feb 2026", staf: "LOLA DWI SETIAWAN", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/001/576-010562", pinjaman: "PU-140-26-01-000095", anggota: "RISKA WIDIANINGSIH", center: "576", kel: "001", tglCair: "03 Feb 2026", staf: "LOLA DWI SETIAWAN", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/576-010542", pinjaman: "PU-140-26-01-000096", anggota: "TITI SARI", center: "576", kel: "002", tglCair: "03 Feb 2026", staf: "LOLA DWI SETIAWAN", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/001/611-011129", pinjaman: "PU-140-26-01-000101", anggota: "KHOLIFAH", center: "611", kel: "001", tglCair: "03 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/611-011133", pinjaman: "PU-140-26-01-000102", anggota: "DEVI FITRIYANI", center: "611", kel: "002", tglCair: "03 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/001/118-011146", pinjaman: "PU-140-26-01-000099", anggota: "WARSINAH", center: "118", kel: "001", tglCair: "04 Feb 2026", staf: "JOKO PRASETYO", tglMon: "25 Feb 2026" },
+            { id: "AGT/140/002/118-011147", pinjaman: "PU-140-26-01-000100", anggota: "YULITA", center: "118", kel: "002", tglCair: "04 Feb 2026", staf: "JOKO PRASETYO", tglMon: "11 Feb 2026" },
+            { id: "AGT/140/001/118-009397", pinjaman: "PU-140-26-01-000113", anggota: "DERENI", center: "118", kel: "001", tglCair: "04 Feb 2026", staf: "JOKO PRASETYO", tglMon: "11 Feb 2026" },
+            { id: "AGT/140/001/118-009398", pinjaman: "PU-140-26-01-000114", anggota: "SUTARI", center: "118", kel: "001", tglCair: "04 Feb 2026", staf: "JOKO PRASETYO", tglMon: "11 Feb 2026" },
+            { id: "AGT/140/001/385-010490", pinjaman: "PU-140-26-01-000115", anggota: "RIWEN", center: "385", kel: "001", tglCair: "04 Feb 2026", staf: "CASDI", tglMon: "25 Feb 2026" },
+            { id: "AGT/140/001/385-010489", pinjaman: "PU-140-26-01-000116", anggota: "RENTI", center: "385", kel: "001", tglCair: "04 Feb 2026", staf: "CASDI", tglMon: "25 Feb 2026" },
+            { id: "AGT/140/001/385-010529", pinjaman: "PU-140-26-01-000117", anggota: "CASNI", center: "385", kel: "001", tglCair: "04 Feb 2026", staf: "CASDI", tglMon: "25 Feb 2026" },
+            { id: "AGT/140/002/582-010527", pinjaman: "PU-140-26-01-000120", anggota: "HARTATI", center: "582", kel: "002", tglCair: "04 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/172-008391", pinjaman: "PU-140-26-01-000121", anggota: "WIDYANINGSIH", center: "172", kel: "001", tglCair: "04 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/592-010575", pinjaman: "PU-140-26-01-000123", anggota: "WARNIAH", center: "592", kel: "001", tglCair: "04 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/100-009685", pinjaman: "PU-140-26-01-000124", anggota: "WALIYAH", center: "100", kel: "001", tglCair: "04 Feb 2026", staf: "JOKO PRASETYO", tglMon: "24 Feb 2026" },
+            { id: "AGT/140/002/512-010455", pinjaman: "PU-140-26-01-000131", anggota: "YULIANAH", center: "512", kel: "003", tglCair: "04 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/172-011159", pinjaman: "PU-140-26-02-000155", anggota: "KASTINI", center: "172", kel: "001", tglCair: "11 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/172-009430", pinjaman: "PU-140-26-02-000160", anggota: "RASTINI", center: "172", kel: "001", tglCair: "11 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/002/612-011166", pinjaman: "PU-140-26-02-000166", anggota: "RAHOENI", center: "612", kel: "002", tglCair: "11 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/172-009431", pinjaman: "PU-140-26-02-000169", anggota: "ROYATI", center: "172", kel: "001", tglCair: "11 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/278-011173", pinjaman: "PU-140-26-02-000185", anggota: "DASTEM", center: "278", kel: "001", tglCair: "16 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "09 Mar 2026" },
+            { id: "AGT/140/002/592-010577", pinjaman: "PU-140-26-02-000200", anggota: "KEMI", center: "592", kel: "002", tglCair: "18 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/002/592-010579", pinjaman: "PU-140-26-02-000201", anggota: "DINA", center: "592", kel: "002", tglCair: "18 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/612-011160", pinjaman: "PU-140-26-02-000208", anggota: "SANTI", center: "612", kel: "001", tglCair: "18 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/002/612-011164", pinjaman: "PU-140-26-02-000209", anggota: "ROKAYAH", center: "612", kel: "002", tglCair: "18 Feb 2026", staf: "ELPHINA DAMAYANTI", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/002/440-007297", pinjaman: "PU-140-26-02-000211", anggota: "CALON WAHYUNI", center: "412", kel: "003", tglCair: "19 Feb 2026", staf: "MUHAMMAD SANDI", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/002/440-007298", pinjaman: "PU-140-26-02-000212", anggota: "BUNGAH CANTIK", center: "412", kel: "003", tglCair: "19 Feb 2026", staf: "MUHAMMAD SANDI", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/002/473-011176", pinjaman: "PU-140-26-02-000215", anggota: "ATIN JATININGSIH", center: "473", kel: "002", tglCair: "20 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/002/489-008406", pinjaman: "PU-140-26-02-000219", anggota: "PATIMAH", center: "489", kel: "002", tglCair: "20 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/002/304-011177", pinjaman: "PU-140-26-02-000223", anggota: "RUSKI", center: "304", kel: "002", tglCair: "23 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "02 Mar 2026" },
+            { id: "AGT/140/001/304-009541", pinjaman: "PU-140-26-02-000227", anggota: "RASINAH", center: "304", kel: "003", tglCair: "23 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "02 Mar 2026" },
+            { id: "AGT/140/001/013-008372", pinjaman: "PU-140-26-02-000228", anggota: "KUSTERI", center: "013", kel: "001", tglCair: "24 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "03 Mar 2026" },
+            { id: "AGT/140/001/383-008803", pinjaman: "PU-140-26-02-000240", anggota: "ROSITA WATI DEWI", center: "383", kel: "001", tglCair: "25 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/383-009346", pinjaman: "PU-140-26-02-000241", anggota: "NOK LOKARI", center: "383", kel: "003", tglCair: "25 Feb 2026", staf: "EKA RAMADHAN", tglMon: "11 Mar 2026" },
+            { id: "AGT/140/001/473-007987", pinjaman: "PU-140-26-02-000261", anggota: "NOVIYANTI", center: "473", kel: "001", tglCair: "27 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/001/473-007991", pinjaman: "PU-140-26-02-000262", anggota: "MEGA AGUSTIANI", center: "489", kel: "001", tglCair: "27 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/001/473-007989", pinjaman: "PU-140-26-02-000264", anggota: "SUMIYATI", center: "473", kel: "001", tglCair: "27 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/002/473-007993", pinjaman: "PU-140-26-02-000265", anggota: "MARSASIH", center: "473", kel: "002", tglCair: "27 Feb 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "06 Mar 2026" },
+            { id: "AGT/140/002/355-005998", pinjaman: "PU-140-26-02-000308", anggota: "SARTINAH", center: "355", kel: "001", tglCair: "03 Mar 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
+            { id: "AGT/140/002/277-004346", pinjaman: "PU-140-26-02-000298", anggota: "TARSIYAH", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/002/277-004348", pinjaman: "PU-140-26-02-000299", anggota: "MITI BT SUKRAD", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/001/277-005987", pinjaman: "PU-140-26-02-000300", anggota: "MUNIKAH", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" }
+        ];
+
+        const dataStafLengkap = {
+            "CASDI": [{ naik: 1778000, turun: 2923500, masuk: 3, keluar: 7 }, { naik: 160000, turun: 2727800, masuk: 2, keluar: 8 }],
+            "NONO SUTRISNO": [{ naik: 1722200, turun: 6377200, masuk: 2, keluar: 2 }, { naik: 5335600, turun: 8060200, masuk: 4, keluar: 10 }],
+            "JOKO PRASETYO": [{ naik: 13352600, turun: 4859900, masuk: 2, keluar: 5 }, { naik: 3536600, turun: 2907800, masuk: 0, keluar: 4 }],
+            "ISET PANJI NUGRAHA": [{ naik: 6046600, turun: 6239400, masuk: 4, keluar: 5 }, { naik: 7585000, turun: 5659500, masuk: 5, keluar: 2 }],
+            "EKA RAMADHAN": [{ naik: 11599100, turun: 3054900, masuk: 4, keluar: 7 }, { naik: 3030000, turun: 3815700, masuk: 1, keluar: 6 }],
+            "PERDI IRAWAN SAPUTRA": [{ naik: 430800, turun: 2098000, masuk: 8, keluar: 8 }, { naik: 1816000, turun: 2000600, masuk: 3, keluar: 4 }],
+            "HERI APRIYOGO": [{ naik: 6670700, turun: 2842500, masuk: 2, keluar: 4 }, { naik: 6829400, turun: 754000, masuk: 0, keluar: 8 }],
+            "RAFID MALIK RIZQULLAH S": [{ naik: 15211000, turun: 5435800, masuk: 1, keluar: 2 }, { naik: 12314200, turun: 15271600, masuk: 4, keluar: 4 }],
+            "MUHAMMAD SANDI": [{ naik: 6616900, turun: 2903700, masuk: 2, keluar: 10 }, { naik: 7205200, turun: 5567200, masuk: 1, keluar: 6 }],
+            "ELPHINA DAMAYANTI": [{ naik: 11639300, turun: 5017500, masuk: 11, keluar: 9 }, { naik: 2976800, turun: 5016800, masuk: 11, keluar: 6 }],
+            "LOLA DWI SETIAWAN": [{ naik: 0, turun: 710400, masuk: 4, keluar: 6 }, { naik: 4132900, turun: 2593800, masuk: 2, keluar: 3 }],
+            "RANGGA ERLANDO": [{ naik: 0, turun: 197700, masuk: 0, keluar: 1 }, { naik: 1294000, turun: 6107700, masuk: 0, keluar: 1 }]
+        };
+
+        let historyLaporan = JSON.parse(localStorage.getItem('dataLaporanSimpanan')) || [];
+
+        function startupSistem() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('main-container').style.display = 'flex';
+            loadPage('Home');
+            ambilDataDariServer();
+        }
+
+        function ambilDataDariServer() {
+            fetch(URL_SCRIPT)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.length > 0) {
+                        historyLaporan = data;
+                        localStorage.setItem('dataLaporanSimpanan', JSON.stringify(historyLaporan));
+                        if(document.getElementById('daftar-laporan-history')) renderHistoryLaporan();
+                    }
+                }).catch(e => console.log("Offline mode atau server belum siap."));
+        }
+
+        function filterStaf() {
+            let input = document.getElementById('searchStaf').value.toUpperCase();
+            let cards = document.getElementsByClassName('staf-card');
+            for (let i = 0; i < cards.length; i++) {
+                let name = cards[i].getAttribute('data-name');
+                cards[i].style.display = (name.toUpperCase().indexOf(input) > -1) ? "" : "none";
+            }
+        }
+
+        // FUNGSI PENCARIAN UNIVERSAL UNTUK TABEL
+        function filterTableUniversal(inputId, tableId) {
+            let input = document.getElementById(inputId).value.toUpperCase();
+            let table = document.getElementById(tableId);
+            let tr = table.getElementsByTagName('tr');
+            for (let i = 1; i < tr.length; i++) {
+                let rowText = tr[i].textContent || tr[i].innerText;
+                tr[i].style.display = (rowText.toUpperCase().indexOf(input) > -1) ? "" : "none";
+            }
+        }
+
+        function toggleFormLaporan() {
+            const form = document.getElementById('form-laporan-container');
+            if(form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                document.getElementById('input-tanggal').valueAsDate = new Date();
+                document.getElementById('input-nama').selectedIndex = 0;
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        function simpanLaporanBaru() {
+            const btn = event.target;
+            const nama = document.getElementById('input-nama').value;
+            if (!nama) return alert("Pilih Nama Staf!");
+
+            const data = {
+                nama: nama,
+                tgl: document.getElementById('input-tanggal').value,
+                naik: parseFloat(document.getElementById('input-naik').value) || 0,
+                turun: parseFloat(document.getElementById('input-turun').value) || 0,
+                masuk: parseFloat(document.getElementById('input-masuk').value) || 0,
+                keluar: parseFloat(document.getElementById('input-keluar').value) || 0
+            };
+
+            btn.innerText = "MENGIRIM...";
+            btn.disabled = true;
+
+            fetch(URL_SCRIPT, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(data)
+            }).then(() => {
+                historyLaporan.unshift(data); 
+                localStorage.setItem('dataLaporanSimpanan', JSON.stringify(historyLaporan));
+                alert("Data Berhasil Terkirim ke Server!");
+                toggleFormLaporan();
+                renderHistoryLaporan();
+                btn.innerText = "SIMPAN DATA";
+                btn.disabled = false;
+            }).catch(e => {
+                alert("Gagal koneksi ke server!");
+                btn.innerText = "SIMPAN DATA";
+                btn.disabled = false;
+            });
+        }
+
+        function renderHistoryLaporan() {
+            const container = document.getElementById('daftar-laporan-history');
+            if (!container) return;
+            if (historyLaporan.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #999; margin-top: 20px;">Belum ada data laporan ditambahkan.</p>`;
+                return;
+            }
+            let html = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h4 style="color: #555;">Data Tersimpan:</h4><button onclick="hapusHistoryLokal()" style="background:none; border:none; color:var(--red-text); cursor:pointer; font-size:12px;">Hapus Semua</button></div>`;
+            historyLaporan.forEach((item) => {
+                const hasilNet = item.naik - item.turun;
+                const agtNet = item.masuk - item.keluar;
+                html += `<div class="staf-card" style="margin-bottom: 15px; border-top-color: var(--green-text);"><div class="staf-header" style="justify-content: space-between;"><span><i class="fas fa-user-circle"></i> ${item.nama}</span><span style="font-size: 11px; font-weight: normal; opacity: 0.6;">${item.tgl}</span></div><div style="padding: 15px;"><div class="data-grid-staf"><div><span class="label-staf">OUTSTANDING</span><small class="val-red">Naik: +${item.naik.toLocaleString('id-ID')}</small><br><small class="val-green">Turun: -${item.turun.toLocaleString('id-ID')}</small></div><div><span class="label-staf">ANGGOTA</span><small>Masuk: ${item.masuk}</small><br><small>Keluar: ${item.keluar}</small></div></div><div class="hasil-staf" style="margin-top: 10px; border-top: 1px dashed #eee;"><span class="${hasilNet >= 0 ? 'val-green' : 'val-orange'}">Rp ${hasilNet.toLocaleString('id-ID')}</span><span class="${agtNet >= 0 ? 'val-blue' : 'val-red'}">${agtNet >= 0 ? '+' : ''}${agtNet} Agt</span></div></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function hapusHistoryLokal() {
+            if(confirm("Hapus semua history input?")) {
+                historyLaporan = [];
+                localStorage.removeItem('dataLaporanSimpanan');
+                renderHistoryLaporan();
+            }
+        }
+
+        function loadPage(page, el) {
+            if(el) {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                el.classList.add('active');
+            }
+            const target = document.getElementById('content-target');
             
-            <button onclick="switchPage('page-bulan')" id="nav-bulan">📊 Data Perbulan</button>
-            <button onclick="switchPage('page-all-staf')" id="nav-all-staf">👥 Data All Staf</button>
-            <button onclick="switchPage('page-rekap')" id="nav-rekap">📋 Rekap Laporan Harian</button>
-            <button onclick="switchPage('page-input')" id="nav-input">📝 Isi Laporan (Masih Tahap Pengembangan)</button>
-            <button onclick="switchPage('page-monitoring')" id="nav-monitoring">🔍 Data Monitoring</button>
-            <button onclick="switchPage('page-sudah')" id="nav-sudah">✅ Sudah Di Monitoring</button>
-            <button onclick="switchPage('page-belum')" id="nav-belum">⚠️ Belum Di Monitoring</button>
-
-            <button onclick="location.reload()" style="margin-top:auto; color: #ff6b6b;">🚪 Keluar</button>
-        </aside>
-
-        <main>
-            <section id="page-bulan" class="page">
-                <h2 style="margin-bottom: 25px;">📊 Rekapitulasi Bulanan</h2>
-                <div id="grid-bulan" class="card-grid"></div>
-            </section>
-
-            <section id="page-all-staf" class="page">
-                <h2 style="margin-bottom: 25px;">👥 Performa Individual Staf</h2>
-                <div id="grid-all-staf" class="card-grid"></div>
-            </section>
-
-            <section id="page-rekap" class="page">
-                <h2 style="margin-bottom: 25px;">📋 Rekap Laporan Staf Perhari</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nama Staf</th>
-                                <th>Tanggal</th>
-                                <th>Kenaikan (PAR)</th>
-                                <th>Penurunan (PAR)</th>
-                                <th>Anggota Masuk</th>
-                                <th>Anggota Keluar</th>
-                                <th>Sisa</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-rekap-body"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="page-monitoring" class="page">
-                <h2 style="margin-bottom: 25px;">🔍 Sisa Monitoring 2026</h2>
-                <div id="grid-monitoring" class="card-grid"></div>
-            </section>
-
-            <section id="page-sudah" class="page">
-                <h2 style="margin-bottom: 20px;">✅ Data Sudah Di Monitoring</h2>
-                
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="search-sudah" onkeyup="filterSudahMonitoring()" 
-                           placeholder="Cari Nama Anggota atau Nama Staf di sini..." 
-                           style="width: 100%; padding: 12px; border: 2px solid #28a745; border-radius: 8px; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                </div>
-            
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Anggota</th>
-                                <th>No.PINJAMAN</th>
-                                <th>Nama Anggota</th>
-                                <th>Center</th>
-                                <th>Kel</th>
-                                <th>Tgl Cair</th>
-                                <th>Nama Staf</th>
-                                <th>Tgl Di Monitoring</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-sudah-body">
-                            </tbody>
-                    </table>
-                </div>
-            </section>
-            
-            <section id="page-belum" class="page">
-                <h2 style="margin-bottom: 20px;">⚠️ Data Belum Di Monitoring</h2>
-                
-                <div style="margin-bottom: 20px;">
-                    <input type="text" id="search-belum" onkeyup="filterBelumMonitoring()" 
-                           placeholder="Cari Nama Anggota atau No. Anggota di sini..." 
-                           style="width: 100%; padding: 12px; border: 2px solid #e67e22; border-radius: 8px; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                </div>
-            
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID Anggota</th>
-                                <th>No. Pinjaman</th>
-                                <th>Nama Anggota</th>
-                                <th>CTR</th>
-                                <th>Tanggal Pencairan</th>
-                                <th>Nama Staf</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-belum-body">
-                            <tr><td>AGT/140/002/447-007400</td><td>PU-140-25-12-002104</td><td>KASTIYAH</td><td>447</td><td>05 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+            if (page === 'Home') {
+                target.innerHTML = `<div style="text-align: center; padding: 20px;"><i class="fas fa-university fa-3x" style="color: var(--primary-blue); margin-bottom: 20px;"></i><h2 style="color: var(--primary-blue); margin-bottom: 10px;">DAFTAR MENU DI PERPUSTAKAAN CILEDUG</h2><p style="color: #666; margin-bottom: 40px;">Gunakan menu di bawah ini untuk mengelola data internal perpustakaan</p><div class="home-grid"><div class="home-card"><i class="fas fa-home" style="color: var(--primary-blue);"></i><div class="card-text"><strong>Home</strong><p>Halaman utama navigasi cepat.</p></div></div><div class="home-card"><i class="fas fa-calendar-alt" style="color: var(--primary-blue);"></i><div class="card-text"><strong>Data Perbulan</strong><p>Melihat rekapitulasi performa bulanan.</p></div></div><div class="home-card"><i class="fas fa-user-tie" style="color: #9b59b6;"></i><div class="card-text"><strong>Data Per Staf</strong><p>Statistik individual staf.</p></div></div><div class="home-card"><i class="fas fa-edit" style="color: var(--orange-accent);"></i><div class="card-text"><strong>Isi Laporan</strong><p>Formulir input data harian.</p></div></div><div class="home-card"><i class="fas fa-desktop" style="color: #34495e;"></i><div class="card-text"><strong>Data Monitoring</strong><p>Pusat pemantauan real-time.</p></div></div><div class="home-card"><i class="fas fa-check-circle" style="color: var(--green-text);"></i><div class="card-text"><strong>Sudah Di Monitoring</strong><p>Data yang telah diverifikasi.</p></div></div><div class="home-card"><i class="fas fa-hourglass-start" style="color: #e67e22;"></i><div class="card-text"><strong>Belum Di Monitoring</strong><p>Daftar antrean verifikasi.</p></div></div><div class="home-card"><i class="fas fa-plus-square" style="color: var(--red-text);"></i><div class="card-text"><strong>Par Baru</strong><p>Input outstanding baru.</p></div></div></div></div>`;
+            } else if (page === 'Data Perbulan') {
+                 target.innerHTML = `<div class="page-header"><i class="fas fa-chart-line" style="margin-right:15px; color:#3498db;"></i> Rekapitulasi Bulanan</div><div class="rekap-container"><div class="rekap-card"><div class="rekap-body"><div class="month-title">Rekap Januari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 75.067.200</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 42.660.500</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-blue">+ 32.406.700</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 0</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-red">+ 43</span></div><div class="data-row"><span>Keluar:</span> <span class="val-green">- 66</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 23 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3258 Orang</strong></div><div class="monitoring-box"><span>Sisa Monitoring:</span><strong>44</strong></div></div></div><div class="rekap-card" style="border-top-color: #3498db;"><div class="rekap-body"><div class="month-title">Rekap Februari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 56.215.700</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 60.482.700</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-green">- 4.267.000</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 0</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-red">+ 33</span></div><div class="data-row"><span>Keluar:</span> <span class="val-green">- 62</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 29 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3230 Orang</strong></div><div class="monitoring-box" style="border-left-color: var(--orange-accent);"><span>Sisa Monitoring:</span><strong>137</strong></div></div></div></div>`;
+            } else if (page === 'Data Per Staf') {
+                let htmlContent = `<div class="page-header"><i class="fas fa-users" style="margin-right:15px; color:#9b59b6;"></i> Performa Individual Staf</div><div class="search-container"><input type="text" id="searchStaf" class="search-bar" onkeyup="filterStaf()" placeholder="Cari nama staf..."></div><div class="staf-container">`;
+                Object.keys(dataStafLengkap).forEach(name => {
+                    htmlContent += `<div class="staf-card" data-name="${name}"><div class="staf-header"><i class="fas fa-user-circle" style="margin-right:10px;"></i> ${name}</div><div class="staf-scroll-area">`;
+                    dataStafLengkap[name].forEach((data, index) => {
+                        const bulan = index === 0 ? "Januari" : "Februari";
+                        const hasilNet = data.naik - data.turun;
+                        const agtNet = data.masuk - data.keluar;
+                        htmlContent += `<div class="staf-month-card"><div class="staf-month-title"><i class="fas fa-calendar-alt"></i> ${bulan} 2026</div><div class="data-grid-staf"><div class="data-item"><span class="label-staf">OUTSTANDING</span><span class="val-red">+ ${data.naik.toLocaleString('id-ID')}</span><br><span class="val-green">- ${data.turun.toLocaleString('id-ID')}</span></div><div class="data-item"><span class="label-staf">ANGGOTA</span>Masuk: ${data.masuk}<br>Keluar: ${data.keluar}</div></div><div class="hasil-staf"><span class="${hasilNet >= 0 ? 'val-green' : 'val-red'}">Rp ${hasilNet.toLocaleString('id-ID')}</span><span>${agtNet >= 0 ? '+' : ''}${agtNet} Agt</span></div></div>`;
+                    });
+                    htmlContent += `</div></div>`;
+                });
+                htmlContent += `</div>`;
+                target.innerHTML = htmlContent;
+            } else if (page === 'Data Monitoring') {
+                let monHTML = `<div class="page-header"><i class="fas fa-desktop" style="margin-right:15px; color:#3498db;"></i> Sisa Monitoring 2026</div><div class="monitor-grid">`;
+                dataMonitoringStaf.forEach(s => {
+                    monHTML += `<div class="monitor-card"><div class="monitor-card-header"><i class="fas fa-user-circle"></i> ${s.nama}</div><div class="monitor-stats-container"><div class="stat-box"><span class="stat-label">Total Cair</span><span class="stat-value">${s.cair}</span></div><div class="stat-box"><span class="stat-label">Monitoring</span><span class="stat-value" style="color:var(--green-text)">${s.sudah}</span></div><div class="stat-box highlight"><span class="stat-label">Sisa</span><span class="stat-value sisa">${s.sisa}</span></div></div></div>`;
+                });
+                monHTML += `</div>`;
+                target.innerHTML = monHTML;
+            } else if (page === 'Sudah Di Monitoring') {
+                let html = `
+                    <div class="page-header"><i class="fas fa-check-circle" style="color: var(--green-text); margin-right:15px;"></i> Data Sudah Di Monitoring</div>
+                    <div class="search-container">
+                        <input type="text" id="searchMon" class="search-bar" onkeyup="filterTableUniversal('searchMon', 'tableMon')" placeholder="Cari Nama Anggota atau Nama Staf di sini...">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table" id="tableMon">
+                            <thead>
+                                <tr>
+                                    <th>ID Anggota</th>
+                                    <th>No. Pinjaman</th>
+                                    <th>Nama Anggota</th>
+                                    <th>Center</th>
+                                    <th>Kel</th>
+                                    <th>Tgl Cair</th>
+                                    <th>Nama Staf</th>
+                                    <th>Tgl Di Monitoring</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                listSudahMonitoring.forEach(item => {
+                    html += `
+                                <tr>
+                                    <td>${item.id}</td>
+                                    <td>${item.pinjaman}</td>
+                                    <td style="font-weight:bold;">${item.anggota}</td>
+                                    <td>${item.center}</td>
+                                    <td>${item.kel}</td>
+                                    <td>${item.tglCair}</td>
+                                    <td>${item.staf}</td>
+                                    <td>${item.tglMon}</td>
+                                </tr>`;
+                });
+                html += `</tbody></table></div>`;
+                target.innerHTML = html;
+            } else if (page === 'Belum Di Monitoring') {
+                // INTEGRASI MENU BELUM DI MONITORING DENGAN TOMBOL PENCARIAN & HEADER BARU
+                let html = `
+                    <div class="page-header"><i class="fas fa-hourglass-start" style="color: #e67e22; margin-right:15px;"></i> Belum Di Monitoring</div>
+                    <div class="search-container">
+                        <input type="text" id="searchBelum" class="search-bar" onkeyup="filterTableUniversal('searchBelum', 'tableBelum')" placeholder="Cari Nama Anggota atau Nama Staf di sini...">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table" id="tableBelum">
+                            <thead>
+                                <tr>
+                                    <th>ID ANGGOTA</th>
+                                    <th>NO PINJAMAN</th>
+                                    <th>NAMA ANGGOTA</th>
+                                    <th>CENTER</th>
+                                    <th>TANGGAL CAIR</th>
+                                    <th>NAMA STAF</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>AGT/140/002/447-007400</td><td>PU-140-25-12-002104</td><td>KASTIYAH</td><td>447</td><td>05 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
 <tr><td>AGT/140/001/447-010398</td><td>PU-140-25-12-002105</td><td>WARSITI</td><td>447</td><td>05 Januari 2026</td><td>ELPHINA DAMAYANTI</td></tr>
 <tr><td>AGT/140/001/211-009197</td><td>PU-140-25-12-002107</td><td>SUTIJAH</td><td>211</td><td>06 Januari 2026</td><td>ISET PANJI NUGRAHA</td></tr>
 <tr><td>AGT/140/002/499-010497</td><td>PU-140-25-12-002108</td><td>MARIA CEMPAKA SARI</td><td>499</td><td>06 Januari 2026</td><td>Rafid Malik Rizqullah S</td></tr>
@@ -406,419 +696,16 @@
 <tr><td>AGT/140/001/545-009610</td><td>PU-140-26-02-000313</td><td>DASIAH</td><td>545</td><td>06 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
 <tr><td>AGT/140/002/504-008701</td><td>PU-140-26-02-000314</td><td>DINI BERKAH</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
 <tr><td>AGT/140/002/504-008698</td><td>PU-140-26-02-000315</td><td>RASNITI</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
-                    </table>
-                </div>
-            </section>
-            
-            <section id="page-input" class="page">
-                <div class="form-box">
-                    <h2 style="margin-bottom: 20px; border-left: 5px solid #ff9800; padding-left: 15px;">Input Laporan Baru</h2>
-                    
-                    <div class="form-group">
-                        <label>Pilih Nama Staf Pelapor</label>
-                        <select id="in-staf">
-                            <option value="" disabled selected>-- Pilih Nama Staf --</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Pilih Tanggal Laporan</label>
-                        <input type="date" id="in-tanggal">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Kenaikan PAR</label>
-                            <input type="number" id="in-naik" placeholder="Masukan Data">
-                        </div>
-                        <div class="form-group">
-                            <label>Penurunan PAR</label>
-                            <input type="number" id="in-turun" placeholder="Masukan Data">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="form-group">
-                            <label>Anggota Masuk</label>
-                            <input type="number" id="in-agt-masuk" placeholder="Masukan Data">
-                        </div>
-                        <div class="form-group">
-                            <label>Anggota Keluar</label>
-                            <input type="number" id="in-agt-keluar" placeholder="Masukan Data">
-                        </div>
-                    </div>
-
-                    <button class="btn-save" onclick="prosesSimpan()">SIMPAN DATA LAPORAN</button>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        // --- DATA DASAR ---
-        const daftarNamaStaf = [
-            "CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", 
-            "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", 
-            "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", 
-            "LOLA DWI SETIAWAN", "RANGGA ERLANDO"
-        ];
-
-        const daftarBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-        // Database Bulanan Utama
-        let databaseBulan = [
-            { bulan: "Januari", out: 0, naik: 75067200, turun: 42660500, totalAgt: 3258, agtMasuk: 43, agtKeluar: 66, sisaMon: 44 },
-            { bulan: "Februari", out: 0, naik: 56215700, turun: 60482700, totalAgt: 3260, agtMasuk: 33, agtKeluar: 62, sisaMon: 137 }
-        ];
-
-        let databaseStaf = daftarNamaStaf.map(nama => ({
-            nama: nama,
-            laporanBulanan: daftarBulan.map(bulan => ({
-                bulan: bulan, naik: 0, turun: 0, masuk: 0, keluar: 0, out: 0
-            }))
-        }));
-
-        function isiData(namaStaf, indexBulan, data) {
-            const indexStaf = daftarNamaStaf.indexOf(namaStaf);
-            if (indexStaf !== -1) {
-                databaseStaf[indexStaf].laporanBulanan[indexBulan] = {
-                    bulan: daftarBulan[indexBulan],
-                    naik: data.naik || 0,
-                    turun: data.turun || 0,
-                    masuk: data.masuk || 0,
-                    keluar: data.keluar || 0,
-                    out: data.out || 0
-                };
-            }
-        }
-
-        // JANUARI 2026
-        isiData("CASDI", 0, { naik: 1778000, turun: 2923500, masuk: 3, keluar: 7, out: 0 });
-        isiData("NONO SUTRISNO", 0, { naik: 1722200, turun: 6377200, masuk: 2, keluar: 2, out: 0 });
-        isiData("JOKO PRASETYO", 0, { naik: 13352600, turun: 4859900, masuk: 2, keluar: 5, out: 0 });
-        isiData("ISET PANJI NUGRAHA", 0, { naik: 6046600, turun: 6239400, masuk: 4, keluar: 5, out: 0 });
-        isiData("EKA RAMADHAN", 0, { naik: 11599100, turun: 3054900, masuk: 4, keluar: 7, out: 0 });
-        isiData("PERDI IRAWAN SAPUTRA", 0, { naik: 430800, turun: 2098000, masuk: 8, keluar: 8, out: 0 });
-        isiData("HERI APRIYOGO", 0, { naik: 6670700, turun: 2842500, masuk: 2, keluar: 4, out: 0 });
-        isiData("RAFID MALIK RIZQULLAH S", 0, { naik: 15211000, turun: 5435800, masuk: 1, keluar: 2, out: 0 });
-        isiData("MUHAMMAD SANDI", 0, { naik: 6616900, turun: 2903700, masuk: 2, keluar: 10, out: 0 });
-        isiData("ELPHINA DAMAYANTI", 0, { naik: 11639300, turun: 5017500, masuk: 11, keluar: 9, out: 0 });
-        isiData("LOLA DWI SETIAWAN", 0, { naik: 0, turun: 710400, masuk: 4, keluar: 6, out: 0 });
-        isiData("RANGGA ERLANDO", 0, { naik: 0, turun: 197700, masuk: 0, keluar: 1, out: 0 });
-        
-        // FEBRUARI 2026
-        isiData("CASDI", 1, { naik: 160000, turun: 2727800, masuk: 2, keluar: 8, out: 0 });
-        isiData("NONO SUTRISNO", 1, { naik: 5335600, turun: 8060200, masuk: 4, keluar: 10, out: 0 });
-        isiData("JOKO PRASETYO", 1, { naik: 3536600, turun: 2907800, masuk: 0, keluar: 4, out: 0 });
-        isiData("ISET PANJI NUGRAHA", 1, { naik: 7585000, turun: 5659500, masuk: 5, keluar: 2, out: 0 });
-        isiData("EKA RAMADHAN", 1, { naik: 3030000, turun: 3815700, masuk: 1, keluar: 6, out: 00 });
-        isiData("PERDI IRAWAN SAPUTRA", 1, { naik: 1816000, turun: 2000600, masuk: 3, keluar: 4, out: 0 });
-        isiData("HERI APRIYOGO", 1, { naik: 6829400, turun: 754000, masuk: 0, keluar: 8, out: 0 });
-        isiData("RAFID MALIK RIZQULLAH S", 1, { naik: 12314200, turun: 15271600, masuk: 4, keluar: 4, out: 0 });
-        isiData("MUHAMMAD SANDI", 1, { naik: 7205200, turun: 5567200, masuk: 1, keluar: 6, out: 0 });
-        isiData("ELPHINA DAMAYANTI", 1, { naik: 2976800, turun: 5016800, masuk: 11, keluar: 6, out: 0 });
-        isiData("LOLA DWI SETIAWAN", 1, { naik: 4132900, turun: 2593800, masuk: 2, keluar: 3, out: 0 });
-        isiData("RANGGA ERLANDO", 1, { naik: 1294000, turun: 6107700, masuk: 0, keluar: 1, out: 0 });
-
-        const dataStafMon = [
-            { nama: "CASDI", cair: 28, sudah: 3, sisa: 25 },
-            { nama: "NONO SUTRISNO", cair: 30, sudah: 0, sisa: 30 },
-            { nama: "JOKO PRASETYO", cair: 9, sudah: 9, sisa: 0 },
-            { nama: "ISET PANJI NUGRAHA", cair: 29, sudah: 0, sisa: 29 },
-            { nama: "EKA RAMADHAN", cair: 32, sudah: 13, sisa: 19 },
-            { nama: "PERDI IRAWAN SAPUTRA", cair: 26, sudah: 19, sisa: 7 },
-            { nama: "HERI APRIYOGO", cair: 17, sudah: 0, sisa: 17 },
-            { nama: "RAFID MALIK RIZQULLAH S", cair: 29, sudah: 0, sisa: 29 },
-            { nama: "MUHAMMAD SANDI", cair: 19, sudah: 4, sisa: 15 },
-            { nama: "ELPHINA DAMAYANTI", cair: 41, sudah: 13, sisa: 28 },
-            { nama: "LOLA DWI SETIAWAN", cair: 32, sudah: 5, sisa: 27 },
-            { nama: "RANGGA ERLANDO", cair: 0, sudah: 0, sisa: 0 }
-        ];
-
-        const dataSudahMon = [
-            ["AGT/140/001/539-009519", "PU-140-25-12-002101", "DEWI ARUM SARI", "539", "001", "05 Jan 2026", "ELPHINA DAMAYANTI", "09 Mar 2026"],
-            ["AGT/140/002/093-010457", "PU-140-25-12-002102", "LIROSNA", "093", "002", "05 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
-            ["AGT/140/002/093-009334", "PU-140-25-12-002103", "CASTIAH", "093", "002", "05 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
-            ["AGT/140/002/493-008529", "PU-140-26-01-000002", "VERAWATI", "493", "001", "08 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
-            ["AGT/140/001/489-008400", "PU-140-26-01-000001", "EEM SUHAEMI", "489", "001", "09 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/002/130-011110", "PU-140-26-01-000003", "AYU ERNAWATI", "130", "002", "12 Jan 2026", "Eka Ramadhan", "23 Feb 2026"],
-            ["AGT/140/001/353-005671", "PU-140-26-01-000007", "DARSIH", "353", "001", "13 Jan 2026", "PERDI IRAWAN SAPUTRA", "10 Mar 2026"],
-            ["AGT/140/001/060-009184", "PU-140-26-01-000014", "ERTIN", "060", "001", "14 Jan 2026", "Joko Prasetyo", "04 Feb 2026"],
-            ["AGT/140/002/093-010558", "PU-140-26-01-000032", "WASRI", "093", "002", "19 Jan 2026", "Eka Ramadhan", "09 Mar 2026"],
-            ["AGT/140/001/414-011115", "PU-140-26-01-000037", "TATI", "414", "001", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
-            ["AGT/140/003/414-011116", "PU-140-26-01-000038", "SHESIL DWI APRILIANI", "414", "003", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
-            ["AGT/140/003/414-011117", "PU-140-26-01-000039", "SITI AISAH", "414", "003", "22 Jan 2026", "PERDI IRAWAN SAPUTRA", "05 Feb 2026"],
-            ["AGT/140/001/255-009410", "PU-140-26-01-000042", "NURUL AINI", "255", "001", "22 Jan 2026", "MUHAMMAD SANDI", "26 Feb 2026"],
-            ["AGT/140/001/611-011130", "PU-140-26-01-000070", "YOYOH YULYANA", "611", "001", "27 Jan 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
-            ["AGT/140/002/611-011134", "PU-140-26-01-000073", "MARLINAH", "611", "002", "27 Jan 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
-            ["AGT/140/002/172-010505", "PU-140-26-01-000059", "DANIRAH", "172", "002", "28 Jan 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/265-009436", "PU-140-26-01-000064", "SURNI", "265", "003", "29 Jan 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
-            ["AGT/140/001/489-011127", "PU-140-26-01-000068", "CRISTIN CRISTIAN", "489", "001", "30 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Feb 2026"],
-            ["AGT/140/001/489-011128", "PU-140-26-01-000069", "SRI MURHATUN", "489", "001", "30 Jan 2026", "PERDI IRAWAN SAPUTRA", "06 Feb 2026"],
-            ["AGT/140/002/278-011143", "PU-140-26-01-000083", "MELINA", "278", "002", "02 Feb 2026", "PERDI IRAWAN SAPUTRA", "09 Mar 2026"],
-            ["AGT/140/002/130-009201", "PU-140-26-01-000092", "DESI REFENA", "130", "002", "02 Feb 2026", "Eka Ramadhan", "16 Feb 2026"],
-            ["AGT/140/001/595-011144", "PU-140-26-01-000084", "DESI SUSILAWATI", "595", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
-            ["AGT/140/002/595-011145", "PU-140-26-01-000085", "DESI ARISANDI", "595", "002", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
-            ["AGT/140/001/576-010543", "PU-140-26-01-000094", "NOPI SUPRIYATIN", "576", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
-            ["AGT/140/001/576-010562", "PU-140-26-01-000095", "RISKA WIDIANINGSIH", "576", "001", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
-            ["AGT/140/002/576-010542", "PU-140-26-01-000096", "TITI SARI", "576", "002", "03 Feb 2026", "LOLA DWI SETIAWAN", "10 Mar 2026"],
-            ["AGT/140/001/611-011129", "PU-140-26-01-000101", "KHOLIFAH", "611", "001", "03 Feb 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
-            ["AGT/140/002/611-011133", "PU-140-26-01-000102", "DEVI FITRIYANI", "611", "002", "03 Feb 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
-            ["AGT/140/001/118-011146", "PU-140-26-01-000099", "WARSINAH", "118", "001", "04 Feb 2026", "Joko Prasetyo", "25 Feb 2026"],
-            ["AGT/140/002/118-011147", "PU-140-26-01-000100", "YULITA", "118", "002", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
-            ["AGT/140/001/118-009397", "PU-140-26-01-000113", "DERENI", "118", "001", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
-            ["AGT/140/001/118-009398", "PU-140-26-01-000114", "SUTARI", "118", "001", "04 Feb 2026", "Joko Prasetyo", "11 Feb 2026"],
-            ["AGT/140/001/385-010490", "PU-140-26-01-000115", "RIWEN", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
-            ["AGT/140/001/385-010489", "PU-140-26-01-000116", "RENTI", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
-            ["AGT/140/001/385-010529", "PU-140-26-01-000117", "CASNI", "385", "001", "04 Feb 2026", "CASDI", "25 Feb 2026"],
-            ["AGT/140/002/582-010527", "PU-140-26-01-000120", "HARTATI", "582", "002", "04 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/172-008391", "PU-140-26-01-000121", "WIDYANINGSIH", "172", "001", "04 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/592-010575", "PU-140-26-01-000123", "WARNIAH", "592", "001", "04 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/001/100-009685", "PU-140-26-01-000124", "WALIYAH", "100", "001", "04 Feb 2026", "Joko Prasetyo", "24 Feb 2026"],
-            ["AGT/140/002/512-010455", "PU-140-26-01-000131", "YULIANAH", "512", "003", "04 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/001/172-011159", "PU-140-26-02-000155", "KASTINI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/172-009430", "PU-140-26-02-000160", "RASTINI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/002/612-011166", "PU-140-26-02-000166", "RAHOENI", "612", "002", "11 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/001/172-009431", "PU-140-26-02-000169", "ROYATI", "172", "001", "11 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/278-011173", "PU-140-26-02-000185", "DASTEM", "278", "001", "16 Feb 2026", "PERDI IRAWAN SAPUTRA", "09 Mar 2026"],
-            ["AGT/140/002/592-010577", "PU-140-26-02-000200", "KEMI", "592", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/002/592-010579", "PU-140-26-02-000201", "DINA", "592", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/001/612-011160", "PU-140-26-02-000208", "SANTI", "612", "001", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/002/612-011164", "PU-140-26-02-000209", "ROKAYAH", "612", "002", "18 Feb 2026", "ELPHINA DAMAYANTI", "11 Mar 2026"],
-            ["AGT/140/002/440-007297", "PU-140-26-02-000211", "CALON WAHYUNI", "412", "003", "19 Feb 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
-            ["AGT/140/002/440-007298", "PU-140-26-02-000212", "BUNGAH CANTIK", "412", "003", "19 Feb 2026", "MUHAMMAD SANDI", "12 Mar 2026"],
-            ["AGT/140/002/473-011176", "PU-140-26-02-000215", "ATIN JATININGSIH", "473", "002", "20 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/002/489-008406", "PU-140-26-02-000219", "PATIMAH", "489", "002", "20 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/002/304-011177", "PU-140-26-02-000223", "RUSKI", "304", "002", "23 Feb 2026", "PERDI IRAWAN SAPUTRA", "02 Mar 2026"],
-            ["AGT/140/001/304-009541", "PU-140-26-02-000227", "RASINAH", "304", "003", "23 Feb 2026", "PERDI IRAWAN SAPUTRA", "02 Mar 2026"],
-            ["AGT/140/001/013-008372", "PU-140-26-02-000228", "KUSTERI", "013", "001", "24 Feb 2026", "PERDI IRAWAN SAPUTRA", "03 Mar 2026"],
-            ["AGT/140/001/383-008803", "PU-140-26-02-000240", "ROSITA WATI DEWI", "383", "001", "25 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/383-009346", "PU-140-26-02-000241", "NOK LOKARI", "383", "003", "25 Feb 2026", "Eka Ramadhan", "11 Mar 2026"],
-            ["AGT/140/001/473-007987", "PU-140-26-02-000261", "NOVIYANTI", "473", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/001/473-007991", "PU-140-26-02-000262", "MEGA AGUSTIANI", "489", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/001/473-007989", "PU-140-26-02-000264", "SUMIYATI", "473", "001", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/002/473-007993", "PU-140-26-02-000265", "MARSASIH", "473", "002", "27 Feb 2026", "PERDI IRAWAN SAPUTRA", "06 Mar 2026"],
-            ["AGT/140/002/355-005998", "PU-140-26-02-000308", "SARTINAH", "355", "001", "03 Mar 2026", "ELPHINA DAMAYANTI", "10 Mar 2026"],
-            ["AGT/140/002/277-004346", "PU-140-26-02-000298", "TARSIYAH", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"],
-            ["AGT/140/002/277-004348", "PU-140-26-02-000299", "MITI BT SUKRAD", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"],
-            ["AGT/140/001/277-005987", "PU-140-26-02-000300", "MUNIKAH", "277", "002", "05 Mar 2026", "Joko Prasetyo", "12 Mar 2026"]
-        ];
-
-        // --- CORE FUNCTIONS ---
-
-        function populateStafDropdown() {
-            const select = document.getElementById('in-staf');
-            if (select.options.length > 1) return; 
-
-            daftarNamaStaf.forEach(nama => {
-                let opt = document.createElement('option');
-                opt.value = nama;
-                opt.innerHTML = nama;
-                select.appendChild(opt);
-            });
-        }
-
-        function startApp() {
-            populateStafDropdown();
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('app-container').style.display = 'flex';
-            switchPage('page-bulan');
-        }
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.getElementById(pageId).style.display = 'block';
-            document.querySelectorAll('aside button').forEach(btn => btn.classList.remove('active'));
-            
-            if(pageId === 'page-bulan') renderBulan();
-            if(pageId === 'page-all-staf') renderAllStaf();
-            if(pageId === 'page-monitoring') renderMonitoring();
-            if(pageId === 'page-rekap') renderTabelRekap();
-            if(pageId === 'page-sudah') renderSudahMonitoring();
-            
-            const navId = 'nav-' + pageId.replace('page-', '');
-            const navBtn = document.getElementById(navId);
-            if(navBtn) navBtn.classList.add('active');
-        }
-
-        // Fungsi Filter untuk "Sudah Di Monitoring"
-        function filterSudahMonitoring() {
-            let input = document.getElementById('search-sudah');
-            let filter = input.value.toLowerCase();
-            let tbody = document.getElementById('tabel-sudah-body');
-            let tr = tbody.getElementsByTagName('tr');
-
-            for (let i = 0; i < tr.length; i++) {
-                let textContent = tr[i].textContent || tr[i].innerText;
-                if (textContent.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-
-        function filterBelumMonitoring() {
-            let input = document.getElementById('search-belum');
-            let filter = input.value.toLowerCase();
-            let tbody = document.getElementById('tabel-belum-body');
-            let tr = tbody.getElementsByTagName('tr');
-
-            for (let i = 0; i < tr.length; i++) {
-                let textContent = tr[i].textContent || tr[i].innerText;
-                if (textContent.toLowerCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-
-
-        function renderBulan() {
-            const container = document.getElementById('grid-bulan');
-            container.innerHTML = "";
-            databaseBulan.forEach(item => {
-                const netPAR = item.naik - item.turun;
-                const netAgt = item.agtMasuk - item.agtKeluar;
-                container.innerHTML += `
-                    <div class="card">
-                        <h3>Rekap ${item.bulan} 2026</h3>
-                        <div class="section-title">💰 Outsanding (PAR)</div>
-                        <div class="data-row"><span>Kenaikan:</span> <span style="color:red">+${item.naik.toLocaleString('id-ID')}</span></div>
-                        <div class="data-row"><span>Penurunan:</span> <span style="color:green">-${item.turun.toLocaleString('id-ID')}</span></div>
-                        <div class="data-row" style="border-top: 1px dashed #ccc; padding-top: 5px; font-weight: bold;">
-                            <span>Hasil (Net):</span> <span style="color: ${netPAR >= 0 ? 'blue' : 'orange'};">${netPAR >= 0 ? '+' : ''}${netPAR.toLocaleString('id-ID')}</span>
-                        </div>
-                        <div class="result-box"><small>Outstanding Akhir:</small><br><b>Rp ${item.out.toLocaleString('id-ID')}</b></div>
-                        <div class="section-title">👥 ANGGOTA</div>
-                        <div class="data-row"><span>Masuk:</span> <span style="color:red">+${item.agtMasuk}</span></div>
-                        <div class="data-row"><span>Keluar:</span> <span style="color:green">-${item.agtKeluar}</span></div>
-                        <div class="data-row" style="border-top: 1px dashed #ccc; padding-top: 5px; font-weight: bold;">
-                            <span>Hasil (Net):</span> <span style="color: ${netAgt >= 0 ? 'blue' : 'orange'};">${netAgt >= 0 ? '+' : ''}${netAgt} Orang</span>
-                        </div>
-                        <div class="result-box" style="border-left-color: #ff9800;"><small>Total Anggota Akhir:</small><br><b>${item.totalAgt} Orang</b></div>
+                                </tbody>
+                        </table>
                     </div>`;
-            });
-        }
-
-        function renderAllStaf() {
-            const container = document.getElementById('grid-all-staf');
-            container.innerHTML = ""; 
-            databaseStaf.forEach(staf => {
-                let htmlBulanan = "";
-                staf.laporanBulanan.slice(0, 2).forEach(item => { // Only show Jan & Feb
-                    const netPAR = item.naik - item.turun;
-                    const netAgt = item.masuk - item.keluar;
-                    htmlBulanan += `
-                        <div style="border: 1px solid #e0e0e0; border-radius: 12px; padding: 15px; margin-bottom: 15px; background: #fff;">
-                            <div style="font-weight: bold; color: #001f3f; border-bottom: 2px solid #ff9800; margin-bottom: 12px; padding-bottom: 5px;">📅 ${item.bulan} 2026</div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem;">
-                                <div>
-                                    <div style="font-weight: bold; color: #888; margin-bottom: 5px; font-size: 0.7rem; text-transform: uppercase;">Outsanding:</div>
-                                    <div style="color: #d9534f; margin-bottom: 4px;">+ ${item.naik.toLocaleString('id-ID')}</div>
-                                    <div style="color: #5cb85c; margin-bottom: 8px;">- ${item.turun.toLocaleString('id-ID')}</div>
-                                    <div style="font-weight: bold; border-top: 1px dashed #ddd; padding-top: 5px; color: ${netPAR >= 0 ? '#001f3f' : '#ff9800'};">Rp ${netPAR.toLocaleString('id-ID')}</div>
-                                    <div style="font-size: 0.75rem; margin-top:5px;">Outstanding: <b>Rp ${item.out.toLocaleString('id-ID')}</b></div>
-                                </div>
-                                <div>
-                                    <div style="font-weight: bold; color: #888; margin-bottom: 5px; font-size: 0.7rem; text-transform: uppercase;">ANGGOTA:</div>
-                                    <div style="margin-bottom: 4px;">Masuk : ${item.masuk}</div>
-                                    <div style="margin-bottom: 8px;">Keluar : ${item.keluar}</div>
-                                    <div style="font-weight: bold; border-top: 1px dashed #ddd; padding-top: 5px; color: ${netAgt >= 0 ? '#007bff' : '#ff9800'};">${netAgt >= 0 ? '+' : ''}${netAgt} Agt</div>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-                container.innerHTML += `
-                    <div class="card" style="display: flex; flex-direction: column; height: 550px; border-top: 6px solid #001f3f;">
-                        <div style="padding: 15px; border-bottom: 1px solid #eee; text-align: center;"><h3 style="margin: 0; color: #001f3f;">👤 ${staf.nama}</h3></div>
-                        <div style="padding: 15px; overflow-y: auto; flex-grow: 1;">${htmlBulanan}</div>
-                    </div>`;
-            });
-        }
-
-        function renderMonitoring() {
-            const container = document.getElementById('grid-monitoring');
-            container.innerHTML = "";
-            dataStafMon.forEach(item => {
-                container.innerHTML += `
-                    <div class="card" style="border: 2px solid #2ecc71; border-top: 8px solid #2ecc71; border-radius: 12px;">
-                        <h3 style="background: #f4fbf7; padding: 12px; margin: -25px -25px 15px -25px; border-radius: 10px 10px 0 0; border-bottom: 2px solid #2ecc71; text-align: center;">👤 ${item.nama}</h3>
-                        <div style="display: flex; justify-content: space-between; gap: 8px;">
-                            <div style="flex: 1; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;"><p style="font-size: 0.65rem; color: #777;">TOTAL PENCAIRAN</p><b>${item.cair}</b></div>
-                            <div style="flex: 1; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;"><p style="font-size: 0.65rem; color: #777;">PENCAIRAN YANG DI MONITORING</p><b style="color: #28a745;">${item.sudah}</b></div>
-                            <div style="flex: 1; padding: 10px; border: 2px solid #2ecc71; border-radius: 8px; text-align: center; background: #fafffb;"><p style="font-size: 0.65rem; color: #777;">SISA</p><b style="color: #e67e22;">${item.sisa}</b></div>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function renderSudahMonitoring() {
-            const tbody = document.getElementById('tabel-sudah-body');
-            tbody.innerHTML = ""; // Bersihkan tabel
-            
-            dataSudahMon.forEach(row => {
-                let tr = document.createElement('tr');
-                row.forEach(cell => {
-                    let td = document.createElement('td');
-                    td.innerHTML = cell;
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-        }
-
-        function prosesSimpan() {
-            const stafNama = document.getElementById('in-staf').value;
-            const tgl = document.getElementById('in-tanggal').value;
-            if(!stafNama || !tgl) return alert("⚠️ Nama Staf dan Tanggal wajib diisi!");
-
-            const dataBaru = {
-                staf: stafNama,
-                tanggal: tgl,
-                naik: parseInt(document.getElementById('in-naik').value) || 0,
-                turun: parseInt(document.getElementById('in-turun').value) || 0,
-                masuk: parseInt(document.getElementById('in-agt-masuk').value) || 0,
-                keluar: parseInt(document.getElementById('in-agt-keluar').value) || 0
-            };
-
-            let rekapLokal = JSON.parse(localStorage.getItem('rekapHarian')) || [];
-            rekapLokal.push(dataBaru);
-            localStorage.setItem('rekapHarian', JSON.stringify(rekapLokal));
-
-            alert("✅ Laporan Tersimpan!");
-            
-            document.getElementById('in-tanggal').value = "";
-            document.getElementById('in-naik').value = "";
-            document.getElementById('in-turun').value = "";
-            document.getElementById('in-agt-masuk').value = "";
-            document.getElementById('in-agt-keluar').value = "";
-
-            switchPage('page-rekap');
-        }
-
-        function renderTabelRekap() {
-            const tbody = document.getElementById('tabel-rekap-body');
-            if (!tbody) return; 
-
-            let listLaporan = JSON.parse(localStorage.getItem('rekapHarian')) || [];
-            const hariIni = new Date().toISOString().split('T')[0]; 
-            const dataHariIni = listLaporan.filter(data => data.tanggal === hariIni);
-
-            tbody.innerHTML = ""; 
-            dataHariIni.reverse().forEach((data) => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${data.staf}</b></td>
-                        <td>${data.tanggal}</td>
-                        <td style="color:red">+${(data.naik).toLocaleString('id-ID')}</td>
-                        <td style="color:green">-${(data.turun).toLocaleString('id-ID')}</td>
-                        <td>${data.masuk}</td>
-                        <td>${data.keluar}</td>
-                        <td><span style="color:green">● Terkirim</span></td>
-                    </tr>`;
-            });
+                target.innerHTML = html;
+            } else if (page === 'Isi Laporan') {
+                target.innerHTML = `<div class="page-header"><i class="fas fa-edit"></i> Penginputan Laporan</div><div style="margin-bottom: 20px;"><button class="btn-masuk" style="margin-top:0; padding: 12px 30px; font-size:15px;" onclick="toggleFormLaporan()"><i class="fas fa-plus"></i> Tambah Laporan</button><button class="btn-masuk" style="margin-top:0; margin-left:10px; padding: 12px 30px; font-size:15px; background: #34495e;" onclick="ambilDataDariServer()"><i class="fas fa-sync"></i> Sinkron Server</button></div><div id="form-laporan-container" class="form-laporan-container"><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;"><div><label class="label-form">Nama Staf</label><select id="input-nama" class="input-mini"><option value="" disabled selected>-- Pilih Nama Staf --</option>${Object.keys(dataStafLengkap).map(name => `<option value="${name}">${name}</option>`).join('')}</select></div><div><label class="label-form">Tanggal</label><input type="date" id="input-tanggal" class="input-mini"></div><div><label class="label-form">Kenaikan PAR</label><input type="number" id="input-naik" class="input-mini" placeholder="0"></div><div><label class="label-form">Penurunan PAR</label><input type="number" id="input-turun" class="input-mini" placeholder="0"></div><div><label class="label-form">Anggota Masuk</label><input type="number" id="input-masuk" class="input-mini" placeholder="0"></div><div><label class="label-form">Anggota Keluar</label><input type="number" id="input-keluar" class="input-mini" placeholder="0"></div></div><div style="margin-top: 20px; display: flex; gap: 10px;"><button class="btn-masuk" style="background: var(--green-text); flex: 1;" onclick="simpanLaporanBaru()">SIMPAN DATA</button><button class="btn-masuk" style="background: var(--red-text); flex: 0.3;" onclick="toggleFormLaporan()">BATAL</button></div></div><div id="daftar-laporan-history"></div>`;
+                renderHistoryLaporan();
+            } else {
+                target.innerHTML = `<div class="page-header">${page}</div><p style="text-align:center; color:#999; margin-top:50px;">Fitur sedang dikembangkan.</p>`;
+            }
         }
     </script>
 </body>
