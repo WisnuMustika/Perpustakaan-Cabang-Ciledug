@@ -136,6 +136,7 @@
         <i class="fas fa-university fa-4x" style="margin-bottom: 20px;"></i>
         <h2>SELAMAT DATANG DI SISTEM INTERNAL</h2>
         <p>Database Cabang Ciledug 2026</p>
+        <p>Versi 1.1.0</p>
         <button class="btn-masuk" onclick="startupSistem()">MASUK KE SISTEM</button>
     </div>
 
@@ -155,11 +156,10 @@
                 <div class="menu-item" onclick="loadPage('Belum Di Monitoring', this)"><i class="fas fa-hourglass-start"></i><span>Belum Di Monitoring</span></div>
                 <div class="menu-item" onclick="loadPage('Par Baru', this)"><i class="fas fa-plus-square"></i><span>Par Baru</span></div>
             </div>
-            <div class="sidebar-footer">
-                <button class="btn-logout" onclick="location.reload()">
-                    <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
-                </button>
+                <div class="menu-item" onclick="location.reload()" style="color: var(--red-text); font-weight: bold;">
+              <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
             </div>
+            
         </div>
 
         <div class="content-area">
@@ -171,17 +171,17 @@
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzaTdqGz7LeyIILfIO-11YVdy1xQzP_C6hjkZw_KeQhueirLyab4ENtBp1XzKPB3ihE/exec";
 
         const dataMonitoringStaf = [
-            { nama: "CASDI", cair: 28, sudah: 3, sisa: 25 },
-            { nama: "NONO SUTRISNO", cair: 30, sudah: 0, sisa: 30 },
-            { nama: "JOKO PRASETYO", cair: 9, sudah: 9, sisa: 0 },
-            { nama: "ISET PANJI NUGRAHA", cair: 29, sudah: 0, sisa: 29 },
-            { nama: "EKA RAMADHAN", cair: 32, sudah: 13, sisa: 19 },
-            { nama: "PERDI IRAWAN SAPUTRA", cair: 26, sudah: 19, sisa: 7 },
-            { nama: "HERI APRIYOGO", cair: 17, sudah: 0, sisa: 17 },
-            { nama: "RAFID MALIK RIZQULLAH S", cair: 29, sudah: 0, sisa: 29 },
-            { nama: "MUHAMMAD SANDI", cair: 19, sudah: 4, sisa: 15 },
-            { nama: "ELPHINA DAMAYANTI", cair: 41, sudah: 13, sisa: 28 },
-            { nama: "LOLA DWI SETIAWAN", cair: 32, sudah: 5, sisa: 27 },
+            { nama: "CASDI", cair: 31, sudah: 3, sisa: 28 },
+            { nama: "NONO SUTRISNO", cair: 37, sudah: 0, sisa: 30 },
+            { nama: "JOKO PRASETYO", cair: 10, sudah: 9, sisa: 1 },
+            { nama: "ISET PANJI NUGRAHA", cair: 34, sudah: 0, sisa: 34 },
+            { nama: "EKA RAMADHAN", cair: 36, sudah: 13, sisa: 23 },
+            { nama: "PERDI IRAWAN SAPUTRA", cair: 27, sudah: 21, sisa: 6 },
+            { nama: "HERI APRIYOGO", cair: 20, sudah: 0, sisa: 20 },
+            { nama: "RAFID MALIK RIZQULLAH S", cair: 30, sudah: 0, sisa: 30 },
+            { nama: "MUHAMMAD SANDI", cair: 21, sudah: 4, sisa: 17 },
+            { nama: "ELPHINA DAMAYANTI", cair: 43, sudah: 13, sisa: 30 },
+            { nama: "LOLA DWI SETIAWAN", cair: 34, sudah: 5, sisa: 29 },
             { nama: "RANGGA ERLANDO", cair: 0, sudah: 0, sisa: 0 }
         ];
 
@@ -251,22 +251,24 @@
             { id: "AGT/140/002/355-005998", pinjaman: "PU-140-26-02-000308", anggota: "SARTINAH", center: "355", kel: "001", tglCair: "03 Mar 2026", staf: "ELPHINA DAMAYANTI", tglMon: "10 Mar 2026" },
             { id: "AGT/140/002/277-004346", pinjaman: "PU-140-26-02-000298", anggota: "TARSIYAH", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" },
             { id: "AGT/140/002/277-004348", pinjaman: "PU-140-26-02-000299", anggota: "MITI BT SUKRAD", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" },
-            { id: "AGT/140/001/277-005987", pinjaman: "PU-140-26-02-000300", anggota: "MUNIKAH", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" }
+            { id: "AGT/140/001/277-005987", pinjaman: "PU-140-26-02-000300", anggota: "MUNIKAH", center: "277", kel: "002", tglCair: "05 Mar 2026", staf: "JOKO PRASETYO", tglMon: "12 Mar 2026" },
+            { id: "AGT/140/002/418-006843", pinjaman: "PU-140-26-02-000276", anggota: "RUKINAH", center: "418", kel: "002", tglCair: "02 Mar 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "30 Mar 2026" },
+            { id: "AGT/140/003/418-008581", pinjaman: "PU-140-26-03-000326", anggota: "RASTINI", center: "418", kel: "003", tglCair: "09 Mar 2026", staf: "PERDI IRAWAN SAPUTRA", tglMon: "30 Mar 2026" }
         ];
 
         const dataStafLengkap = {
-            "CASDI": [{ naik: 1778000, turun: 2923500, masuk: 3, keluar: 7 }, { naik: 160000, turun: 2727800, masuk: 2, keluar: 8 }],
-            "NONO SUTRISNO": [{ naik: 1722200, turun: 6377200, masuk: 2, keluar: 2 }, { naik: 5335600, turun: 8060200, masuk: 4, keluar: 10 }],
-            "JOKO PRASETYO": [{ naik: 13352600, turun: 4859900, masuk: 2, keluar: 5 }, { naik: 3536600, turun: 2907800, masuk: 0, keluar: 4 }],
-            "ISET PANJI NUGRAHA": [{ naik: 6046600, turun: 6239400, masuk: 4, keluar: 5 }, { naik: 7585000, turun: 5659500, masuk: 5, keluar: 2 }],
-            "EKA RAMADHAN": [{ naik: 11599100, turun: 3054900, masuk: 4, keluar: 7 }, { naik: 3030000, turun: 3815700, masuk: 1, keluar: 6 }],
-            "PERDI IRAWAN SAPUTRA": [{ naik: 430800, turun: 2098000, masuk: 8, keluar: 8 }, { naik: 1816000, turun: 2000600, masuk: 3, keluar: 4 }],
-            "HERI APRIYOGO": [{ naik: 6670700, turun: 2842500, masuk: 2, keluar: 4 }, { naik: 6829400, turun: 754000, masuk: 0, keluar: 8 }],
-            "RAFID MALIK RIZQULLAH S": [{ naik: 15211000, turun: 5435800, masuk: 1, keluar: 2 }, { naik: 12314200, turun: 15271600, masuk: 4, keluar: 4 }],
-            "MUHAMMAD SANDI": [{ naik: 6616900, turun: 2903700, masuk: 2, keluar: 10 }, { naik: 7205200, turun: 5567200, masuk: 1, keluar: 6 }],
-            "ELPHINA DAMAYANTI": [{ naik: 11639300, turun: 5017500, masuk: 11, keluar: 9 }, { naik: 2976800, turun: 5016800, masuk: 11, keluar: 6 }],
-            "LOLA DWI SETIAWAN": [{ naik: 0, turun: 710400, masuk: 4, keluar: 6 }, { naik: 4132900, turun: 2593800, masuk: 2, keluar: 3 }],
-            "RANGGA ERLANDO": [{ naik: 0, turun: 197700, masuk: 0, keluar: 1 }, { naik: 1294000, turun: 6107700, masuk: 0, keluar: 1 }]
+            "CASDI": [{ naik: 1778000, turun: 2923500, masuk: 3, keluar: 7 }, { naik: 160000, turun: 2727800, masuk: 2, keluar: 8 },  { naik: 0, turun: 39000, masuk: 0, keluar: 0 }],
+            "NONO SUTRISNO": [{ naik: 1722200, turun: 6377200, masuk: 2, keluar: 2 }, { naik: 5335600, turun: 8060200, masuk: 4, keluar: 10 },  { naik: 1974800, turun: 0, masuk: 0, keluar: 1 }],
+            "JOKO PRASETYO": [{ naik: 13352600, turun: 4859900, masuk: 2, keluar: 5 }, { naik: 1363400, turun: 754400, masuk: 0, keluar: 4 },  { naik: 1647000, turun: 3030300, masuk: 0, keluar: 1 }],
+            "ISET PANJI NUGRAHA": [{ naik: 6046600, turun: 6240300, masuk: 4, keluar: 5 }, { naik: 7585000, turun: 5659500, masuk: 5, keluar: 2 },  { naik: 1860500, turun: 50300, masuk: 0, keluar: 2 }],    
+            "EKA RAMADHAN": [{ naik: 11599100, turun: 3054900, masuk: 4, keluar: 7 }, { naik: 3030000, turun: 3815700, masuk: 1, keluar: 6 },  { naik: 8072800, turun: 8072800, masuk: 1, keluar: 1 }],      
+            "PERDI IRAWAN SAPUTRA": [{ naik: 430800, turun: 2098000, masuk: 8, keluar: 8 }, { naik: 1816000, turun: 2000600, masuk: 3, keluar: 4 },  { naik: 2849600, turun: 1436700, masuk: 0, keluar: 0 }],
+            "HERI APRIYOGO": [{ naik: 6670700, turun: 2842500, masuk: 2, keluar: 4 }, { naik: 6829400, turun: 754000, masuk: 0, keluar: 8 },  { naik: 5926600, turun: 4227400, masuk: 0, keluar: 2 }],      
+            "RAFID MALIK RIZQULLAH S": [{ naik: 15211000, turun: 5435800, masuk: 1, keluar: 2 }, { naik: 12314200, turun: 15271600, masuk: 4, keluar: 4 },  { naik: 5962100, turun: 237300, masuk: 0, keluar: 2 }],  
+            "MUHAMMAD SANDI": [{ naik: 6616900, turun: 2903700, masuk: 2, keluar: 10 }, { naik: 7205200, turun: 5567200, masuk: 1, keluar: 6 },  { naik: 6698700, turun: 3921400, masuk: 0, keluar: 1 }],      
+            "ELPHINA DAMAYANTI": [{ naik: 0, turun: 2040000, masuk: 11, keluar: 9 }, { naik: 2976800, turun: 5016800, masuk: 11, keluar: 6 },  { naik: 0, turun: 422000, masuk: 0, keluar: 5 }],        
+            "LOLA DWI SETIAWAN": [{ naik: 0, turun: 710400, masuk: 4, keluar: 6 }, { naik: 1857700, turun: 318600, masuk: 2, keluar: 3 },  { naik: 841800, turun: 883100, masuk: 0, keluar: 0 }],        
+            "RANGGA ERLANDO": [{ naik: 0, turun: 197700, masuk: 0, keluar: 1 }, { naik: 1294000, turun: 6107700, masuk: 0, keluar: 1 },  { naik: 0, turun: 0, masuk: 0, keluar: 0 }]
         };
 
         let historyLaporan = JSON.parse(localStorage.getItem('dataLaporanSimpanan')) || [];
@@ -392,13 +394,19 @@
             if (page === 'Home') {
                 target.innerHTML = `<div style="text-align: center; padding: 20px;"><i class="fas fa-university fa-3x" style="color: var(--primary-blue); margin-bottom: 20px;"></i><h2 style="color: var(--primary-blue); margin-bottom: 10px;">DAFTAR MENU DI PERPUSTAKAAN CILEDUG</h2><p style="color: #666; margin-bottom: 40px;">Gunakan menu di bawah ini untuk mengelola data internal perpustakaan</p><div class="home-grid"><div class="home-card"><i class="fas fa-home" style="color: var(--primary-blue);"></i><div class="card-text"><strong>Home</strong><p>Halaman utama navigasi cepat.</p></div></div><div class="home-card"><i class="fas fa-calendar-alt" style="color: var(--primary-blue);"></i><div class="card-text"><strong>Data Perbulan</strong><p>Melihat rekapitulasi performa bulanan.</p></div></div><div class="home-card"><i class="fas fa-user-tie" style="color: #9b59b6;"></i><div class="card-text"><strong>Data Per Staf</strong><p>Statistik individual staf.</p></div></div><div class="home-card"><i class="fas fa-edit" style="color: var(--orange-accent);"></i><div class="card-text"><strong>Isi Laporan</strong><p>Formulir input data harian.</p></div></div><div class="home-card"><i class="fas fa-desktop" style="color: #34495e;"></i><div class="card-text"><strong>Data Monitoring</strong><p>Pusat pemantauan real-time.</p></div></div><div class="home-card"><i class="fas fa-check-circle" style="color: var(--green-text);"></i><div class="card-text"><strong>Sudah Di Monitoring</strong><p>Data yang telah diverifikasi.</p></div></div><div class="home-card"><i class="fas fa-hourglass-start" style="color: #e67e22;"></i><div class="card-text"><strong>Belum Di Monitoring</strong><p>Daftar antrean verifikasi.</p></div></div><div class="home-card"><i class="fas fa-plus-square" style="color: var(--red-text);"></i><div class="card-text"><strong>Par Baru</strong><p>Input outstanding baru.</p></div></div></div></div>`;
             } else if (page === 'Data Perbulan') {
-                 target.innerHTML = `<div class="page-header"><i class="fas fa-chart-line" style="margin-right:15px; color:#3498db;"></i> Rekapitulasi Bulanan</div><div class="rekap-container"><div class="rekap-card"><div class="rekap-body"><div class="month-title">Rekap Januari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 75.067.200</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 42.660.500</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-blue">+ 32.406.700</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 0</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-red">+ 43</span></div><div class="data-row"><span>Keluar:</span> <span class="val-green">- 66</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 23 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3258 Orang</strong></div><div class="monitoring-box"><span>Sisa Monitoring:</span><strong>44</strong></div></div></div><div class="rekap-card" style="border-top-color: #3498db;"><div class="rekap-body"><div class="month-title">Rekap Februari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 56.215.700</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 60.482.700</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-green">- 4.267.000</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 0</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-red">+ 33</span></div><div class="data-row"><span>Keluar:</span> <span class="val-green">- 62</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 29 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3230 Orang</strong></div><div class="monitoring-box" style="border-left-color: var(--orange-accent);"><span>Sisa Monitoring:</span><strong>137</strong></div></div></div></div>`;
+                 target.innerHTML = target.innerHTML = `<div class="page-header"><i class="fas fa-chart-line" style="margin-right:15px; color:#3498db;"></i> Rekapitulasi Bulanan</div><div class="rekap-container"><div class="rekap-card"><div class="rekap-body"><div class="month-title">Rekap Januari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 75.067.200</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 42.660.500</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">+ 32.406.700</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 2.330.754.800</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-red">+ 43</span></div><div class="data-row"><span>Keluar:</span> <span class="val-green">- 66</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 23 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3298 Orang</strong></div><div class="monitoring-box"><span>Sisa Monitoring:</span><strong>44</strong></div></div></div>
+
+
+<div class="rekap-card" style="border-top-color: #3498db;"><div class="rekap-body"><div class="month-title">Rekap Februari 2026</div><div class="section-label"><i class="fas fa-money-bill-wave"></i> OUTSTANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+ 29.404.000</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">- 33.681.800</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-green">- 4.277.800</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 2.326.477.000</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-green">+ 33</span></div><div class="data-row"><span>Keluar:</span> <span class="val-red">- 62</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">- 29 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3269 Orang</strong></div><div class="monitoring-box" style="border-left-color: var(--orange-accent);"><span>Sisa Monitoring:</span><strong>136</strong></div></div></div></div><div class="rekap-card">
+               
+<div class="rekap-card" style="border-top-color: #3498db;"><div class="rekap-body"><div class="month-title">Rekap Maret 2026</div><div class="section-label"><i class="fas fa-money-bill-wave "></i> OUTSANDING (PAR)</div><div class="data-row"><span>Kenaikan:</span> <span class="val-red">+35.833.900</span></div><div class="data-row"><span>Penurunan:</span> <span class="val-green">-22.320.300</span></div><div class="data-row net"><span>Hasil (Net):</span> <span class="val-red">+13.513.600</span></div><div class="highlight-box"><span>Outstanding Akhir:</span><strong>Rp 2.339.990.600</strong></div><div class="section-label"><i class="fas fa-users"></i> ANGGOTA</div><div class="data-row"><span>Masuk:</span> <span class="val-green">+1</span></div><div class="data-row"><span>Keluar:</span> <span class="val-red">- 15</span></div><div class="data-row net"><span>Hasil (Net)</span> <span class="val-red">-14 Orang</span></div><div class="highlight-box"><span>Total Anggota Akhir:</span><strong>3.255 Orang</strong></div><div class="monitoring-box" style="border-left-color: var(--orange-accent);"><span>Sisa Monitoring:</span><strong>75</strong></div></div></div></div>`;
+
             } else if (page === 'Data Per Staf') {
                 let htmlContent = `<div class="page-header"><i class="fas fa-users" style="margin-right:15px; color:#9b59b6;"></i> Performa Individual Staf</div><div class="search-container"><input type="text" id="searchStaf" class="search-bar" onkeyup="filterStaf()" placeholder="Cari nama staf..."></div><div class="staf-container">`;
                 Object.keys(dataStafLengkap).forEach(name => {
                     htmlContent += `<div class="staf-card" data-name="${name}"><div class="staf-header"><i class="fas fa-user-circle" style="margin-right:10px;"></i> ${name}</div><div class="staf-scroll-area">`;
                     dataStafLengkap[name].forEach((data, index) => {
-                        const bulan = index === 0 ? "Januari" : "Februari";
+    const bulan = index === 0 ? "Januari" : (index === 1 ? "Februari" : "Maret");
                         const hasilNet = data.naik - data.turun;
                         const agtNet = data.masuk - data.keluar;
                         htmlContent += `<div class="staf-month-card"><div class="staf-month-title"><i class="fas fa-calendar-alt"></i> ${bulan} 2026</div><div class="data-grid-staf"><div class="data-item"><span class="label-staf">OUTSTANDING</span><span class="val-red">+ ${data.naik.toLocaleString('id-ID')}</span><br><span class="val-green">- ${data.turun.toLocaleString('id-ID')}</span></div><div class="data-item"><span class="label-staf">ANGGOTA</span>Masuk: ${data.masuk}<br>Keluar: ${data.keluar}</div></div><div class="hasil-staf"><span class="${hasilNet >= 0 ? 'val-green' : 'val-red'}">Rp ${hasilNet.toLocaleString('id-ID')}</span><span>${agtNet >= 0 ? '+' : ''}${agtNet} Agt</span></div></div>`;
@@ -408,15 +416,15 @@
                 htmlContent += `</div>`;
                 target.innerHTML = htmlContent;
             } else if (page === 'Data Monitoring') {
-                let monHTML = `<div class="page-header"><i class="fas fa-desktop" style="margin-right:15px; color:#3498db;"></i> Sisa Monitoring 2026</div><div class="monitor-grid">`;
+                let monHTML = `<div class="page-header"><i class="fas fa-desktop" style="margin-right:15px; color:#3498db;"></i> Sisa Monitoring 2026 (Update Sampai Dengan 31 Maret 2026)</div><div class="monitor-grid">`;
                 dataMonitoringStaf.forEach(s => {
-                    monHTML += `<div class="monitor-card"><div class="monitor-card-header"><i class="fas fa-user-circle"></i> ${s.nama}</div><div class="monitor-stats-container"><div class="stat-box"><span class="stat-label">Total Cair</span><span class="stat-value">${s.cair}</span></div><div class="stat-box"><span class="stat-label">Monitoring</span><span class="stat-value" style="color:var(--green-text)">${s.sudah}</span></div><div class="stat-box highlight"><span class="stat-label">Sisa</span><span class="stat-value sisa">${s.sisa}</span></div></div></div>`;
+                    monHTML += `<div class="monitor-card"><div class="monitor-card-header"><i class="fas fa-user-circle"></i> ${s.nama}</div><div class="monitor-stats-container"><div class="stat-box"><span class="stat-label">Total Pencairan</span><span class="stat-value">${s.cair}</span></div><div class="stat-box"><span class="stat-label">Yang Di Monitoring</span><span class="stat-value" style="color:var(--green-text)">${s.sudah}</span></div><div class="stat-box highlight"><span class="stat-label">Sisa</span><span class="stat-value sisa">${s.sisa}</span></div></div></div>`;
                 });
                 monHTML += `</div>`;
                 target.innerHTML = monHTML;
             } else if (page === 'Sudah Di Monitoring') {
                 let html = `
-                    <div class="page-header"><i class="fas fa-check-circle" style="color: var(--green-text); margin-right:15px;"></i> Data Sudah Di Monitoring</div>
+                    <div class="page-header"><i class="fas fa-check-circle" style="color: var(--green-text); margin-right:15px;"></i> Data Sudah Di Monitoring (Diambil sampai dengan 31 Maret 2026)</div>
                     <div class="search-container">
                         <input type="text" id="searchMon" class="search-bar" onkeyup="filterTableUniversal('searchMon', 'tableMon')" placeholder="Cari Nama Anggota atau Nama Staf di sini...">
                     </div>
@@ -453,7 +461,7 @@
             } else if (page === 'Belum Di Monitoring') {
                 // INTEGRASI MENU BELUM DI MONITORING DENGAN TOMBOL PENCARIAN & HEADER BARU
                 let html = `
-                    <div class="page-header"><i class="fas fa-hourglass-start" style="color: #e67e22; margin-right:15px;"></i> Belum Di Monitoring</div>
+                    <div class="page-header"><i class="fas fa-hourglass-start" style="color: #e67e22; margin-right:15px;"></i> Belum Di Monitoring (Diambil sampai dengan 31 Maret 2026)</div>
                     <div class="search-container">
                         <input type="text" id="searchBelum" class="search-bar" onkeyup="filterTableUniversal('searchBelum', 'tableBelum')" placeholder="Cari Nama Anggota atau Nama Staf di sini...">
                     </div>
@@ -659,7 +667,6 @@
 <tr><td>AGT/140/001/501-008665</td><td>PU-140-26-02-000273</td><td>SRI HAYATI</td><td>501</td><td>02 Maret 2026</td><td>Eka Ramadhan</td></tr>
 <tr><td>AGT/140/001/537-009461</td><td>PU-140-26-02-000274</td><td>JUMYATI</td><td>537</td><td>02 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
 <tr><td>AGT/140/001/532-010559</td><td>PU-140-26-02-000275</td><td>ENAH</td><td>532</td><td>02 Maret 2026</td><td>Nono Sutrisno</td></tr>
-<tr><td>AGT/140/002/418-006843</td><td>PU-140-26-02-000276</td><td>RUKINAH</td><td>418</td><td>02 Maret 2026</td><td>PERDI IRAWAN SAPUTRA</td></tr>
 <tr><td>AGT/140/001/075-007872</td><td>PU-140-26-02-000277</td><td>RAHMANIAR</td><td>075</td><td>02 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
 <tr><td>AGT/140/001/503-008686</td><td>PU-140-26-02-000278</td><td>CALI</td><td>503</td><td>02 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
 <tr><td>AGT/140/001/593-011183</td><td>PU-140-26-02-000271</td><td>HENI SUHAENI</td><td>593</td><td>03 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
@@ -696,7 +703,37 @@
 <tr><td>AGT/140/001/545-009610</td><td>PU-140-26-02-000313</td><td>DASIAH</td><td>545</td><td>06 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
 <tr><td>AGT/140/002/504-008701</td><td>PU-140-26-02-000314</td><td>DINI BERKAH</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
 <tr><td>AGT/140/002/504-008698</td><td>PU-140-26-02-000315</td><td>RASNITI</td><td>504</td><td>06 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
-                                </tbody>
+<tr><td>AGT/140/001/201-004613</td><td>PMB-140-26-03-000002</td><td>JUMAENAH</td><td>199</td><td>09 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/002/501-008670</td><td>PU-140-26-03-000316</td><td>KARNESIH</td><td>501</td><td>09 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/093-009332</td><td>PU-140-26-03-000317</td><td>DANING</td><td>93</td><td>09 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/002/432-010638</td><td>PU-140-26-03-000318</td><td>UMIROH ROHAYATI</td><td>432</td><td>09 Maret 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/442-010606</td><td>PU-140-26-03-000319</td><td>SAHERI</td><td>442</td><td>09 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/004/442-008344</td><td>PU-140-26-03-000320</td><td>TARHENI</td><td>442</td><td>09 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/003/370-006427</td><td>PU-140-26-03-000321</td><td>RAHAYU</td><td>370</td><td>09 Maret 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/001/379-006216</td><td>PU-140-26-03-000322</td><td>SAMINAH</td><td>379</td><td>09 Maret 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/002/379-010547</td><td>PU-140-26-03-000323</td><td>TARWETI</td><td>379</td><td>09 Maret 2026</td><td>ELPHINA DAMAYANTI</td></tr>
+<tr><td>AGT/140/001/587-010674</td><td>PU-140-26-03-000324</td><td>NAWANGSIH</td><td>587</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/532-010608</td><td>PU-140-26-03-000325</td><td>SANTI SUSANTI</td><td>532</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/538-009504</td><td>PU-140-26-03-000340</td><td>JUNIAH</td><td>538</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/002/538-009505</td><td>PU-140-26-03-000341</td><td>IIN KARLINA SARI</td><td>538</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/538-009498</td><td>PU-140-26-03-000342</td><td>KARMILA EULISINTIA BELA</td><td>538</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/538-010654</td><td>PU-140-26-03-000343</td><td>CASRINI</td><td>538</td><td>09 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/092-008359</td><td>PU-140-26-03-000327</td><td>KARNINGSIH</td><td>92</td><td>10 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/092-003537</td><td>PU-140-26-03-000328</td><td>KUNAH RATNANINGSIH</td><td>92</td><td>10 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/002/556-010703</td><td>PU-140-26-03-000329</td><td>KARMINAH</td><td>556</td><td>10 Maret 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/002/590-010441</td><td>PU-140-26-03-000330</td><td>INTAN NURLAELA</td><td>590</td><td>10 Maret 2026</td><td>Rafid Malik Rizqullah S</td></tr>
+<tr><td>AGT/140/001/530-009338</td><td>PU-140-26-03-000332</td><td>CASIH</td><td>530</td><td>10 Maret 2026</td><td>CASDI</td></tr>
+<tr><td>AGT/140/001/419-009479</td><td>PU-140-26-03-000333</td><td>SUNENTI</td><td>419</td><td>10 Maret 2026</td><td>HERI APRIYOGO</td></tr>
+<tr><td>AGT/140/001/172-011186</td><td>PU-140-26-03-000331</td><td>TASYAH</td><td>172</td><td>11 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/001/021-010077</td><td>PU-140-26-03-000334</td><td>SULISTYANI</td><td>21</td><td>11 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>
+<tr><td>AGT/140/001/383-009305</td><td>PU-140-26-03-000335</td><td>TIROH</td><td>383</td><td>11 Maret 2026</td><td>Eka Ramadhan</td></tr>
+<tr><td>AGT/140/003/197-010584</td><td>PU-140-26-03-000336</td><td>MUHAESIH</td><td>197</td><td>11 Maret 2026</td><td>LOLA DWI SETIAWAN</td></tr>                                
+<tr><td>AGT/140/002/277-004347</td><td>PU-140-26-03-000337</td><td>SUKYATI</td><td>277</td><td>12 Maret 2026</td><td>Joko Prasetyo</td></tr>
+<tr><td>AGT/140/001/272-009481</td><td>PU-140-26-03-000338</td><td>YANTI</td><td>272</td><td>12 Maret 2026</td><td>MUHAMMAD SANDI</td></tr>
+<tr><td>AGT/140/003/230-010167</td><td>PU-140-26-03-000339</td><td>TUSINI</td><td>230</td><td>12 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+<tr><td>AGT/140/001/072-009446</td><td>PU-140-26-03-000344</td><td>SUNENTI</td><td>72</td><td>12 Maret 2026</td><td>Nono Sutrisno</td></tr>
+<tr><td>AGT/140/001/545-009705</td><td>PU-140-26-03-000345</td><td>ERI SAERI</td><td>545</td><td>13 Maret 2026</td><td>ISET PANJI NUGRAHA</td></tr>
+</tbody>
                         </table>
                     </div>`;
                 target.innerHTML = html;
