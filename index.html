@@ -171,7 +171,7 @@
         <h1>SELAMAT DATANG DI SISTEM INTERNAL</h1>
         <p>Database Cabang Ciledug 2026</p>
         <button class="btn-enter" onclick="startupSistem()">MULAI AKSES</button>
-        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.0.0 Update Data Anggota Par</p>
+        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.1.0 Update Auto Debit</p>
     </div>
 
     <div id="main-container">
@@ -196,14 +196,15 @@
 
     <script>
         let dataPar = []; 
+        let dataAutodebit = []; 
         const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO"];
         const listBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
         
         const urlLaporan = "https://script.google.com/macros/s/AKfycby_WCviFd5iKmKER-n3-Jd0ZQ7s82VJRpqcPKVxemgbNtJ-2kHDW181r7Tr1UAQxvRfWA/exec";
         const urlDatabaseUtama = "https://script.google.com/macros/s/AKfycbwkVMC37Wu30dCAtgoi1g-mXLtwQX8-iCzC9lCB8QnTfTRwX8ufw0CvT36Sl5zyfv5i/exec";
         const urlProgress = "https://script.google.com/macros/s/AKfycbydCcNzf46bphtaTDjUQFwzeg8hWjpSXWkEgwFSNI_qQAkhhvHS7Ul3QPUmALOmZmyiiQ/exec";
-        // VARIABEL MANDIRI UNTUK CAPAIAN PER STAF
         const urlCapaianStaf = "https://script.google.com/macros/s/AKfycbwsFTScYZz6gYeJxwubAYXX_OcjQCqygCx2qgAWy0_0CrZRSfB4_0fcVmrK8UxPb2Xl/exec";
+        const urlAutodebit = "https://script.google.com/macros/s/AKfycbwAhTpvUF8N5F2W1kMyK3q4qlvoJs0EhdXi3bTq3EHBcQA-CGPl5WrnT40aMur8qlI3/exec";
 
         function startupSistem() {
             document.getElementById('landing-page').style.display = 'none';
@@ -265,6 +266,72 @@
             });
         }
 
+        function syncAutodebit() {
+            if (!urlAutodebit) { 
+                alert("https://script.google.com/macros/s/AKfycbwAhTpvUF8N5F2W1kMyK3q4qlvoJs0EhdXi3bTq3EHBcQA-CGPl5WrnT40aMur8qlI3/exec"); 
+                return; 
+            }
+            document.getElementById('loading').style.display = 'flex';
+            fetch(urlAutodebit).then(r => r.json()).then(data => {
+                dataAutodebit = data.slice(1); // Potong header sheet
+                document.getElementById('loading').style.display = 'none';
+                renderAutodebitTable(dataAutodebit); // Tampilkan langsung ke tabel
+                alert("Data autodebit berhasil diperbarui!");
+            }).catch(e => { 
+                document.getElementById('loading').style.display = 'none'; 
+                alert("Gagal menarik data.");
+            });
+        }
+
+        function renderAutodebitTable(data) {
+            const tb = document.getElementById('tb-autodebit');
+            if (!tb) return;
+            if (data.length === 0) {
+                tb.innerHTML = `<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan</td></tr>`;
+                return;
+            }
+            tb.innerHTML = data.map(r => `
+                <tr>
+                    <td>${r[0] || '-'}</td>
+                    <td>${r[1] || '-'}</td>
+                    <td>${r[2] || '-'}</td>
+                    <td>${r[3] || '-'}</td>
+                    <td>${typeof r[4] === 'number' ? r[4].toLocaleString('id-ID') : r[4]}</td>
+                    <td>${typeof r[5] === 'number' ? r[5].toLocaleString('id-ID') : r[5]}</td>
+                    <td><strong>${typeof r[6] === 'number' ? r[6].toLocaleString('id-ID') : r[6]}</strong></td>
+                    <td>${r[7] || '-'}</td>
+                    <td>${r[8] || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function searchAutodebit() {
+    const keyword = document.getElementById('src-autodebit').value.toLowerCase();
+    
+    // Validasi jika data belum ditarik
+    if (dataAutodebit.length === 0) { 
+        alert("Silakan klik 'Tarik Data Terbaru' terlebih dahulu."); 
+        return; 
+    }
+    
+    // Filter data berdasarkan beberapa kolom sekaligus
+    const filtered = dataAutodebit.filter(r => {
+        const idMembers = (r[2] || "").toString().toLowerCase();
+        const namaMembers = (r[3] || "").toString().toLowerCase();
+        const hariPertemuan = (r[7] || "").toString().toLowerCase();
+        const namaStaf = (r[8] || "").toString().toLowerCase();
+        const center = (r[1] || "").toString().toLowerCase();
+
+        return namaMembers.includes(keyword) || 
+               idMembers.includes(keyword) || 
+               hariPertemuan.includes(keyword) || 
+               namaStaf.includes(keyword) ||
+               center.includes(keyword);
+    });
+    
+    renderAutodebitTable(filtered);
+}
+
         function loadPage(page, element) {
             const target = document.getElementById('content-target');
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -303,7 +370,7 @@
                 renderStats();
             }
             else if (page === 'Autodebit Simpanan') {
-                target.innerHTML = `<div class="page-header">AUTODEBIT SIMPANAN</div><div class="search-wrapper"><input type="text" id="src-autodebit" class="input-search" placeholder="Cari..."><button class="btn-search">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No. Pinjaman</th><th>Kode Center</th><th>Id</th><th>Nama Anggota</th><th>Total Sukarela</th><th>Pensiun</th><th>Total Simpanan</th><th>Hari</th><th>Nama Staf</th></tr></thead><tbody id="tb-autodebit"><tr><td colspan="9" style="text-align:center; padding:20px;">Gunakan pencarian</td></tr></tbody></table></div>`;
+                target.innerHTML = `<div class="page-header">AUTODEBIT SIMPANAN TERSEDIA H-7 DI AKHIR BULAN</div><div class="sync-wrapper"><button class="btn-sync" style="background:#2980b9;" onclick="syncAutodebit()"><i class="fas fa-cloud-download-alt"></i> Tarik Data Terbaru</button></div><div class="search-wrapper"><input type="text" id="src-autodebit" class="input-search" placeholder="Cari Nama/ID/Center..."><button class="btn-search" onclick="searchAutodebit()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No. Pinj</th><th>Center</th><th>Id</th><th>Nama</th><th>Sukarela</th><th>Pensiun</th><th>Total</th><th>Hari</th><th>Staf</th></tr></thead><tbody id="tb-autodebit"><tr><td colspan="9" style="text-align:center; padding:20px;">Klik 'Tarik Data' lalu cari nama anggota</td></tr></tbody></table></div>`;
             }
         }
 
@@ -318,68 +385,24 @@
 
         function viewCapaianStaf(n) {
             const target = document.getElementById('content-target');
-            target.innerHTML = `
-                <div class="page-header">
-                    <i class="fas fa-arrow-left" onclick="loadPage('Capaian Staf')" style="margin-right:15px; cursor:pointer;"></i>
-                    CAPAIAN: ${n}
-                </div>
-                <div id="loading-staf" style="text-align:center; padding:20px;">
-                    <i class="fas fa-spinner fa-spin"></i> Memuat data capaian ${n}...
-                </div>
-                <div class="progress-grid" id="staf-progress-grid" style="display:none;">
-                    ${generateMonthCards(false)}
-                </div>`;
-
-            // MEMANGGIL URL MANDIRI KHUSUS CAPAIAN STAF
-            fetch(urlCapaianStaf)
-                .then(response => response.json())
-                .then(data => {
-                    listBulan.forEach(bulan => {
-                        // Mencari data di properti allData sesuai format GS mandiri
-                        const d = (data.allData ? data.allData.find(item => item.staf === n && item.bulan === bulan) : null);
-
-                        if (d) {
-                            const naik = parseFloat(d.kenaikan) || 0;
-                            const turun = parseFloat(d.penurunan) || 0;
-                            const msk = parseInt(d.masuk) || 0;
-                            const klr = parseInt(d.keluar) || 0;
-                            
-                            const netPar = naik - turun;
-                            const netAgt = msk - klr;
-                            const sisaMon = d.sisaMonitoring || 0;
-
-                            const elKenaikan = document.getElementById(`kenaikan-${bulan}`);
-                            const elPenurunan = document.getElementById(`penurunan-${bulan}`);
-                            const elNetPar = document.getElementById(`netpar-${bulan}`);
-                            const elMasuk = document.getElementById(`masuk-${bulan}`);
-                            const elKeluar = document.getElementById(`keluar-${bulan}`);
-                            const elNetAgt = document.getElementById(`netagt-${bulan}`);
-                            const elSisa = document.getElementById(`sisa-${bulan}`);
-
-                            if(elKenaikan) elKenaikan.innerText = naik.toLocaleString('id-ID');
-                            if(elPenurunan) elPenurunan.innerText = turun.toLocaleString('id-ID');
-                            if(elNetPar) {
-                                elNetPar.innerText = netPar.toLocaleString('id-ID');
-                                elNetPar.style.color = netPar < 0 ? 'var(--red-text)' : 'var(--primary-blue)';
-                            }
-                            
-                            if(elMasuk) elMasuk.innerText = msk;
-                            if(elKeluar) elKeluar.innerText = klr;
-                            if(elNetAgt) {
-                                elNetAgt.innerText = (netAgt > 0 ? '+' : '') + netAgt;
-                                elNetAgt.style.color = netAgt < 0 ? 'var(--red-text)' : 'var(--primary-blue)';
-                            }
-                            if(elSisa) elSisa.innerText = sisaMon;
-                        }
-                    });
-
-                    document.getElementById('loading-staf').style.display = 'none';
-                    document.getElementById('staf-progress-grid').style.display = 'grid';
-                })
-                .catch(err => {
-                    console.error("Gagal memuat data capaian:", err);
-                    document.getElementById('loading-staf').innerHTML = `<p style="color:red;">Gagal mengambil data dari server.</p>`;
+            target.innerHTML = `<div class="page-header"><i class="fas fa-arrow-left" onclick="loadPage('Capaian Staf')" style="margin-right:15px; cursor:pointer;"></i>CAPAIAN: ${n}</div><div id="loading-staf" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Memuat data capaian ${n}...</div><div class="progress-grid" id="staf-progress-grid" style="display:none;">${generateMonthCards(false)}</div>`;
+            fetch(urlCapaianStaf).then(r => r.json()).then(data => {
+                listBulan.forEach(bulan => {
+                    const d = (data.allData ? data.allData.find(item => item.staf === n && item.bulan === bulan) : null);
+                    if (d) {
+                        const naik = parseFloat(d.kenaikan) || 0, turun = parseFloat(d.penurunan) || 0, msk = parseInt(d.masuk) || 0, klr = parseInt(d.keluar) || 0, netPar = naik - turun, netAgt = msk - klr;
+                        if(document.getElementById(`kenaikan-${bulan}`)) document.getElementById(`kenaikan-${bulan}`).innerText = naik.toLocaleString('id-ID');
+                        if(document.getElementById(`penurunan-${bulan}`)) document.getElementById(`penurunan-${bulan}`).innerText = turun.toLocaleString('id-ID');
+                        if(document.getElementById(`netpar-${bulan}`)) { document.getElementById(`netpar-${bulan}`).innerText = netPar.toLocaleString('id-ID'); document.getElementById(`netpar-${bulan}`).style.color = netPar < 0 ? 'var(--red-text)' : 'var(--primary-blue)'; }
+                        if(document.getElementById(`masuk-${bulan}`)) document.getElementById(`masuk-${bulan}`).innerText = msk;
+                        if(document.getElementById(`keluar-${bulan}`)) document.getElementById(`keluar-${bulan}`).innerText = klr;
+                        if(document.getElementById(`netagt-${bulan}`)) { document.getElementById(`netagt-${bulan}`).innerText = (netAgt > 0 ? '+' : '') + netAgt; document.getElementById(`netagt-${bulan}`).style.color = netAgt < 0 ? 'var(--red-text)' : 'var(--primary-blue)'; }
+                        if(document.getElementById(`sisa-${bulan}`)) document.getElementById(`sisa-${bulan}`).innerText = d.sisaMonitoring || 0;
+                    }
                 });
+                document.getElementById('loading-staf').style.display = 'none';
+                document.getElementById('staf-progress-grid').style.display = 'grid';
+            }).catch(e => { document.getElementById('loading-staf').innerHTML = `Gagal memuat.`; });
         }
 
         function render(d) {
@@ -397,36 +420,21 @@
         function search() { let k = document.getElementById('src').value.toLowerCase(); render(dataPar.filter(r => (r[3]||"").toLowerCase().includes(k) || (r[7]||"").toLowerCase().includes(k))); }
 
         function simpanLaporan() {
-            const d = {
-                staf: document.getElementById('input-staf').value,
-                tanggal: document.getElementById('input-tanggal').value,
-                kenaikan: document.getElementById('input-kenaikan').value,
-                penurunan: document.getElementById('input-penurunan').value,
-                masuk: document.getElementById('input-masuk').value,
-                keluar: document.getElementById('input-keluar').value,
-                timestamp: new Date().toISOString()
-            };
+            const d = { staf: document.getElementById('input-staf').value, tanggal: document.getElementById('input-tanggal').value, kenaikan: document.getElementById('input-kenaikan').value, penurunan: document.getElementById('input-penurunan').value, masuk: document.getElementById('input-masuk').value, keluar: document.getElementById('input-keluar').value, timestamp: new Date().toISOString() };
             if (!d.staf) { alert("Pilih nama staf!"); return; }
             document.getElementById('loading').style.display = 'flex';
-            fetch(urlLaporan, { method: 'POST', body: JSON.stringify(d) })
-            .then(r => r.json()).then(res => {
-                if(res.result === 'success') {
-                    alert("Laporan " + d.staf + " berhasil disimpan! Terimakasih! Jangan Lupa Absen Jika Sudah Jam 17:00 WIB!");
-                    toggleForm();
-                    renderHistoryFromServer();
-                } else { 
-                    alert("Gagal: " + res.error); 
-                    document.getElementById('loading').style.display = 'none';
-                }
-            }).catch(e => { document.getElementById('loading').style.display = 'none'; alert("Kesalahan koneksi!"); });
+            fetch(urlLaporan, { method: 'POST', body: JSON.stringify(d) }).then(r => r.json()).then(res => {
+                if(res.result === 'success') { alert("Laporan " + d.staf + " berhasil disimpan! Terimakasih! Jangan Lupa Absen Jika Sudah Jam 17:00 WIB!"); toggleForm(); renderHistoryFromServer(); } else { alert("Gagal!"); document.getElementById('loading').style.display = 'none'; }
+            }).catch(e => { document.getElementById('loading').style.display = 'none'; });
         }
 
+        // FUNGSI INI SUDAH DIKEMBALIKAN KE FORMAT LAMA YANG LENGKAP
         function renderHistoryFromServer() {
             const target = document.getElementById('history-list-target');
             if(!target) return;
             fetch(urlLaporan).then(r => r.json()).then(data => {
                 document.getElementById('loading').style.display = 'none';
-                const historiData = data.slice(1); 
+                const historiData = data.slice(1);
                 if(historiData.length === 0) { 
                     target.innerHTML = `<p style="text-align:center; color:#999; font-size:12px; margin-top:10px;">Belum ada data di server.</p>`; 
                     return; 
@@ -434,9 +442,37 @@
                 historiData.reverse();
                 target.innerHTML = historiData.map(item => {
                     const timestamp = item[0], tglLaporan = item[1], nama = item[2], naik = parseInt(item[3]) || 0, turun = parseInt(item[4]) || 0, msk = parseInt(item[5]) || 0, klr = parseInt(item[6]) || 0, netRp = naik - turun, netAgt = msk - klr;
-                    return `<div class="report-card"><div class="report-card-header"><div class="report-user"><i class="fas fa-user"></i> ${nama}</div><div class="report-timestamp">Lap: ${tglLaporan}<br>Input: ${new Date(timestamp).toLocaleString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div></div><div class="report-grid"><div class="grid-item"><span class="grid-label">OUTSTANDING</span><span class="grid-val-naik">Naik: +${naik.toLocaleString('id-ID')}</span></div><div class="grid-item"><span class="grid-label">ANGGOTA</span><span class="grid-val-normal">Masuk: ${msk}</span></div><div class="grid-item"><span class="grid-label">PAR TURUN</span><span class="grid-val-turun">Turun: -${turun.toLocaleString('id-ID')}</span></div><div class="grid-item"><span class="grid-label">ANGGOTA</span><span class="grid-val-normal">Keluar: ${klr}</span></div></div><div class="report-footer"><div class="footer-net-rp">Rp ${netRp.toLocaleString('id-ID')}</div><div class="footer-net-agt">${netAgt >= 0 ? '+' : ''}${netAgt} Agt</div></div></div>`;
+                    return `
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-user"><i class="fas fa-user"></i> ${nama}</div>
+                                <div class="report-timestamp">Lap: ${tglLaporan}<br>Input: ${new Date(timestamp).toLocaleString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div>
+                            </div>
+                            <div class="report-grid">
+                                <div class="grid-item">
+                                    <span class="grid-label">OUTSTANDING</span>
+                                    <span class="grid-val-naik">Naik: +${naik.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div class="grid-item">
+                                    <span class="grid-label">ANGGOTA</span>
+                                    <span class="grid-val-normal">Masuk: ${msk}</span>
+                                </div>
+                                <div class="grid-item">
+                                    <span class="grid-label">Outstanding</span>
+                                    <span class="grid-val-turun">Turun: -${turun.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div class="grid-item">
+                                    <span class="grid-label">ANGGOTA</span>
+                                    <span class="grid-val-normal">Keluar: ${klr}</span>
+                                </div>
+                            </div>
+                            <div class="report-footer">
+                                <div class="footer-net-rp">Rp ${netRp.toLocaleString('id-ID')}</div>
+                                <div class="footer-net-agt">${netAgt >= 0 ? '+' : ''}${netAgt} Agt</div>
+                            </div>
+                        </div>`;
                 }).join('');
-            }).catch(e => { target.innerHTML = "Gagal memuat histori dari server."; });
+            }).catch(e => { target.innerHTML = "Gagal memuat histori."; });
         }
     </script>
 </body>
