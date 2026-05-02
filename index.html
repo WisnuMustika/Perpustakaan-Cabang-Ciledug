@@ -71,7 +71,7 @@
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center;
-            color: #7f8c8d; cursor: pointer; font-size: 0.6rem; width: 13%;
+            color: #7f8c8d; cursor: pointer; font-size: 0.6rem; width: 13%; /* Adjusted width for fewer items */
             transition: 0.2s;
         }
         .nav-item i { font-size: 1.1rem; margin-bottom: 4px; }
@@ -138,7 +138,7 @@
         .form-group label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #555; }
         .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
         .btn-form-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-submit { flex: 2; padding: 12px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-submit { flex: 2; padding: 12px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-cancel { flex: 1; padding: 12px; background: #eee; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
         /* HISTORY CARD */
@@ -156,6 +156,25 @@
         .footer-net-rp { font-size: 0.85rem; font-weight: 800; color: var(--primary-blue); }
         .footer-net-agt { font-size: 0.75rem; font-weight: bold; padding: 2px 8px; background: #e8f4fd; color: #193d80; border-radius: 10px; }
 
+        /* EDIT BUTTON STYLE */
+        .btn-edit-report { padding: 4px 8px; background: var(--orange-accent); color: white; border: none; border-radius: 4px; font-size: 0.7rem; cursor: pointer; margin-left: 10px; }
+
+        /* REVISI STYLE SK CARD (BARU) */
+        .sk-list-container { display: flex; flex-direction: column; gap: 12px; }
+        .sk-card {
+            background: white; border-radius: 15px; padding: 20px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-left: 6px solid var(--primary-blue);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sk-text { display: flex; flex-direction: column; gap: 4px; }
+        .sk-title { font-size: 1rem; font-weight: bold; color: #333; }
+        .sk-meta { font-size: 0.8rem; color: #888; }
+        .sk-btn-view {
+            padding: 8px 18px; background: var(--primary-blue); color: white;
+            border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+
         @media (min-width: 768px) {
             .progress-grid { grid-template-columns: repeat(2, 1fr); }
             .home-grid-container { grid-template-columns: repeat(3, 1fr); }
@@ -171,7 +190,7 @@
         <h1>SELAMAT DATANG DI SISTEM INTERNAL</h1>
         <p>Database Cabang Ciledug 2026</p>
         <button class="btn-enter" onclick="startupSistem()">MULAI AKSES</button>
-        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.1.0 Update Auto Debit</p>
+        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.2.0 Update Kolom Edit Di Menu Laporan</p>
     </div>
 
     <div id="main-container">
@@ -197,10 +216,10 @@
     <script>
         let dataPar = []; 
         let dataAutodebit = []; 
-        const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO"];
+        const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO"," DESTA ADI TRIANA"];
         const listBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
         
-        const urlLaporan = "https://script.google.com/macros/s/AKfycby_WCviFd5iKmKER-n3-Jd0ZQ7s82VJRpqcPKVxemgbNtJ-2kHDW181r7Tr1UAQxvRfWA/exec";
+        const urlLaporan = "https://script.google.com/macros/s/AKfycbylHX9sEz9xRo565RZMlbEYm87T0moKMQOeUAyNkGXi-dfFLyoI32rfMQULGl0As_lg/exec";
         const urlDatabaseUtama = "https://script.google.com/macros/s/AKfycbwkVMC37Wu30dCAtgoi1g-mXLtwQX8-iCzC9lCB8QnTfTRwX8ufw0CvT36Sl5zyfv5i/exec";
         const urlProgress = "https://script.google.com/macros/s/AKfycbydCcNzf46bphtaTDjUQFwzeg8hWjpSXWkEgwFSNI_qQAkhhvHS7Ul3QPUmALOmZmyiiQ/exec";
         const urlCapaianStaf = "https://script.google.com/macros/s/AKfycbwsFTScYZz6gYeJxwubAYXX_OcjQCqygCx2qgAWy0_0CrZRSfB4_0fcVmrK8UxPb2Xl/exec";
@@ -267,15 +286,11 @@
         }
 
         function syncAutodebit() {
-            if (!urlAutodebit) { 
-                alert("https://script.google.com/macros/s/AKfycbwAhTpvUF8N5F2W1kMyK3q4qlvoJs0EhdXi3bTq3EHBcQA-CGPl5WrnT40aMur8qlI3/exec"); 
-                return; 
-            }
             document.getElementById('loading').style.display = 'flex';
             fetch(urlAutodebit).then(r => r.json()).then(data => {
-                dataAutodebit = data.slice(1); // Potong header sheet
+                dataAutodebit = data.slice(1);
                 document.getElementById('loading').style.display = 'none';
-                renderAutodebitTable(dataAutodebit); // Tampilkan langsung ke tabel
+                renderAutodebitTable(dataAutodebit);
                 alert("Data autodebit berhasil diperbarui!");
             }).catch(e => { 
                 document.getElementById('loading').style.display = 'none'; 
@@ -306,31 +321,18 @@
         }
 
         function searchAutodebit() {
-    const keyword = document.getElementById('src-autodebit').value.toLowerCase();
-    
-    // Validasi jika data belum ditarik
-    if (dataAutodebit.length === 0) { 
-        alert("Silakan klik 'Tarik Data Terbaru' terlebih dahulu."); 
-        return; 
-    }
-    
-    // Filter data berdasarkan beberapa kolom sekaligus
-    const filtered = dataAutodebit.filter(r => {
-        const idMembers = (r[2] || "").toString().toLowerCase();
-        const namaMembers = (r[3] || "").toString().toLowerCase();
-        const hariPertemuan = (r[7] || "").toString().toLowerCase();
-        const namaStaf = (r[8] || "").toString().toLowerCase();
-        const center = (r[1] || "").toString().toLowerCase();
-
-        return namaMembers.includes(keyword) || 
-               idMembers.includes(keyword) || 
-               hariPertemuan.includes(keyword) || 
-               namaStaf.includes(keyword) ||
-               center.includes(keyword);
-    });
-    
-    renderAutodebitTable(filtered);
-}
+            const keyword = document.getElementById('src-autodebit').value.toLowerCase();
+            if (dataAutodebit.length === 0) { alert("Silakan klik 'Tarik Data Terbaru' terlebih dahulu."); return; }
+            const filtered = dataAutodebit.filter(r => {
+                const idMembers = (r[2] || "").toString().toLowerCase();
+                const namaMembers = (r[3] || "").toString().toLowerCase();
+                const hariPertemuan = (r[7] || "").toString().toLowerCase();
+                const namaStaf = (r[8] || "").toString().toLowerCase();
+                const center = (r[1] || "").toString().toLowerCase();
+                return namaMembers.includes(keyword) || idMembers.includes(keyword) || hariPertemuan.includes(keyword) || namaStaf.includes(keyword) || center.includes(keyword);
+            });
+            renderAutodebitTable(filtered);
+        }
 
         function loadPage(page, element) {
             const target = document.getElementById('content-target');
@@ -345,8 +347,9 @@
                     {n:'Progress', p:'Progress Bulanan', i:'tasks', d:'Progress Bulanan.'},
                     {n:'Capaian', p:'Capaian Staf', i:'user-check', d:'Per Staf Per Bulan.'},
                     {n:'Autodebit', p:'Autodebit Simpanan', i:'money-check-alt', d:'Informasi simpanan.'}
+                    // SK menu item removed from here
                 ];
-                target.innerHTML = `<div class="page-header">MENU UTAMA SISTEM</div><div class="home-grid-container">${menus.map((m, idx) => `<div class="menu-card" onclick="loadPage('${m.p}', document.querySelectorAll('.nav-item')[${idx+1}])"><i class="fas fa-${m.i}"></i><h4>${m.n}</h4><p>${m.d}</p></div>`).join('')}</div><div style="margin-top: 30px; text-align: center;"><p style="font-size:11px; color:#7f8c8d;">Database Cabang Ciledug 2026</p><p style="font-size:10px; color:#bdc3c7;">Created by Wisnu Mustika Adhi</p></div>`;
+                target.innerHTML = `<div class="page-header">MENU UTAMA PERPUSTAKAAN</div><div class="home-grid-container">${menus.map((m, idx) => `<div class="menu-card" onclick="loadPage('${m.p}', document.querySelectorAll('.nav-item')[${idx+1}])"><i class="fas fa-${m.i}"></i><h4>${m.n}</h4><p>${m.d}</p></div>`).join('')}</div><div style="margin-top: 30px; text-align: center;"><p style="font-size:11px; color:#7f8c8d;">Database Cabang Ciledug 2026</p><p style="font-size:10px; color:#bdc3c7;">Created by Wisnu Mustika Adhi</p></div>`;
             } 
             else if (page === 'Data Anggota PAR') {
                 target.innerHTML = `<div class="page-header">DATA ANGGOTA PAR</div><div class="sync-wrapper"><button class="btn-sync" onclick="syncDataFromServer()"><i class="fas fa-sync"></i> Sinkron Server</button></div><div class="search-wrapper"><input type="text" id="src" class="input-search" placeholder="Cari..."><button class="btn-search" onclick="search()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No Pinjaman</th><th>Center</th><th>Id</th><th>Nama</th><th>Pinjaman</th><th>Tunggakan</th><th>Tipe</th><th>Staf</th></tr></thead><tbody id="tb"></tbody></table></div>`;
@@ -358,7 +361,7 @@
             }
             else if (page === 'Capaian Staf') {
                 let stafListHtml = listStafSistem.map(staf => `<div class="staf-btn" onclick="viewCapaianStaf('${staf}')">${staf}</div>`).join('');
-                target.innerHTML = `<div class="page-header">CAPAIAN PER STAF</div><div class="staf-selector-grid">${stafListHtml}</div>`;
+                target.innerHTML = `<div class="page-header">CAPAIAN PER STAF (Klik Nama Untuk Melihat) </div><div class="staf-selector-grid">${stafListHtml}</div>`;
             }
             else if (page === 'Isi Laporan') {
                 const opsiStaf = listStafSistem.map(staf => `<option value="${staf}">${staf}</option>`).join('');
@@ -372,11 +375,27 @@
             else if (page === 'Autodebit Simpanan') {
                 target.innerHTML = `<div class="page-header">AUTODEBIT SIMPANAN TERSEDIA H-7 DI AKHIR BULAN</div><div class="sync-wrapper"><button class="btn-sync" style="background:#2980b9;" onclick="syncAutodebit()"><i class="fas fa-cloud-download-alt"></i> Tarik Data Terbaru</button></div><div class="search-wrapper"><input type="text" id="src-autodebit" class="input-search" placeholder="Cari Nama/ID/Center..."><button class="btn-search" onclick="searchAutodebit()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No. Pinj</th><th>Center</th><th>Id</th><th>Nama</th><th>Sukarela</th><th>Pensiun</th><th>Total</th><th>Hari</th><th>Staf</th></tr></thead><tbody id="tb-autodebit"><tr><td colspan="9" style="text-align:center; padding:20px;">Klik 'Tarik Data' lalu cari nama anggota</td></tr></tbody></table></div>`;
             }
+            // SK page load condition remains for script integrity but is not reachable via UI
+            else if (page === 'Surat Keputusan') {
+                target.innerHTML = `
+                    <div class="page-header">SURAT KEPUTUSAN (SK)</div>
+                    <div class="sk-list-container" id="sk-list-target">
+                        <p style="text-align:center; padding:20px; color:#999;"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke server...</p>
+                    </div>`;
+                fetchSKFromServer();
+            }
         }
 
         function toggleForm() {
             const f = document.getElementById('form-container');
-            if(f) f.style.display = (f.style.display === 'none') ? 'block' : 'none';
+            if(f) {
+                f.style.display = (f.style.display === 'none') ? 'block' : 'none';
+                const btnSubmit = document.querySelector('.btn-submit');
+                if(btnSubmit) {
+                    btnSubmit.innerHTML = 'SIMPAN DATA';
+                    btnSubmit.style.background = 'var(--primary-blue)';
+                }
+            }
         }
 
         function generateMonthCards(showB) {
@@ -424,11 +443,17 @@
             if (!d.staf) { alert("Pilih nama staf!"); return; }
             document.getElementById('loading').style.display = 'flex';
             fetch(urlLaporan, { method: 'POST', body: JSON.stringify(d) }).then(r => r.json()).then(res => {
-                if(res.result === 'success') { alert("Laporan " + d.staf + " berhasil disimpan! Terimakasih! Jangan Lupa Absen Jika Sudah Jam 17:00 WIB!"); toggleForm(); renderHistoryFromServer(); } else { alert("Gagal!"); document.getElementById('loading').style.display = 'none'; }
+                if(res.result === 'success') { 
+                    alert("Laporan"  +  d.staf  + (res.message || "Data tersimpan!")); 
+                    toggleForm(); 
+                    renderHistoryFromServer(); 
+                } else { 
+                    alert("Gagal!"); 
+                    document.getElementById('loading').style.display = 'none'; 
+                }
             }).catch(e => { document.getElementById('loading').style.display = 'none'; });
         }
 
-        // FUNGSI INI SUDAH DIKEMBALIKAN KE FORMAT LAMA YANG LENGKAP
         function renderHistoryFromServer() {
             const target = document.getElementById('history-list-target');
             if(!target) return;
@@ -445,7 +470,12 @@
                     return `
                         <div class="report-card">
                             <div class="report-card-header">
-                                <div class="report-user"><i class="fas fa-user"></i> ${nama}</div>
+                                <div class="report-user">
+                                    <i class="fas fa-user"></i> ${nama}
+                                    <button class="btn-edit-report" onclick="prepareEditLaporan('${nama}', '${tglLaporan}', ${naik}, ${turun}, ${msk}, ${klr})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </div>
                                 <div class="report-timestamp">Lap: ${tglLaporan}<br>Input: ${new Date(timestamp).toLocaleString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div>
                             </div>
                             <div class="report-grid">
@@ -473,6 +503,30 @@
                         </div>`;
                 }).join('');
             }).catch(e => { target.innerHTML = "Gagal memuat histori."; });
+        }
+
+        function prepareEditLaporan(staf, tanggal, naik, turun, masuk, keluar) {
+            const form = document.getElementById('form-container');
+            if(form) form.style.display = 'block';
+            document.getElementById('input-staf').value = staf;
+            try {
+                const parts = tanggal.split('/');
+                if(parts.length === 3) {
+                    const formattedDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+                    document.getElementById('input-tanggal').value = formattedDate;
+                }
+            } catch(e) { console.log("Gagal memformat tanggal"); }
+            document.getElementById('input-kenaikan').value = naik;
+            document.getElementById('input-penurunan').value = turun;
+            document.getElementById('input-masuk').value = masuk;
+            document.getElementById('input-keluar').value = keluar;
+            const btnSubmit = document.querySelector('.btn-submit');
+            if(btnSubmit) {
+                btnSubmit.innerHTML = '<i class="fas fa-save"></i> UPDATE DATA LAPORAN';
+                btnSubmit.style.background = "var(--green-text)";
+            }
+            if(form) form.scrollIntoView({ behavior: 'smooth' });
+            alert("MODE EDIT: Silakan ubah data " + staf + " lalu klik UPDATE DATA.");
         }
     </script>
 </body>
