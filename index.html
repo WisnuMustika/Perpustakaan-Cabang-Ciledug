@@ -26,10 +26,10 @@
             overflow: hidden; 
         }
 
-        /* LANDING PAGE */
+        /* LANDING PAGE DENGAN BACKGROUND PERPUSTAKAAN */
         #landing-page {
             position: fixed; width: 100%; height: 100%;
-            background: linear-gradient(rgba(25, 61, 128, 0.9), rgba(4, 57, 111, 0.9)), url('https://images.unsplash.com/photo-1454165833767-027ffea70288?auto=format&fit=crop&q=80');
+            background: linear-gradient(rgba(25, 61, 128, 0.8), rgba(4, 57, 111, 0.8)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80');
             background-size: cover; background-position: center;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             color: white; z-index: 1000; text-align: center; padding: 20px;
@@ -71,7 +71,7 @@
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center;
-            color: #7f8c8d; cursor: pointer; font-size: 0.6rem; width: 13%; /* Adjusted width for fewer items */
+            color: #7f8c8d; cursor: pointer; font-size: 0.6rem; width: 12%; 
             transition: 0.2s;
         }
         .nav-item i { font-size: 1.1rem; margin-bottom: 4px; }
@@ -156,24 +156,7 @@
         .footer-net-rp { font-size: 0.85rem; font-weight: 800; color: var(--primary-blue); }
         .footer-net-agt { font-size: 0.75rem; font-weight: bold; padding: 2px 8px; background: #e8f4fd; color: #193d80; border-radius: 10px; }
 
-        /* EDIT BUTTON STYLE */
         .btn-edit-report { padding: 4px 8px; background: var(--orange-accent); color: white; border: none; border-radius: 4px; font-size: 0.7rem; cursor: pointer; margin-left: 10px; }
-
-        /* REVISI STYLE SK CARD (BARU) */
-        .sk-list-container { display: flex; flex-direction: column; gap: 12px; }
-        .sk-card {
-            background: white; border-radius: 15px; padding: 20px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-left: 6px solid var(--primary-blue);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .sk-text { display: flex; flex-direction: column; gap: 4px; }
-        .sk-title { font-size: 1rem; font-weight: bold; color: #333; }
-        .sk-meta { font-size: 0.8rem; color: #888; }
-        .sk-btn-view {
-            padding: 8px 18px; background: var(--primary-blue); color: white;
-            border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; gap: 8px;
-        }
 
         @media (min-width: 768px) {
             .progress-grid { grid-template-columns: repeat(2, 1fr); }
@@ -190,7 +173,7 @@
         <h1>SELAMAT DATANG DI SISTEM INTERNAL</h1>
         <p>Database Cabang Ciledug 2026</p>
         <button class="btn-enter" onclick="startupSistem()">MULAI AKSES</button>
-        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.2.0 Update Kolom Edit Di Menu Laporan</p>
+        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.2.1 Update Menu Ranking | Update Nama Staf | Double Pinjaman</p>
     </div>
 
     <div id="main-container">
@@ -209,6 +192,7 @@
             <div class="nav-item" onclick="loadPage('Progress Bulanan', this)"><i class="fas fa-tasks"></i>Progress</div>
             <div class="nav-item" onclick="loadPage('Capaian Staf', this)"><i class="fas fa-user-check"></i>Capaian</div>
             <div class="nav-item" onclick="loadPage('Autodebit Simpanan', this)"><i class="fas fa-money-check-alt"></i>Auto</div>
+            <div class="nav-item" onclick="loadPage('Ranking Staf', this)"><i class="fas fa-trophy" style="color: #f1c40f;"></i>Rank</div>
             <div class="nav-item" onclick="logoutSistem()"><i class="fas fa-sign-out-alt" style="color: var(--red-text);"></i>Out</div>
         </div>
     </div>
@@ -216,7 +200,7 @@
     <script>
         let dataPar = []; 
         let dataAutodebit = []; 
-        const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "HERI APRIYOGO", "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "ELPHINA DAMAYANTI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO"," DESTA ADI TRIANA"];
+        const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "RAFID MALIK RIZQULLAH S", "MUHAMMAD SANDI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO"," DESTA ADI TRIANA","ABU YAJID ALBUSTOMI"];
         const listBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
         
         const urlLaporan = "https://script.google.com/macros/s/AKfycbylHX9sEz9xRo565RZMlbEYm87T0moKMQOeUAyNkGXi-dfFLyoI32rfMQULGl0As_lg/exec";
@@ -224,6 +208,9 @@
         const urlProgress = "https://script.google.com/macros/s/AKfycbydCcNzf46bphtaTDjUQFwzeg8hWjpSXWkEgwFSNI_qQAkhhvHS7Ul3QPUmALOmZmyiiQ/exec";
         const urlCapaianStaf = "https://script.google.com/macros/s/AKfycbwsFTScYZz6gYeJxwubAYXX_OcjQCqygCx2qgAWy0_0CrZRSfB4_0fcVmrK8UxPb2Xl/exec";
         const urlAutodebit = "https://script.google.com/macros/s/AKfycbwAhTpvUF8N5F2W1kMyK3q4qlvoJs0EhdXi3bTq3EHBcQA-CGPl5WrnT40aMur8qlI3/exec";
+        
+        // URL SCRIPT RANKING MANDIRI (PASTIKAN SUDAH SESUAI)
+        const urlRankingMandiri = "https://script.google.com/macros/s/AKfycbwRmb-DRjT8p2vjpD2FT6ZHLRxLS0TMiu9aihrb3luPt4ot34rQuBZ-ztMKMu_RhvFbYA/exec"; 
 
         function startupSistem() {
             document.getElementById('landing-page').style.display = 'none';
@@ -346,10 +333,10 @@
                     {n:'Isi Laporan', p:'Isi Laporan', i:'file-signature', d:'Menu input laporan.'},
                     {n:'Progress', p:'Progress Bulanan', i:'tasks', d:'Progress Bulanan.'},
                     {n:'Capaian', p:'Capaian Staf', i:'user-check', d:'Per Staf Per Bulan.'},
-                    {n:'Autodebit', p:'Autodebit Simpanan', i:'money-check-alt', d:'Informasi simpanan.'}
-                    // SK menu item removed from here
+                    {n:'Autodebit', p:'Autodebit Simpanan', i:'money-check-alt', d:'Informasi simpanan.'},
+                    {n:'Ranking Staf', p:'Ranking Staf', i:'trophy', d:'Peringkat performa staf.'}
                 ];
-                target.innerHTML = `<div class="page-header">MENU UTAMA PERPUSTAKAAN</div><div class="home-grid-container">${menus.map((m, idx) => `<div class="menu-card" onclick="loadPage('${m.p}', document.querySelectorAll('.nav-item')[${idx+1}])"><i class="fas fa-${m.i}"></i><h4>${m.n}</h4><p>${m.d}</p></div>`).join('')}</div><div style="margin-top: 30px; text-align: center;"><p style="font-size:11px; color:#7f8c8d;">Database Cabang Ciledug 2026</p><p style="font-size:10px; color:#bdc3c7;">Created by Wisnu Mustika Adhi</p></div>`;
+                target.innerHTML = `<div class="page-header">MENU UTAMA PERPUSTAKAAN</div><div class="home-grid-container">${menus.map((m, idx) => `<div class="menu-card" onclick="loadPage('${m.p}', document.querySelectorAll('.nav-item')[${idx+1}])"><i class="fas fa-${m.i}" ${m.p === 'Ranking Staf' ? 'style="color:#f1c40f;"' : ''}></i><h4>${m.n}</h4><p>${m.d}</p></div>`).join('')}</div><div style="margin-top: 30px; text-align: center;"><p style="font-size:11px; color:#7f8c8d;">Database Cabang Ciledug 2026</p><p style="font-size:10px; color:#bdc3c7;">Created by Wisnu Mustika Adhi</p></div>`;
             } 
             else if (page === 'Data Anggota PAR') {
                 target.innerHTML = `<div class="page-header">DATA ANGGOTA PAR</div><div class="sync-wrapper"><button class="btn-sync" onclick="syncDataFromServer()"><i class="fas fa-sync"></i> Sinkron Server</button></div><div class="search-wrapper"><input type="text" id="src" class="input-search" placeholder="Cari..."><button class="btn-search" onclick="search()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No Pinjaman</th><th>Center</th><th>Id</th><th>Nama</th><th>Pinjaman</th><th>Tunggakan</th><th>Tipe</th><th>Staf</th></tr></thead><tbody id="tb"></tbody></table></div>`;
@@ -375,14 +362,51 @@
             else if (page === 'Autodebit Simpanan') {
                 target.innerHTML = `<div class="page-header">AUTODEBIT SIMPANAN TERSEDIA H-7 DI AKHIR BULAN</div><div class="sync-wrapper"><button class="btn-sync" style="background:#2980b9;" onclick="syncAutodebit()"><i class="fas fa-cloud-download-alt"></i> Tarik Data Terbaru</button></div><div class="search-wrapper"><input type="text" id="src-autodebit" class="input-search" placeholder="Cari Nama/ID/Center..."><button class="btn-search" onclick="searchAutodebit()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No. Pinj</th><th>Center</th><th>Id</th><th>Nama</th><th>Sukarela</th><th>Pensiun</th><th>Total</th><th>Hari</th><th>Staf</th></tr></thead><tbody id="tb-autodebit"><tr><td colspan="9" style="text-align:center; padding:20px;">Klik 'Tarik Data' lalu cari nama anggota</td></tr></tbody></table></div>`;
             }
-            // SK page load condition remains for script integrity but is not reachable via UI
-            else if (page === 'Surat Keputusan') {
+            else if (page === 'Ranking Staf') {
                 target.innerHTML = `
-                    <div class="page-header">SURAT KEPUTUSAN (SK)</div>
-                    <div class="sk-list-container" id="sk-list-target">
-                        <p style="text-align:center; padding:20px; color:#999;"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke server...</p>
+                    <div class="page-header">TERBAIK BULAN APRIL</div>
+                    <div id="rank-loading-container" style="text-align:center; padding:50px;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary-blue)"></i>
+                        <p style="margin-top:15px; color:#7f8c8d;">Mengambil data peringkat...</p>
                     </div>`;
-                fetchSKFromServer();
+
+                fetch(urlRankingMandiri)
+                    .then(r => r.json())
+                    .then(res => {
+                        const renderRankCard = (title, icon, data, color) => {
+                            // Foto Cadangan: Menggunakan inisial nama otomatis jika link foto kosong
+                            const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama)}&background=random&color=fff`;
+                            
+                            // Validasi link foto
+                            const linkFoto = (data.foto && data.foto.includes('http')) ? data.foto : fallback;
+
+                            return `
+                                <div class="month-card" style="position: relative; overflow: hidden; padding: 40px 20px; border-top: none; border-radius: 20px; margin-bottom:20px;">
+                                    <div style="position: absolute; top: 15px; right: -35px; background: ${color}; color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">JUARA 1</div>
+                                    <div style="text-align: center;">
+                                        <p style="color: #888; font-size: 0.8rem; margin-bottom: 20px;"><i class="${icon}"></i> ${title}</p>
+                                        <div style="margin-bottom:15px;">
+                                            <img src="${linkFoto}" 
+                                                 style="width:100px; height:100px; border:4px solid ${color}; border-radius:50%; object-fit:cover;"
+                                                 onerror="this.src='${fallback}'">
+                                        </div>
+                                        <h3 style="color: #193d80; font-size: 1.2rem; text-transform: uppercase;">${data.nama}</h3>
+                                        <div style="display: inline-block; background: #fff5e6; color: ${color}; padding: 5px 25px; border-radius: 20px; font-weight: bold; margin-top: 10px; font-size: 0.9rem;">
+                                            ${title.includes('ANGGOTA') ? data.skor + ' Agt' : 'Rp ' + data.skor.toLocaleString('id-ID')}
+                                        </div>
+                                    </div>
+                                </div>`;
+                        };
+                        target.innerHTML = `
+                            <div class="page-header">TERBAIK BULAN APRIL</div>
+                            <div style="display: flex; flex-direction: column; padding-bottom: 20px;">
+                                ${renderRankCard('PENURUNAN PAR TERBANYAK', 'fas fa-arrow-down', res.penurunan, '#f39c12')}
+                                ${renderRankCard('DISBURSE TERBANYAK', 'fas fa-hand-holding-usd', res.disburse, '#27ae60')}
+                                ${renderRankCard('ANGGOTA MASUK TERBANYAK', 'fas fa-user-plus', res.masuk, '#2980b9')}
+                            </div>`;
+                    }).catch(e => {
+                        target.innerHTML = `<div style="text-align:center; padding:50px; color:red;"><i class="fas fa-exclamation-triangle fa-2x"></i><p>Gagal memuat data ranking dinamis.</p></div>`;
+                    });
             }
         }
 
@@ -430,10 +454,73 @@
         }
 
         function renderStats() {
-            const c = document.getElementById('stats-container'); if(!c) return;
-            const s = {}; listStafSistem.forEach(n => { s[n] = { count: 0, tpk: 0, p: 0, t: 0 }; });
-            dataPar.forEach(r => { let m = listStafSistem.find(st => (r[7]||"").toUpperCase().includes(st)); if(m){ s[m].count++; s[m].p += parseFloat(String(r[4]).replace(/\./g,'').replace(',','.'))||0; s[m].t += parseFloat(String(r[5]).replace(/\./g,'').replace(',','.'))||0; if((r[6]||"").toUpperCase()==="KHUSUS") s[m].tpk++; }});
-            c.innerHTML = listStafSistem.map(st => `<div class="stat-card"><h4>${st}</h4><div class="stat-grid"><div class="stat-box"><span class="stat-label">Total Anggota PAR</span><span>${s[st].count}</span></div><div class="stat-box"><span class="stat-label">PAR DITPK</span><span class="val-red">${s[st].tpk}</span></div><div class="stat-box"><span class="stat-label">Total Pinjaman</span><span>${s[st].p.toLocaleString('id-ID')}</span></div><div class="stat-box"><span class="stat-label">Total Tunggakan</span><span>${s[st].t.toLocaleString('id-ID')}</span></div></div></div>`).join('');
+            const c = document.getElementById('stats-container'); 
+            if(!c) return;
+
+            // Inisialisasi data staf
+            const s = {}; 
+            listStafSistem.forEach(n => { 
+                s[n] = { count: 0, tpk: 0, p: 0, t: 0, double: 0 }; 
+            });
+
+            // Langkah 1: Hitung frekuensi ID untuk mendeteksi Double Pinjaman
+            const idCounts = {};
+            dataPar.forEach(r => {
+                const id = r[2]; // Index 2 adalah ID Anggota
+                if (id) {
+                    idCounts[id] = (idCounts[id] || 0) + 1;
+                }
+            });
+
+            // Langkah 2: Akumulasi data ke masing-masing staf
+            dataPar.forEach(r => {
+                let m = listStafSistem.find(st => (r[7] || "").toUpperCase().includes(st));
+                if (m) {
+                    s[m].count++;
+                    s[m].p += parseFloat(String(r[4]).replace(/\./g, '').replace(',', '.')) || 0;
+                    s[m].t += parseFloat(String(r[5]).replace(/\./g, '').replace(',', '.')) || 0;
+                    
+                    // Cek jika tipe pinjaman Khusus
+                    if ((r[6] || "").toUpperCase() === "KHUSUS") s[m].tpk++;
+
+                    // Cek jika ID ini muncul lebih dari 1 kali (Double Pinjaman)
+                    const id = r[2];
+                    if (idCounts[id] > 1) {
+                        s[m].double++;
+                    }
+                }
+            });
+
+            // Langkah 3: Render ke UI dengan grid 3 kolom dan tata letak rapi
+            c.innerHTML = listStafSistem.map(st => `
+                <div class="stat-card">
+                    <h4>${st}</h4>
+                    <div class="stat-grid-3">
+                        <div class="stat-box">
+                            <span class="stat-label">Total Anggota PAR</span>
+                            <span>${s[st].count}</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">PAR DITPK</span>
+                            <span class="val-red">${s[st].tpk}</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Double Pinjaman</span>
+                            <span style="color: var(--orange-accent); font-weight: bold;">${s[st].double}</span>
+                        </div>
+                    </div>
+                    <div class="stat-grid" style="margin-top:10px;">
+                        <div class="stat-box">
+                            <span class="stat-label">Total Pinjaman</span>
+                            <span>${s[st].p.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Total Tunggakan</span>
+                            <span>${s[st].t.toLocaleString('id-ID')}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function search() { let k = document.getElementById('src').value.toLowerCase(); render(dataPar.filter(r => (r[3]||"").toLowerCase().includes(k) || (r[7]||"").toLowerCase().includes(k))); }
@@ -444,7 +531,7 @@
             document.getElementById('loading').style.display = 'flex';
             fetch(urlLaporan, { method: 'POST', body: JSON.stringify(d) }).then(r => r.json()).then(res => {
                 if(res.result === 'success') { 
-                    alert("Laporan"  +  d.staf  + (res.message || "Data tersimpan!")); 
+                    alert("Laporan "  +  d.staf  + " " + (res.message || "Data tersimpan!")); 
                     toggleForm(); 
                     renderHistoryFromServer(); 
                 } else { 
