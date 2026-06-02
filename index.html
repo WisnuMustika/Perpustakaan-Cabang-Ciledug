@@ -2,618 +2,2062 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Internal Cabang Ciledug</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-blue: #193d80;
-            --secondary-blue: #04396f;
-            --orange-accent: #f39c12;
-            --red-text: #e74c3c;
-            --green-text: #27ae60;
-            --bg-light: #f4f7f9;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        body { 
-            background-color: var(--bg-light); 
-            color: #333333; 
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-
-        /* LANDING PAGE DENGAN BACKGROUND PERPUSTAKAAN */
-        #landing-page {
-            position: fixed; width: 100%; height: 100%;
-            background: linear-gradient(rgba(25, 61, 128, 0.8), rgba(4, 57, 111, 0.8)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80');
-            background-size: cover; background-position: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; z-index: 1000; text-align: center; padding: 20px;
-        }
-        #landing-page h1 { font-size: 2.2rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        #landing-page p { font-size: 1rem; margin-bottom: 30px; opacity: 0.9; }
-        .btn-enter {
-            padding: 15px 40px; background: var(--orange-accent); color: white;
-            border: none; border-radius: 50px; font-weight: bold; font-size: 1.1rem;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s;
-        }
-        .btn-enter:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
-
-        /* MAIN LAYOUT */
-        #main-container { display: none; flex-direction: column; height: 100%; }
-        .top-nav {
-            background: var(--primary-blue); color: white;
-            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 100;
-        }
-        .top-nav h2 { font-size: 1.1rem; font-weight: 600; }
-        
-        #content-target { 
-            flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 90px;
-            scroll-behavior: smooth;
-        }
-
-        .page-header { 
-            font-size: 1.2rem; font-weight: bold; color: var(--primary-blue);
-            margin-bottom: 20px; border-left: 5px solid var(--orange-accent);
-            padding-left: 10px; display: flex; align-items: center;
-        }
-
-        /* BOTTOM NAV */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%;
-            background: white; display: flex; justify-content: space-around;
-            padding: 8px 2px; border-top: 1px solid #ddd; z-index: 200;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            color: #7f8c8d; cursor: pointer; font-size: 0.6rem; width: 12%; 
-            transition: 0.2s;
-        }
-        .nav-item i { font-size: 1.1rem; margin-bottom: 4px; }
-        .nav-item.active { color: var(--primary-blue); font-weight: bold; }
-
-        /* LOADING */
-        #loading {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8); display: none;
-            justify-content: center; align-items: center; z-index: 2000;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-blue); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* GRID & CARDS */
-        .home-grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 10px; }
-        .menu-card {
-            background: white; padding: 20px; border-radius: 12px; text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer;
-        }
-        .menu-card i { font-size: 1.8rem; color: var(--primary-blue); margin-bottom: 10px; }
-        .menu-card h4 { font-size: 0.85rem; color: #333; margin-bottom: 5px; }
-        .menu-card p { font-size: 0.65rem; color: #7f8c8d; }
-
-        .custom-table { width: 100%; border-collapse: collapse; background: white; font-size: 0.75rem; }
-        .custom-table th { background: var(--primary-blue); color: white; padding: 10px; text-align: left; }
-        .custom-table td { padding: 10px; border-bottom: 1px solid #eee; }
-        .table-responsive { overflow-x: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        .search-wrapper { display: flex; gap: 10px; margin-bottom: 15px; }
-        .input-search { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        .btn-search { padding: 10px 20px; background: var(--primary-blue); color: white; border: none; border-radius: 5px; cursor: pointer; }
-
-        .btn-sync { padding: 8px 15px; background: var(--green-text); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-bottom: 10px; }
-        
-        .progress-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .month-card { background: white; border-radius: 10px; padding: 15px; border-top: 4px solid var(--primary-blue); box-shadow: 0 3px 6px rgba(0,0,0,0.05); }
-        .month-name { font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; color: var(--primary-blue); }
-        .progress-section { margin-bottom: 10px; }
-        .section-title { font-size: 0.7rem; font-weight: bold; color: #95a5a6; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .data-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 3px; }
-        .data-label { color: #7f8c8d; }
-        .data-val { font-weight: 600; }
-        .val-net { color: var(--primary-blue); font-weight: bold; }
-        .val-red { color: var(--red-text); }
-
-        .staf-selector-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .staf-btn { background: white; padding: 12px; border-radius: 8px; font-size: 0.8rem; text-align: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
-
-        .stat-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .stat-card h4 { margin-bottom: 12px; color: var(--primary-blue); border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .stat-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; }
-        .stat-label { font-size: 0.65rem; color: #7f8c8d; margin-bottom: 4px; }
-
-        /* FORM INPUT LAPORAN */
-        .form-laporan-container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #555; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
-        .btn-form-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-submit { flex: 2; padding: 12px; background: var(--primary-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-cancel { flex: 1; padding: 12px; background: #eee; color: #333; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-
-        /* HISTORY CARD */
-        .report-card { background: white; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 4px solid var(--orange-accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .report-card-header { display: flex; justify-content: space-between; font-size: 0.75rem; border-bottom: 1px solid #f5f5f5; padding-bottom: 6px; margin-bottom: 8px; }
-        .report-user { font-weight: bold; color: var(--primary-blue); }
-        .report-timestamp { color: #999; text-align: right; }
-        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .grid-item { display: flex; flex-direction: column; background: #fdfdfd; padding: 5px; border-radius: 4px; }
-        .grid-label { font-size: 0.6rem; color: #aaa; text-transform: uppercase; }
-        .grid-val-naik { font-size: 0.8rem; font-weight: bold; color: var(--red-text); }
-        .grid-val-turun { font-size: 0.8rem; font-weight: bold; color: var(--green-text); }
-        .grid-val-normal { font-size: 0.8rem; font-weight: bold; color: #444; }
-        .report-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee; }
-        .footer-net-rp { font-size: 0.85rem; font-weight: 800; color: var(--primary-blue); }
-        .footer-net-agt { font-size: 0.75rem; font-weight: bold; padding: 2px 8px; background: #e8f4fd; color: #193d80; border-radius: 10px; }
-
-        .btn-edit-report { padding: 4px 8px; background: var(--orange-accent); color: white; border: none; border-radius: 4px; font-size: 0.7rem; cursor: pointer; margin-left: 10px; }
-
-        @media (min-width: 768px) {
-            .progress-grid { grid-template-columns: repeat(2, 1fr); }
-            .home-grid-container { grid-template-columns: repeat(3, 1fr); }
+        .bg-database {
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), 
+                        url('https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=1200') no-repeat center center/cover;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased overflow-x-hidden">
 
-    <div id="loading"><div class="spinner"></div></div>
-
-    <div id="landing-page">
-        <i class="fas fa-university" style="font-size: 4rem; margin-bottom: 20px; color: var(--orange-accent);"></i>
-        <h1>SELAMAT DATANG DI SISTEM INTERNAL</h1>
-        <p>Database Cabang Ciledug 2026</p>
-        <button class="btn-enter" onclick="startupSistem()">MULAI AKSES</button>
-        <p style="position: absolute; bottom: 20px; font-size: 0.7rem; opacity: 0.6;">v2.2.2 Update Nama Staf</p>
-    </div>
-
-    <div id="main-container">
-        <div class="top-nav">
-            <h2>KOMIDA CILEDUG</h2>
-            <i class="fas fa-bell"></i>
-        </div>
-
-        <div id="content-target"></div>
-
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="loadPage('Home', this)"><i class="fas fa-home"></i>Home</div>
-            <div class="nav-item" onclick="loadPage('Data Anggota PAR', this)"><i class="fas fa-users"></i>Data</div>
-            <div class="nav-item" onclick="loadPage('Statistik By Staf', this)"><i class="fas fa-chart-pie"></i>Stat</div>
-            <div class="nav-item" onclick="loadPage('Isi Laporan', this)"><i class="fas fa-file-signature"></i>Lapor</div>
-            <div class="nav-item" onclick="loadPage('Progress Bulanan', this)"><i class="fas fa-tasks"></i>Progress</div>
-            <div class="nav-item" onclick="loadPage('Capaian Staf', this)"><i class="fas fa-user-check"></i>Capaian</div>
-            <div class="nav-item" onclick="loadPage('Autodebit Simpanan', this)"><i class="fas fa-money-check-alt"></i>Auto</div>
-            <div class="nav-item" onclick="loadPage('Ranking Staf', this)"><i class="fas fa-trophy" style="color: #f1c40f;"></i>Rank</div>
-            <div class="nav-item" onclick="logoutSistem()"><i class="fas fa-sign-out-alt" style="color: var(--red-text);"></i>Out</div>
-        </div>
-    </div>
-
-    <script>
-        let dataPar = []; 
-        let dataAutodebit = []; 
-        const listStafSistem = ["CASDI", "NONO SUTRISNO", "JOKO PRASETYO", "ISET PANJI NUGRAHA", "EKA RAMADHAN", "PERDI IRAWAN SAPUTRA", "MUHAMMAD SANDI", "LOLA DWI SETIAWAN", "RANGGA ERLANDO","ARI SUNDAPA","DESTA ADI TRIANA","ABU YAJID ALBUSTOMI"];
-        const listBulan = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
-        
-        const urlLaporan = "https://script.google.com/macros/s/AKfycbylHX9sEz9xRo565RZMlbEYm87T0moKMQOeUAyNkGXi-dfFLyoI32rfMQULGl0As_lg/exec";
-        const urlDatabaseUtama = "https://script.google.com/macros/s/AKfycbwkVMC37Wu30dCAtgoi1g-mXLtwQX8-iCzC9lCB8QnTfTRwX8ufw0CvT36Sl5zyfv5i/exec";
-        const urlProgress = "https://script.google.com/macros/s/AKfycbydCcNzf46bphtaTDjUQFwzeg8hWjpSXWkEgwFSNI_qQAkhhvHS7Ul3QPUmALOmZmyiiQ/exec";
-        const urlCapaianStaf = "https://script.google.com/macros/s/AKfycbwsFTScYZz6gYeJxwubAYXX_OcjQCqygCx2qgAWy0_0CrZRSfB4_0fcVmrK8UxPb2Xl/exec";
-        const urlAutodebit = "https://script.google.com/macros/s/AKfycbwAhTpvUF8N5F2W1kMyK3q4qlvoJs0EhdXi3bTq3EHBcQA-CGPl5WrnT40aMur8qlI3/exec";
-        
-        // URL SCRIPT RANKING MANDIRI (PASTIKAN SUDAH SESUAI)
-        const urlRankingMandiri = "https://script.google.com/macros/s/AKfycbwRmb-DRjT8p2vjpD2FT6ZHLRxLS0TMiu9aihrb3luPt4ot34rQuBZ-ztMKMu_RhvFbYA/exec"; 
-
-        function startupSistem() {
-            document.getElementById('landing-page').style.display = 'none';
-            document.getElementById('main-container').style.display = 'flex';
-            syncDataFromServer();
-            loadPage('Home', document.querySelector('.nav-item'));
+    <div id="landing-page" class="bg-database min-h-screen flex flex-col justify-center items-center text-center px-4 transition-all duration-500">
+        <div class="max-w-2xl bg-slate-900/60 p-8 rounded-2xl backdrop-blur-md border border-slate-700/50 shadow-2xl">
+            <div class="text-indigo-500 text-6xl mb-4 animate-bounce">
+                <i class="fas fa-database"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                SELAMAT DATANG DI SISTEM INTERNAL
+            </h1>
+            <p class="text-slate-400 text-lg mb-8">
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.0.0
+            </p>
             
-            setInterval(() => {
-                const title = document.querySelector('.page-header')?.innerText;
-                if(title?.includes('PENGINPUTAN LAPORAN')) renderHistoryFromServer();
-            }, 60000);
-        }
+            <button onclick="bukaMenuUtama()" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
+                Mulai Akses <i class="fas fa-arrow-right ml-2 text-sm"></i>
+            </button>
+        </div>
+    </div>
 
-        function logoutSistem() {
-            if(confirm("Apakah Anda yakin ingin keluar dari sistem?")) {
-                document.getElementById('main-container').style.display = 'none';
-                document.getElementById('landing-page').style.display = 'flex';
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                document.querySelector('.nav-item').classList.add('active');
-            }
-        }
+    <div id="main-menu-page" class="hidden min-h-screen flex flex-col md:flex-row">
+        
+        <div class="md:hidden bg-slate-950 border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-40">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-bell text-indigo-500 text-xl"></i>
+                <span class="font-bold text-lg tracking-wider text-slate-200">KOMIDA CILEDUG</span>
+            </div>
+            <button onclick="toggleSidebar()" class="text-slate-200 text-2xl p-2 focus:outline-none cursor-pointer">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
 
-        function syncDataFromServer() {
-            document.getElementById('loading').style.display = 'flex';
-            fetch(urlDatabaseUtama).then(response => response.json()).then(data => {
-                dataPar = data.slice(1).map(r => [ 
-                    r[0], r[1], r[2], r[3], 
-                    typeof r[4] === 'number' ? r[4].toLocaleString('id-ID') : r[4], 
-                    typeof r[5] === 'number' ? r[5].toLocaleString('id-ID') : r[5], 
-                    r[6], r[7] 
-                ]);
-                document.getElementById('loading').style.display = 'none';
-                const activeTitle = document.querySelector('.page-header')?.innerText;
-                if(activeTitle === 'DATA ANGGOTA PAR') render(dataPar);
-                else if(activeTitle === 'STATISTIK PER STAF') renderStats();
-            }).catch(error => { 
-                console.error('Error:', error); 
-                document.getElementById('loading').style.display = 'none'; 
-            });
-        }
-
-        function syncProgressData() {
-            document.getElementById('loading').style.display = 'flex';
-            fetch(urlProgress).then(response => response.json()).then(data => {
-                listBulan.forEach(bulan => {
-                    const d = data[bulan];
-                    if (d) {
-                        const ids = ['kenaikan', 'penurunan', 'netpar', 'masalah', 'masuk', 'keluar', 'netagt', 'sisa'];
-                        ids.forEach(id => {
-                            let el = document.getElementById(`${id}-${bulan}`);
-                            if(el) el.innerText = (id === 'masuk' || id === 'keluar' || id === 'netagt' || id === 'sisa') ? d[id === 'netagt' ? 'hasilNetAnggota' : (id === 'sisa' ? 'sisaMonitoring' : id)] : d[id === 'netpar' ? 'hasilNetPAR' : (id === 'masalah' ? 'bermasalah' : id)].toLocaleString('id-ID');
-                        });
-                    }
-                });
-                document.getElementById('loading').style.display = 'none';
-            }).catch(err => {
-                console.error("Gagal sinkron progress:", err);
-                document.getElementById('loading').style.display = 'none';
-            });
-        }
-
-        function syncAutodebit() {
-            document.getElementById('loading').style.display = 'flex';
-            fetch(urlAutodebit).then(r => r.json()).then(data => {
-                dataAutodebit = data.slice(1);
-                document.getElementById('loading').style.display = 'none';
-                renderAutodebitTable(dataAutodebit);
-                alert("Data autodebit berhasil diperbarui!");
-            }).catch(e => { 
-                document.getElementById('loading').style.display = 'none'; 
-                alert("Gagal menarik data.");
-            });
-        }
-
-        function renderAutodebitTable(data) {
-            const tb = document.getElementById('tb-autodebit');
-            if (!tb) return;
-            if (data.length === 0) {
-                tb.innerHTML = `<tr><td colspan="9" style="text-align:center;">Data tidak ditemukan</td></tr>`;
-                return;
-            }
-            tb.innerHTML = data.map(r => `
-                <tr>
-                    <td>${r[0] || '-'}</td>
-                    <td>${r[1] || '-'}</td>
-                    <td>${r[2] || '-'}</td>
-                    <td>${r[3] || '-'}</td>
-                    <td>${typeof r[4] === 'number' ? r[4].toLocaleString('id-ID') : r[4]}</td>
-                    <td>${typeof r[5] === 'number' ? r[5].toLocaleString('id-ID') : r[5]}</td>
-                    <td><strong>${typeof r[6] === 'number' ? r[6].toLocaleString('id-ID') : r[6]}</strong></td>
-                    <td>${r[7] || '-'}</td>
-                    <td>${r[8] || '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        function searchAutodebit() {
-            const keyword = document.getElementById('src-autodebit').value.toLowerCase();
-            if (dataAutodebit.length === 0) { alert("Silakan klik 'Tarik Data Terbaru' terlebih dahulu."); return; }
-            const filtered = dataAutodebit.filter(r => {
-                const idMembers = (r[2] || "").toString().toLowerCase();
-                const namaMembers = (r[3] || "").toString().toLowerCase();
-                const hariPertemuan = (r[7] || "").toString().toLowerCase();
-                const namaStaf = (r[8] || "").toString().toLowerCase();
-                const center = (r[1] || "").toString().toLowerCase();
-                return namaMembers.includes(keyword) || idMembers.includes(keyword) || hariPertemuan.includes(keyword) || namaStaf.includes(keyword) || center.includes(keyword);
-            });
-            renderAutodebitTable(filtered);
-        }
-
-        function loadPage(page, element) {
-            const target = document.getElementById('content-target');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            if(element) element.classList.add('active');
-
-            if (page === 'Home') {
-                const menus = [
-                    {n:'Data Anggota', p:'Data Anggota PAR', i:'users', d:'Daftar anggota PAR.'},
-                    {n:'Statistik', p:'Statistik By Staf', i:'chart-pie', d:'Rekapitulasi per Staf.'},
-                    {n:'Isi Laporan', p:'Isi Laporan', i:'file-signature', d:'Menu input laporan.'},
-                    {n:'Progress', p:'Progress Bulanan', i:'tasks', d:'Progress Bulanan.'},
-                    {n:'Capaian', p:'Capaian Staf', i:'user-check', d:'Per Staf Per Bulan.'},
-                    {n:'Autodebit', p:'Autodebit Simpanan', i:'money-check-alt', d:'Informasi simpanan.'},
-                    {n:'Ranking Staf', p:'Ranking Staf', i:'trophy', d:'Peringkat performa staf.'}
-                ];
-                target.innerHTML = `<div class="page-header">MENU UTAMA PERPUSTAKAAN</div><div class="home-grid-container">${menus.map((m, idx) => `<div class="menu-card" onclick="loadPage('${m.p}', document.querySelectorAll('.nav-item')[${idx+1}])"><i class="fas fa-${m.i}" ${m.p === 'Ranking Staf' ? 'style="color:#f1c40f;"' : ''}></i><h4>${m.n}</h4><p>${m.d}</p></div>`).join('')}</div><div style="margin-top: 30px; text-align: center;"><p style="font-size:11px; color:#7f8c8d;">Database Cabang Ciledug 2026</p><p style="font-size:10px; color:#bdc3c7;">Created by Wisnu Mustika Adhi</p></div>`;
-            } 
-            else if (page === 'Data Anggota PAR') {
-                target.innerHTML = `<div class="page-header">DATA ANGGOTA PAR</div><div class="sync-wrapper"><button class="btn-sync" onclick="syncDataFromServer()"><i class="fas fa-sync"></i> Sinkron Server</button></div><div class="search-wrapper"><input type="text" id="src" class="input-search" placeholder="Cari..."><button class="btn-search" onclick="search()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No Pinjaman</th><th>Center</th><th>Id</th><th>Nama</th><th>Pinjaman</th><th>Tunggakan</th><th>Tipe</th><th>Staf</th></tr></thead><tbody id="tb"></tbody></table></div>`;
-                if(dataPar.length > 0) render(dataPar);
-            }
-            else if (page === 'Progress Bulanan') {
-                target.innerHTML = `<div class="page-header">PROGRESS BULANAN 2026</div><div class="progress-grid">${generateMonthCards(true)}</div>`;
-                syncProgressData();
-            }
-            else if (page === 'Capaian Staf') {
-                let stafListHtml = listStafSistem.map(staf => `<div class="staf-btn" onclick="viewCapaianStaf('${staf}')">${staf}</div>`).join('');
-                target.innerHTML = `<div class="page-header">CAPAIAN PER STAF (Klik Nama Untuk Melihat) </div><div class="staf-selector-grid">${stafListHtml}</div>`;
-            }
-            else if (page === 'Isi Laporan') {
-                const opsiStaf = listStafSistem.map(staf => `<option value="${staf}">${staf}</option>`).join('');
-                target.innerHTML = `<div class="page-header"><i class="fas fa-edit" style="margin-right:10px;"></i> PENGINPUTAN LAPORAN</div><div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;"><button class="btn-sync" style="background: #f39c12; flex: 1; min-width: 120px;" onclick="toggleForm()"><i class="fas fa-plus"></i> Tambah Laporan</button><button class="btn-sync" style="background: #34495e; flex: 1; min-width: 120px;" onclick="renderHistoryFromServer()"><i class="fas fa-sync"></i> Refresh Histori</button></div><div id="form-container" class="form-laporan-container" style="display: none;"><div class="form-group"><label>Nama Staf</label><select id="input-staf" class="form-control"><option value="">-- Pilih Nama Staf --</option>${opsiStaf}</select></div><div class="form-group"><label>Tanggal</label><input type="date" id="input-tanggal" class="form-control" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><label>Kenaikan PAR</label><input type="number" id="input-kenaikan" class="form-control" value="0"></div><div class="form-group"><label>Penurunan PAR</label><input type="number" id="input-penurunan" class="form-control" value="0"></div><div class="form-group"><label>Anggota Masuk</label><input type="number" id="input-masuk" class="form-control" value="0"></div><div class="form-group"><label>Anggota Keluar</label><input type="number" id="input-keluar" class="form-control" value="0"></div><div class="btn-form-group"><button class="btn-submit" onclick="simpanLaporan()">SIMPAN DATA</button><button class="btn-cancel" onclick="toggleForm()">BATAL</button></div></div><div class="history-section"><div class="history-header"><span class="history-title">Rekap Laporan Harian:</span></div><div id="history-list-target">Memuat data server...</div></div>`;
-                renderHistoryFromServer();
-            }
-            else if (page === 'Statistik By Staf') {
-                target.innerHTML = `<div class="page-header">STATISTIK PER STAF</div><div class="sync-wrapper"><button class="btn-sync" onclick="syncDataFromServer()"><i class="fas fa-sync"></i> Update Statistik</button></div><div id="stats-container"></div>`;
-                renderStats();
-            }
-            else if (page === 'Autodebit Simpanan') {
-                target.innerHTML = `<div class="page-header">AUTODEBIT SIMPANAN TERSEDIA H-7 DI AKHIR BULAN</div><div class="sync-wrapper"><button class="btn-sync" style="background:#2980b9;" onclick="syncAutodebit()"><i class="fas fa-cloud-download-alt"></i> Tarik Data Terbaru</button></div><div class="search-wrapper"><input type="text" id="src-autodebit" class="input-search" placeholder="Cari Nama/ID/Center..."><button class="btn-search" onclick="searchAutodebit()">Cari</button></div><div class="table-responsive"><table class="custom-table"><thead><tr><th>No. Pinj</th><th>Center</th><th>Id</th><th>Nama</th><th>Sukarela</th><th>Pensiun</th><th>Total</th><th>Hari</th><th>Staf</th></tr></thead><tbody id="tb-autodebit"><tr><td colspan="9" style="text-align:center; padding:20px;">Klik 'Tarik Data' lalu cari nama anggota</td></tr></tbody></table></div>`;
-            }
-            else if (page === 'Ranking Staf') {
-                target.innerHTML = `
-                    <div class="page-header">TERBAIK BULAN MEI</div>
-                    <div id="rank-loading-container" style="text-align:center; padding:50px;">
-                        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary-blue)"></i>
-                        <p style="margin-top:15px; color:#7f8c8d;">Mengambil data peringkat...</p>
-                    </div>`;
-
-                fetch(urlRankingMandiri)
-                    .then(r => r.json())
-                    .then(res => {
-                        const renderRankCard = (title, icon, data, color) => {
-                            // Foto Cadangan: Menggunakan inisial nama otomatis jika link foto kosong
-                            const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nama)}&background=random&color=fff`;
-                            
-                            // Validasi link foto
-                            const linkFoto = (data.foto && data.foto.includes('http')) ? data.foto : fallback;
-
-                            return `
-                                <div class="month-card" style="position: relative; overflow: hidden; padding: 40px 20px; border-top: none; border-radius: 20px; margin-bottom:20px;">
-                                    <div style="position: absolute; top: 15px; right: -35px; background: ${color}; color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">JUARA 1</div>
-                                    <div style="text-align: center;">
-                                        <p style="color: #888; font-size: 0.8rem; margin-bottom: 20px;"><i class="${icon}"></i> ${title}</p>
-                                        <div style="margin-bottom:15px;">
-                                            <img src="${linkFoto}" 
-                                                 style="width:100px; height:100px; border:4px solid ${color}; border-radius:50%; object-fit:cover;"
-                                                 onerror="this.src='${fallback}'">
-                                        </div>
-                                        <h3 style="color: #193d80; font-size: 1.2rem; text-transform: uppercase;">${data.nama}</h3>
-                                        <div style="display: inline-block; background: #fff5e6; color: ${color}; padding: 5px 25px; border-radius: 20px; font-weight: bold; margin-top: 10px; font-size: 0.9rem;">
-                                            ${title.includes('ANGGOTA') ? data.skor + ' Agt' : 'Rp ' + data.skor.toLocaleString('id-ID')}
-                                        </div>
-                                    </div>
-                                </div>`;
-                        };
-                        target.innerHTML = `
-                            <div class="page-header">TERBAIK BULAN APRIL</div>
-                            <div style="display: flex; flex-direction: column; padding-bottom: 20px;">
-                                ${renderRankCard('PENURUNAN PAR TERBANYAK', 'fas fa-arrow-down', res.penurunan, '#f39c12')}
-                                ${renderRankCard('DISBURSE TERBANYAK', 'fas fa-hand-holding-usd', res.disburse, '#27ae60')}
-                                ${renderRankCard('ANGGOTA MASUK TERBANYAK', 'fas fa-user-plus', res.masuk, '#2980b9')}
-                            </div>`;
-                    }).catch(e => {
-                        target.innerHTML = `<div style="text-align:center; padding:50px; color:red;"><i class="fas fa-exclamation-triangle fa-2x"></i><p>Gagal memuat data ranking dinamis.</p></div>`;
-                    });
-            }
-        }
-
-        function toggleForm() {
-            const f = document.getElementById('form-container');
-            if(f) {
-                f.style.display = (f.style.display === 'none') ? 'block' : 'none';
-                const btnSubmit = document.querySelector('.btn-submit');
-                if(btnSubmit) {
-                    btnSubmit.innerHTML = 'SIMPAN DATA';
-                    btnSubmit.style.background = 'var(--primary-blue)';
-                }
-            }
-        }
-
-        function generateMonthCards(showB) {
-            return listBulan.map(b => `<div class="month-card"><div class="month-name"><span>${b}</span> <i class="far fa-calendar-check"></i></div><div class="progress-section"><span class="section-title">Outstanding PAR</span><div class="data-row"><span class="data-label">Kenaikan</span> <span class="data-val" id="kenaikan-${b}">0</span></div><div class="data-row"><span class="data-label">Penurunan</span> <span class="data-val" id="penurunan-${b}">0</span></div><div class="data-row"><span class="data-label">Hasil Net</span> <span class="data-val val-net" id="netpar-${b}">0</span></div>${showB ? `<div class="data-row"><span class="data-label">Bermasalah</span> <span class="data-val val-red" id="masalah-${b}">0</span></div>` : ''}</div><div class="progress-section"><span class="section-title">Capaian Anggota</span><div class="data-row"><span class="data-label">Masuk</span> <span class="data-val" id="masuk-${b}">0</span></div><div class="data-row"><span class="data-label">Keluar</span> <span class="data-val" id="keluar-${b}">0</span></div><div class="data-row"><span class="data-label">Hasil Net</span> <span class="data-val val-net" id="netagt-${b}">0</span></div><div class="data-row" style="margin-top:5px; background:#f9f9f9; padding:5px; border-radius:4px;"><span class="data-label" style="font-weight:bold;">Sisa Monitoring</span> <span class="data-val" id="sisa-${b}" style="color:var(--orange-accent);">0</span></div></div></div>`).join('');
-        }
-
-        function viewCapaianStaf(n) {
-            const target = document.getElementById('content-target');
-            target.innerHTML = `<div class="page-header"><i class="fas fa-arrow-left" onclick="loadPage('Capaian Staf')" style="margin-right:15px; cursor:pointer;"></i>CAPAIAN: ${n}</div><div id="loading-staf" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Memuat data capaian ${n}...</div><div class="progress-grid" id="staf-progress-grid" style="display:none;">${generateMonthCards(false)}</div>`;
-            fetch(urlCapaianStaf).then(r => r.json()).then(data => {
-                listBulan.forEach(bulan => {
-                    const d = (data.allData ? data.allData.find(item => item.staf === n && item.bulan === bulan) : null);
-                    if (d) {
-                        const naik = parseFloat(d.kenaikan) || 0, turun = parseFloat(d.penurunan) || 0, msk = parseInt(d.masuk) || 0, klr = parseInt(d.keluar) || 0, netPar = naik - turun, netAgt = msk - klr;
-                        if(document.getElementById(`kenaikan-${bulan}`)) document.getElementById(`kenaikan-${bulan}`).innerText = naik.toLocaleString('id-ID');
-                        if(document.getElementById(`penurunan-${bulan}`)) document.getElementById(`penurunan-${bulan}`).innerText = turun.toLocaleString('id-ID');
-                        if(document.getElementById(`netpar-${bulan}`)) { document.getElementById(`netpar-${bulan}`).innerText = netPar.toLocaleString('id-ID'); document.getElementById(`netpar-${bulan}`).style.color = netPar < 0 ? 'var(--red-text)' : 'var(--primary-blue)'; }
-                        if(document.getElementById(`masuk-${bulan}`)) document.getElementById(`masuk-${bulan}`).innerText = msk;
-                        if(document.getElementById(`keluar-${bulan}`)) document.getElementById(`keluar-${bulan}`).innerText = klr;
-                        if(document.getElementById(`netagt-${bulan}`)) { document.getElementById(`netagt-${bulan}`).innerText = (netAgt > 0 ? '+' : '') + netAgt; document.getElementById(`netagt-${bulan}`).style.color = netAgt < 0 ? 'var(--red-text)' : 'var(--primary-blue)'; }
-                        if(document.getElementById(`sisa-${bulan}`)) document.getElementById(`sisa-${bulan}`).innerText = d.sisaMonitoring || 0;
-                    }
-                });
-                document.getElementById('loading-staf').style.display = 'none';
-                document.getElementById('staf-progress-grid').style.display = 'grid';
-            }).catch(e => { document.getElementById('loading-staf').innerHTML = `Gagal memuat.`; });
-        }
-
-        function render(d) {
-            const tb = document.getElementById('tb');
-            if(tb) tb.innerHTML = d.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
-        }
-
-        function renderStats() {
-            const c = document.getElementById('stats-container'); 
-            if(!c) return;
-
-            // Inisialisasi data staf
-            const s = {}; 
-            listStafSistem.forEach(n => { 
-                s[n] = { count: 0, tpk: 0, p: 0, t: 0, double: 0 }; 
-            });
-
-            // Langkah 1: Hitung frekuensi ID untuk mendeteksi Double Pinjaman
-            const idCounts = {};
-            dataPar.forEach(r => {
-                const id = r[2]; // Index 2 adalah ID Anggota
-                if (id) {
-                    idCounts[id] = (idCounts[id] || 0) + 1;
-                }
-            });
-
-            // Langkah 2: Akumulasi data ke masing-masing staf
-            dataPar.forEach(r => {
-                let m = listStafSistem.find(st => (r[7] || "").toUpperCase().includes(st));
-                if (m) {
-                    s[m].count++;
-                    s[m].p += parseFloat(String(r[4]).replace(/\./g, '').replace(',', '.')) || 0;
-                    s[m].t += parseFloat(String(r[5]).replace(/\./g, '').replace(',', '.')) || 0;
-                    
-                    // Cek jika tipe pinjaman Khusus
-                    if ((r[6] || "").toUpperCase() === "KHUSUS") s[m].tpk++;
-
-                    // Cek jika ID ini muncul lebih dari 1 kali (Double Pinjaman)
-                    const id = r[2];
-                    if (idCounts[id] > 1) {
-                        s[m].double++;
-                    }
-                }
-            });
-
-            // Langkah 3: Render ke UI dengan grid 3 kolom dan tata letak rapi
-            c.innerHTML = listStafSistem.map(st => `
-                <div class="stat-card">
-                    <h4>${st}</h4>
-                    <div class="stat-grid-3">
-                        <div class="stat-box">
-                            <span class="stat-label">Total Anggota PAR</span>
-                            <span>${s[st].count}</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">PAR DITPK</span>
-                            <span class="val-red">${s[st].tpk}</span>
-                        </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Double Pinjaman</span>
-                            <span style="color: var(--orange-accent); font-weight: bold;">${s[st].double}</span>
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"></div>
+        
+        <aside id="sidebar-menu" class="fixed top-0 bottom-0 left-0 w-64 bg-slate-950 border-r border-slate-800 p-6 flex flex-col justify-between z-50 transform -translate-x-full transition-transform duration-300 md:translate-x-0">
+            <div>
+                <div class="flex items-center justify-between mb-8 px-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bell text-indigo-500 text-2xl"></i>
+                        <span class="font-bold text-xl tracking-wider text-slate-200">KOMIDA CILEDUG</span>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-200 text-xl cursor-pointer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <nav class="space-y-2">
+                    <div>
+                        <button onclick="toggleDashboardDropdown()" id="btn-dashboard-main" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all cursor-pointer">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-chart-pie w-5 text-center"></i> Dashboard
+                            </span>
+                            <i id="dashboard-arrow" class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div id="dashboard-submenu" class="hidden pl-9 mt-1 space-y-1">
+                            <button onclick="gantiTab('progres-kemarin')" id="btn-progres-kemarin" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-circle text-[6px]"></i> 📑 Progres Hari Kemarin
+                            </button>
+                            <button onclick="gantiTab('ranking')" id="btn-ranking" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-circle text-[6px]"></i> 🏆 Ranking
+                            </button>
                         </div>
                     </div>
-                    <div class="stat-grid" style="margin-top:10px;">
-                        <div class="stat-box">
-                            <span class="stat-label">Total Pinjaman</span>
-                            <span>${s[st].p.toLocaleString('id-ID')}</span>
+
+                    <div>
+                        <button onclick="toggleDbCabangDropdown()" id="btn-dbcabang-main" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all cursor-pointer">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-network-wired w-5 text-center"></i> Database Cabang
+                            </span>
+                            <i id="dbcabang-arrow" class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div id="dbcabang-submenu" class="hidden pl-9 mt-1 space-y-1">
+                            <button onclick="gantiTab('db-anggota-par')" id="btn-db-anggota-par" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-users text-[10px] w-4 text-center"></i> Data Anggota Par
+                            </button>
+                            <button onclick="gantiTab('db-statistik-staf')" id="btn-db-statistik-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-chart-line text-[10px] w-4 text-center"></i> Statistik Par Per Staf
+                            </button>
+                            <button onclick="gantiTab('db-progres-cabang')" id="btn-db-progres-cabang" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-calendar-alt text-[10px] w-4 text-center"></i> Progres Cabang
+                            </button>
+                            <button onclick="gantiTab('db-Capaian-staf')" id="btn-db-Capaian-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-user-tie text-[10px] w-4 text-center"></i> Capaian Staf
+                            </button>
+                            <button onclick="gantiTab('db-laporan-harian')" id="btn-db-laporan-harian" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-file-invoice text-[10px] w-4 text-center"></i> Isi Laporan Harian
+                            </button>
                         </div>
-                        <div class="stat-box">
-                            <span class="stat-label">Total Tunggakan</span>
-                            <span>${s[st].t.toLocaleString('id-ID')}</span>
+                    </div>
+
+                    <div>
+                        <button onclick="toggleDropdownMis()" id="btn-mis-main" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all cursor-pointer">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-lock w-5 text-center text-amber-500"></i> Rekap Data MIS
+                            </span>
+                            <i id="mis-arrow" class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+                        </button>
+                        <div id="mis-submenu" class="hidden pl-9 mt-1 space-y-1">
+                            <button onclick="gantiTab('mis-progres')" id="btn-mis-progres" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-edit text-[10px] w-4 text-center"></i> Update Progres Kemarin
+                            </button>
+                            <button onclick="gantiTab('mis-ranking')" id="btn-mis-ranking" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-trophy text-[10px] w-4 text-center"></i> Update Ranking
+                            </button>
+                            <button onclick="gantiTab('mis-info')" id="btn-mis-info" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-bell text-[10px] w-4 text-center"></i> Update Information
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            
+            <button onclick="kembaliKeAwal()" class="mt-8 flex items-center justify-center gap-2 w-full px-4 py-2 text-sm text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 rounded-lg transition-all cursor-pointer">
+                <i class="fas fa-sign-out-alt"></i> Keluar Sistem
+            </button>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10 md:ml-64 min-h-screen overflow-y-auto">
+
+            <section id="content-progres-kemarin" class="tab-content block animate-fade-in">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-100"> 📑Progres Hari Kemarin</h2>
+                    <p class="text-slate-400">Data Hari Kemarin</p>
+                </header>
+                <div class="mb-10">
+                    <h3 class="text-xl font-bold text-rose-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-trending-up"></i> Data Kenaikan PAR (Perlu Evaluasi)
+                    </h3>
+                    <div id="display-kenaikan-par" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                        <i class="fas fa-trending-down"></i> Data Penurunan PAR (Prestasi Baik)
+                    </h3>
+                    <div id="display-penurunan-par" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+            </section>
+
+            <section id="content-ranking" class="tab-content hidden animate-fade-in">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-100">🏆 Ranking Bulanan</h2>
+                    <p class="text-slate-400">Update Setiap Ganti Bulan</p>
+                </header>
+                <div class="space-y-12">
+                    <div>
+                        <h3 class="text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2.5 border-b border-slate-800 pb-2">
+                            <span class="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm"><i class="fas fa-chart-line-down"></i></span>
+                            <span>Kategori: Penurunan PAR Terbanyak</span>
+                        </h3>
+                        <div id="rank-box-par" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2.5 border-b border-slate-800 pb-2">
+                            <span class="p-1.5 bg-cyan-500/10 text-cyan-400 rounded-lg text-sm"><i class="fas fa-money-bill-wave"></i></span>
+                            <span>Kategori: Disburse Terbanyak</span>
+                        </h3>
+                        <div id="rank-box-disburse" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-indigo-400 mb-4 flex items-center gap-2.5 border-b border-slate-800 pb-2">
+                            <span class="p-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg text-sm"><i class="fas fa-user-plus"></i></span>
+                            <span>Kategori: Anggota Masuk Terbanyak</span>
+                        </h3>
+                        <div id="rank-box-anggota" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2.5 border-b border-slate-800 pb-2">
+                            <span class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg text-sm"><i class="fas fa-route"></i></span>
+                            <span>Kategori: Rajin Monitoring</span>
+                        </h3>
+                        <div id="rank-box-monitor" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-db-anggota-par" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-users text-indigo-400"></i> Data Anggota PAR Cabang
+                    </h2>
+                    <p class="text-slate-400 text-sm">Master log data seluruh nasabah/anggota yang masuk kategori penunggakan (PAR).</p>
+                </header>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <button onclick="sinkronServerPAR(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
+                            <i class="fas fa-sync-alt"></i> Sinkron Server
+                        </button>
+                    </div>
+
+                    <div class="max-w-md relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fas fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="cari-anggota-par" onkeyup="cariDataAnggotaPAR()" placeholder="Cari berdasarkan nama, id, center, atau staf..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/40 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap text-xs md:text-sm">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-300 font-semibold border-b border-slate-800 tracking-wide">
+                                    <th class="py-3.5 px-4 text-center">No. Pinjaman</th>
+                                    <th class="py-3.5 px-4">Center</th>
+                                    <th class="py-3.5 px-4">Id</th>
+                                    <th class="py-3.5 px-4">Nama Anggota</th>
+                                    <th class="py-3.5 px-4 text-right">Total Pinjaman</th>
+                                    <th class="py-3.5 px-4 text-right">Total Tunggakan</th>
+                                    <th class="py-3.5 px-4 text-center">Tipe</th>
+                                    <th class="py-3.5 px-4">Staf</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-anggota-par" class="divide-y divide-slate-900 text-slate-300">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-db-statistik-staf" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2"><i class="fas fa-chart-line text-emerald-400"></i> Statistik PAR Per Staf</h2>
+                    <p class="text-slate-400 text-sm">Total Nominal Dari Setiap Kategori</p>
+                </header>
+
+                <div class="mb-6">
+                    <button onclick="hitungDanTampilkanStatistik(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Update Statistik
+                    </button>
+                </div>
+
+                <div id="container-card-statistik-staf" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <p class="text-slate-400 italic text-sm text-center py-8 col-span-full">Memuat indikator data and statistik per staf...</p>
+                </div>
+            </section>
+
+            <section id="content-db-progres-cabang" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-cyan-400"></i> Progres Cabang Setiap Bulan Nya
+                    </h2>
+                    <p class="text-slate-400 text-sm">Laporan progres bulanan, rekapitulasi pertumbuhan anggota, outstanding cabang.</p>
+                </header>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    </div>
+            </section>
+
+            <section id="content-db-Capaian-staf" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-user-tie text-indigo-400"></i> Capaian Staf Perbulan
+                    </h2>
+                    <p class="text-slate-400 text-sm">Pilih nama staf resmi di bawah untuk meninjau</p>
+                </header>
+            
+                <div class="mb-8">
+                    <label class="block text-slate-400 text-xs font-semibold mb-3 uppercase tracking-wide">Daftar Staf Lapang</label>
+                    <div id="list-card-staf-individu" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        </div>
+                </div>
+            
+                <div id="detail-individu-staf-box" class="hidden space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center font-bold">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <h3 id="nama-staf-terpilih-judul" class="text-xl font-bold text-slate-100">Nama Staf</h3>
+                                <p class="text-xs text-slate-400">Rekapitulasi Kinerja Bulanan (Januari - Desember)</p>
+                            </div>
+                        </div>
+                        <button onclick="tutupDetailStafIndiv()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                            <i class="fas fa-times mr-1"></i> Tutup Detail
+                        </button>
+                    </div>
+            
+                    <div id="grid-bulan-staf-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
+                </div>
+            
+                <div id="detail-Capaian-box-fallback" class="bg-slate-950/20 border border-dashed border-slate-800 p-6 rounded-2xl text-center text-slate-500 text-sm italic">
+                    Silakan klik salah satu card nama staf di atas untuk melihat detail rekap kerja bulanan.
+                </div>
+            </section>
+
+            <!-- SUB MENU: ISI LAPORAN HARIAN -->
+            <section id="content-db-laporan-harian" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-file-invoice text-amber-400"></i> Form Isi Laporan Harian
+                    </h2>
+                    <p class="text-slate-400 text-sm">Jangan Sampai Ada Form Yang Masih Kosong</p>
+                </header>
+
+                <!-- Tombol Utama Pengendali -->
+                <div class="flex flex-wrap gap-4 mb-6">
+                    <button onclick="bukaFormLaporan()" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-950/40 transition-all flex items-center gap-2">
+                        <i class="fas fa-plus-circle"></i> Buat Laporan
+                    </button>
+                    <button onclick="sinkronDataLaporanHarian(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Sinkron Data
+                    </button>
+                </div>
+
+                <!-- Formulir Tambah/Edit Laporan (Hidden by default) -->
+                <div id="form-container-laporan" class="hidden bg-slate-950/60 border border-slate-800 p-6 rounded-2xl max-w-xl mb-8 animate-fade-in">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+                        <h3 id="judul-form-laporan" class="text-lg font-bold text-slate-200">Formulir Laporan Baru</h3>
+                        <button onclick="tutupFormLaporan()" class="text-slate-400 hover:text-rose-400 text-sm"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <!-- Warning Alert Banner -->
+                    <div id="warning-laporan-kosong" class="hidden bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-xl mb-4 flex items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Peringatan: Mohon lengkapi seluruh field data laporan yang masih kosong!</span>
+                    </div>
+
+                    <!-- ID Hidden untuk mode edit -->
+                    <input type="hidden" id="form-lh-id">
+
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Pilih Nama Staf</label>
+                            <select id="form-lh-staf" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Tanggal Laporan</label>
+                            <input type="date" id="form-lh-tanggal" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Kenaikan PAR (Rp)</label>
+                                <input type="number" id="form-lh-naik-par" placeholder="Contoh: 500000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Penurunan PAR (Rp)</label>
+                                <input type="number" id="form-lh-turun-par" placeholder="Contoh: 1200000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Anggota Masuk</label>
+                                <input type="number" id="form-lh-ang-masuk" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Anggota Keluar</label>
+                                <input type="number" id="form-lh-ang-keluar" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="simpanLaporanHarian()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-md cursor-pointer">
+                                <i class="fas fa-save mr-1"></i> Simpan Laporan
+                            </button>
+                            <button onclick="tutupFormLaporan()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm cursor-pointer">
+                                Batal
+                            </button>
                         </div>
                     </div>
                 </div>
-            `).join('');
-        }
 
-        function search() { let k = document.getElementById('src').value.toLowerCase(); render(dataPar.filter(r => (r[3]||"").toLowerCase().includes(k) || (r[7]||"").toLowerCase().includes(k))); }
+                <!-- Bagian Penampilan Output Card Laporan -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-300 mb-4 flex items-center gap-2">
+                        <i class="fas fa-clipboard-list text-indigo-400"></i> Rekap Hasil Laporan Harian Staf
+                    </h3>
+                    <div id="container-card-laporan-harian" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Card list load secara dinamis disini -->
+                    </div>
+                </div>
+            </section>
 
-        function simpanLaporan() {
-            const d = { staf: document.getElementById('input-staf').value, tanggal: document.getElementById('input-tanggal').value, kenaikan: document.getElementById('input-kenaikan').value, penurunan: document.getElementById('input-penurunan').value, masuk: document.getElementById('input-masuk').value, keluar: document.getElementById('input-keluar').value, timestamp: new Date().toISOString() };
-            if (!d.staf) { alert("Pilih nama staf!"); return; }
-            document.getElementById('loading').style.display = 'flex';
-            fetch(urlLaporan, { method: 'POST', body: JSON.stringify(d) }).then(r => r.json()).then(res => {
-                if(res.result === 'success') { 
-                    alert("Laporan "  +  d.staf  + " " + (res.message || "Data tersimpan!")); 
-                    toggleForm(); 
-                    renderHistoryFromServer(); 
-                } else { 
-                    alert("Gagal!"); 
-                    document.getElementById('loading').style.display = 'none'; 
-                }
-            }).catch(e => { document.getElementById('loading').style.display = 'none'; });
-        }
+            <section id="content-mis-progres" class="tab-content hidden animate-fade-in">
+                <header class="mb-6 border-b border-slate-800 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-edit text-indigo-400"></i> Pengaturan Data Progres Hari Kemarin
+                    </h2>
+                    <p class="text-slate-400 text-sm">Formulir untuk menambahkan data baru secara akumulatif beserta status verifikasinya.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-800">
+                        <h3 class="text-slate-200 font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-indigo-400"></i> Tambah Data Kinerja Baru</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-400 mb-1">Kategori Indikator</label>
+                                    <select id="form-p-tipe" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                               <option value="Pilih">--Pilih Kategori--</option>         
+                            <option value="naik">Kenaikan PAR</option>
+                                        <option value="turun">Penurunan PAR</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 mb-1">Status Validasi</label>
+                                    <select id="form-p-status" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
 
-        function renderHistoryFromServer() {
-            const target = document.getElementById('history-list-target');
-            if(!target) return;
-            fetch(urlLaporan).then(r => r.json()).then(data => {
-                document.getElementById('loading').style.display = 'none';
-                const historiData = data.slice(1);
-                if(historiData.length === 0) { 
-                    target.innerHTML = `<p style="text-align:center; color:#999; font-size:12px; margin-top:10px;">Belum ada data di server.</p>`; 
-                    return; 
-                }
-                historiData.reverse();
-                target.innerHTML = historiData.map(item => {
-                    const timestamp = item[0], tglLaporan = item[1], nama = item[2], naik = parseInt(item[3]) || 0, turun = parseInt(item[4]) || 0, msk = parseInt(item[5]) || 0, klr = parseInt(item[6]) || 0, netRp = naik - turun, netAgt = msk - klr;
-                    return `
-                        <div class="report-card">
-                            <div class="report-card-header">
-                                <div class="report-user">
-                                    <i class="fas fa-user"></i> ${nama}
-                                    <button class="btn-edit-report" onclick="prepareEditLaporan('${nama}', '${tglLaporan}', ${naik}, ${turun}, ${msk}, ${klr})">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                </div>
-                                <div class="report-timestamp">Lap: ${tglLaporan}<br>Input: ${new Date(timestamp).toLocaleString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div>
-                            </div>
-                            <div class="report-grid">
-                                <div class="grid-item">
-                                    <span class="grid-label">OUTSTANDING</span>
-                                    <span class="grid-val-naik">Naik: +${naik.toLocaleString('id-ID')}</span>
-                                </div>
-                                <div class="grid-item">
-                                    <span class="grid-label">ANGGOTA</span>
-                                    <span class="grid-val-normal">Masuk: ${msk}</span>
-                                </div>
-                                <div class="grid-item">
-                                    <span class="grid-label">Outstanding</span>
-                                    <span class="grid-val-turun">Turun: -${turun.toLocaleString('id-ID')}</span>
-                                </div>
-                                <div class="grid-item">
-                                    <span class="grid-label">ANGGOTA</span>
-                                    <span class="grid-val-normal">Keluar: ${klr}</span>
+                        <option value="Pilih">--Pilih Kategori--</option>
+                                        <option value="terkonfirmasi">✓ Terkonfirmasi</option>
+                                        <option value="tidak">✗ Tidak Terkonfirmasi</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="report-footer">
-                                <div class="footer-net-rp">Rp ${netRp.toLocaleString('id-ID')}</div>
-                                <div class="footer-net-agt">${netAgt >= 0 ? '+' : ''}${netAgt} Agt</div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Nama Staf</label>
+                                <select id="form-p-nama" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer"></select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Atas Nama Anggota</label>
+                                <input id="form-p-an" type="text" placeholder="Contoh: Ibu Siti Aminah" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-400 mb-1">Center</label>
+                                    <input id="form-p-ctr" type="text" placeholder="CTR-04B" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-400 mb-1">Nominal Rupiah</label>
+                                    <input id="form-p-nom" type="text" placeholder="Rp 2.500.000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                                </div>
+                            </div>
+                            <button onclick="tambahDataProgres()" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg cursor-pointer transition-all shadow-md">
+                                <i class="fas fa-save mr-1"></i> Simpan Tambah Data Baru
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-800 flex flex-col h-[400px]">
+                        <h3 class="text-slate-200 font-bold mb-3 flex items-center gap-2"><i class="fas fa-list-alt text-amber-500"></i> Manajemen Log Data Tersimpan</h3>
+                        <div id="admin-progres-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-mis-ranking" class="tab-content hidden animate-fade-in">
+                <header class="mb-6 border-b border-slate-800 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-trophy text-amber-400"></i> Pengaturan Juara Ranking Tim
+                    </h2>
+                    <p class="text-slate-400 text-sm">Formulir entri akumulatif untuk menambahkan pemenang ranking baru di dashboard.</p>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-800 md:col-span-1 h-fit">
+                        <h3 class="text-slate-200 font-bold mb-4 flex items-center gap-2"><i class="fas fa-medal text-cyan-400"></i> Tambah Juara</h3>
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Kategori Kompetisi</label>
+                                <select id="form-r-kat" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                    <option value="par">Penurunan PAR Terbanyak</option>
+                                    <option value="db">Disburse Terbanyak</option>
+                                    <option value="ag">Anggota Masuk Terbanyak</option>
+                                    <option value="mn">Rajin Monitoring</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Nama Staf</label>
+                                <select id="form-r-nama" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer"></select>
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Jabatan / Sub</label>
+                                <input id="form-r-sub" type="text" placeholder="Contoh: Staf Lapang 03" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Skor Nilai Pencapaian</label>
+                                <input id="form-r-val" type="text" placeholder="Contoh: Total: Rp 125 Juta" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Tautan URL Foto</label>
+                                <input id="form-r-img" type="text" placeholder="Kosongkan jika ingin foto bawaan" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs">
+                            </div>
+                            <button onclick="tambahDataRanking()" class="w-full mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-lg cursor-pointer transition-all shadow-md">
+                                <i class="fas fa-plus mr-1"></i> Masukkan Ke Peringkat
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-800 md:col-span-2 flex flex-col h-[520px]">
+                        <h3 class="text-slate-200 font-bold mb-3 flex items-center gap-2"><i class="fas fa-trophy text-amber-500"></i> Daftar Seluruh Peringkat Terdaftar</h3>
+                        <div id="admin-ranking-list" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="content-mis-info" class="tab-content hidden animate-fade-in">
+                <header class="mb-6 border-b border-slate-800 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-bell text-amber-400"></i> Pengaturan Informasi / Pengumuman Sistem
+                    </h2>
+                    <p class="text-slate-400 text-sm">Tulis informasi penting di sini. Pesan ini akan langsung muncul sebagai notifikasi pop-up ketika user mengklik tombol "Mulai Akses".</p>
+                </header>
+                <div class="bg-slate-950/40 p-6 rounded-2xl border border-slate-800 max-w-xl">
+                    <h3 class="text-slate-200 font-bold mb-3 flex items-center gap-2"><i class="fas fa-edit text-indigo-400"></i> Isi Pesan Notifikasi</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <textarea id="form-info-teks" rows="5" placeholder="Contoh: Perhatian untuk seluruh staf..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-100 focus:outline-none focus:border-indigo-500 text-sm"></textarea>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="simpanInformasi()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-lg text-sm cursor-pointer transition-all shadow-md">
+                                <i class="fas fa-save mr-1"></i> Simpan & Publikasikan
+                            </button>
+                            <button onclick="hapusInformasi()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 font-medium px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-all">
+                                <i class="fas fa-eraser mr-1"></i> Kosongkan Info
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const URL_WEB_APP_GS = "https://script.google.com/macros/s/AKfycbyYbzfLx2UQF874wmHYlAcW0b-P8FjQMQ212YwEBUkfL09_yipPwpMAjj_6y1BYkbIhOA/exec"; 
+        const URL_PROGRES_BULANAN_MANDIRI = "https://script.google.com/macros/s/AKfycbwci2_fXzVwlDDIh5QUzG_xFS3wcP-nuu12PQ6SISVWBFLAx0T0DeLzAPhoKJKeb_1rHA/exec";
+        const URL_LAPORAN_HARIAN = "https://script.google.com/macros/s/AKfycbxpR1jHEQfoUqc6_B_3b3urYWEELtngjsr3_weEIC13Ttgqw78s1o8UYfU4v4MAKDyzYw/exec";
+        // ▼ URL Web App GS untuk Rekap Data MIS (Progres, Ranking, Informasi)
+        // Ganti dengan URL hasil Deploy dari Code_MIS_WebApp.gs
+        const URL_MIS = "https://script.google.com/macros/s/AKfycbzd0g0XlLhlfxzuO-8P0y90stWp4piAfyVa28eUSIs-2j1Yv1STCmojWDq66o4--1cW/exec";
+
+        const PASSWORD_ADMIN = "mztxa2026";
+        let statusAdminTerverifikasi = false;
+        let sidebarTerbuka = false;
+        let dropdownDashboardTerbuka = false;
+        let dropdownDbCabangTerbuka = false;
+        let dropdownMisTerbuka = false;
+
+        const listStaf = [
+            "Casdi", "Nono Sutrisno", "Joko Prasetyo", "Iset Panji Nugraha", 
+            "Eka Ramadhan", "Perdi Irawan Saputra", "Muhammad Sandi", 
+            "Lola Dwi Setiawan", "Rangga Erlando", "Ari Sundapa", 
+            "Desta Adi Triana", "Abu Yajid Albustomi"
+        ];
+
+        let databaseAnggotaPar = [];
+
+        const defaultProgresList = [
+            { id: 1, tipe: "naik", nama: "Casdi", an: "Ibu Siti Aminah", ctr: "CTR-04B", nom: "Rp 2.450.000", status: "tidak" },
+            { id: 2, tipe: "turun", nama: "Nono Sutrisno", an: "Ibu Nurhayati", ctr: "CTR-07C", nom: "Rp 3.120.000", status: "terkonfirmasi" }
+        ];
+
+        const defaultRankingList = [
+            { id: 1, kat: "par", nama: "Iset Panji Nugraha", sub: "Staf Lapang 03", val: "Penurunan: -4.2%", img: "" },
+            { id: 2, kat: "db", nama: "Eka Ramadhan", sub: "Staf Lapang 12", val: "Total: Rp 125 Juta", img: "" }
+        ];
+
+        // Default mock data untuk Laporan Harian jika belum ada data tersimpan di localstorage
+        const defaultLaporanHarian = [
+            { id: 1716983000000, staf: "Casdi", tanggal: "2026-05-29", naikPar: 250000, turunPar: 1500000, angMasuk: 3, angKeluar: 1 }
+        ];
+
+        window.onload = function() {
+            // Laporan harian tetap pakai localStorage sebagai cache lokal
+            if (!localStorage.getItem('arr_laporan_harian')) localStorage.setItem('arr_laporan_harian', JSON.stringify(defaultLaporanHarian));
+            
+            buatOpsiDropdownStaf();
+            buatOpsiDropdownStafLaporanHarian();
+            muatDataDariSpreadsheet();
+            buatCardListStafIndividu();
+            renderCardLaporanHarian();
+            // Muat semua data MIS dari Spreadsheet saat halaman pertama dibuka
+            muatSemuaDataMIS();
+        };
+
+        function buatOpsiDropdownStaf() {
+            const selectProgres = document.getElementById('form-p-nama');
+            const selectRanking = document.getElementById('form-r-nama');
+            
+            let htmlOptions = `<option value="">-- Pilih Nama Staf --</option>`;
+            listStaf.forEach(nama => {
+                htmlOptions += `<option value="${nama}">${nama}</option>`;
+            });
+
+            if(selectProgres) selectProgres.innerHTML = htmlOptions;
+            if(selectRanking) selectRanking.innerHTML = htmlOptions;
+        }
+
+        // Generate list staf untuk dropdown form isi laporan harian
+        function buatOpsiDropdownStafLaporanHarian() {
+            const selectLhStaf = document.getElementById('form-lh-staf');
+            let htmlOptions = `<option value="">-- Pilih Nama Staf --</option>`;
+            listStaf.forEach(nama => {
+                htmlOptions += `<option value="${nama}">${nama}</option>`;
+            });
+            if(selectLhStaf) selectLhStaf.innerHTML = htmlOptions;
+        }
+
+        function sinkronisasiSistem() {
+            renderDashboardProgres();
+            renderDashboardRanking();
+            renderAdminProgresControl();
+            renderAdminRankingControl();
+        }
+
+        // ================================================================
+        //  MUAT SEMUA DATA MIS DARI SPREADSHEET (Progres + Ranking + Info)
+        //  Dipanggil saat: halaman load, gantiTab MIS, tombol sinkron
+        // ================================================================
+        function muatSemuaDataMIS() {
+            muatProgresDariServer();
+            muatRankingDariServer();
+            muatInformasiDariServer();
+        }
+
+        // ── Ambil data Progres dari Spreadsheet ──────────────────────────
+        function muatProgresDariServer() {
+            fetch(URL_MIS + "?action=ambilProgres", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                if (json.status === "success") {
+                    // Simpan ke cache lokal
+                    localStorage.setItem('arr_progres', JSON.stringify(json.data));
+                    renderDashboardProgres();
+                    renderAdminProgresControl();
+                } else {
+                    console.warn("Gagal muat progres dari server:", json.message);
+                    // Fallback: render dari localStorage jika ada
+                    renderDashboardProgres();
+                    renderAdminProgresControl();
+                }
+            })
+            .catch(err => {
+                console.warn("Koneksi gagal, render dari cache lokal:", err);
+                renderDashboardProgres();
+                renderAdminProgresControl();
+            });
+        }
+
+        // ── Ambil data Ranking dari Spreadsheet ──────────────────────────
+        function muatRankingDariServer() {
+            fetch(URL_MIS + "?action=ambilRanking", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                if (json.status === "success") {
+                    localStorage.setItem('arr_ranking', JSON.stringify(json.data));
+                    renderDashboardRanking();
+                    renderAdminRankingControl();
+                } else {
+                    console.warn("Gagal muat ranking dari server:", json.message);
+                    renderDashboardRanking();
+                    renderAdminRankingControl();
+                }
+            })
+            .catch(err => {
+                console.warn("Koneksi gagal, render dari cache lokal:", err);
+                renderDashboardRanking();
+                renderAdminRankingControl();
+            });
+        }
+
+        // ── Ambil Informasi dari Spreadsheet, simpan, dan set textarea ───
+        function muatInformasiDariServer() {
+            fetch(URL_MIS + "?action=ambilInformasi", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                if (json.status === "success" && json.data) {
+                    const teks = json.data.teks || "";
+                    localStorage.setItem('sys_informasi', teks);
+                    // Isi textarea di form MIS jika sudah ada di DOM
+                    const ta = document.getElementById('form-info-teks');
+                    if (ta) ta.value = teks;
+                }
+            })
+            .catch(err => console.warn("Gagal muat informasi dari server:", err));
+        }
+
+        function parseRupiahKeAngka(stringRupiah) {
+            if (!stringRupiah) return 0;
+            let bersih = stringRupiah.toString().replace(/[^0-9]/g, '');
+            let hasil = parseInt(bersih, 10);
+            return isNaN(hasil) ? 0 : hasil;
+        }
+
+        function formatAngkaKeRupiah(angka) {
+            const isMinus = angka < 0;
+            const angkaAbsolut = Math.abs(angka);
+            const formatted = "Rp " + angkaAbsolut.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return isMinus ? `-${formatted}` : formatted;
+        }
+
+        function formatWaktuISO(isoString) {
+            if (!isoString) return null;
+            try {
+                const d = new Date(isoString);
+                if (isNaN(d)) return null;
+                return d.toLocaleString('id-ID', {
+                    day:    '2-digit',
+                    month:  'short',
+                    year:   'numeric',
+                    hour:   '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            } catch(e) { return null; }
+        }
+
+        // ==========================================
+        // OPERASIONAL LOGIK SUB-MENU LAPORAN HARIAN
+        // ==========================================
+
+        // --- Buka form untuk membuat laporan BARU ---
+        function bukaFormLaporan() {
+            document.getElementById('form-container-laporan').classList.remove('hidden');
+            document.getElementById('judul-form-laporan').innerText = "Formulir Laporan Baru";
+            document.getElementById('warning-laporan-kosong').classList.add('hidden');
+            document.getElementById('form-lh-id').value = "";
+            clearFormLaporanHarian();
+        }
+
+        // --- Tutup form ---
+        function tutupFormLaporan() {
+            document.getElementById('form-container-laporan').classList.add('hidden');
+            document.getElementById('warning-laporan-kosong').classList.add('hidden');
+            clearFormLaporanHarian();
+        }
+
+        // --- Reset semua field form ---
+        function clearFormLaporanHarian() {
+            document.getElementById('form-lh-id').value         = "";
+            document.getElementById('form-lh-staf').value       = "";
+            document.getElementById('form-lh-tanggal').value    = "";
+            document.getElementById('form-lh-naik-par').value   = "";
+            document.getElementById('form-lh-turun-par').value  = "";
+            document.getElementById('form-lh-ang-masuk').value  = "";
+            document.getElementById('form-lh-ang-keluar').value = "";
+        }
+
+        // --- Buka form dalam mode EDIT ---
+        function editLaporanHarian(idTarget) {
+            const list = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+            // BUG FIX 2a: Bandingkan sebagai String agar tidak gagal karena perbedaan tipe number vs string
+            const item = list.find(d => String(d.id) === String(idTarget));
+            if (!item) { alert("Data tidak ditemukan."); return; }
+
+            document.getElementById('form-container-laporan').classList.remove('hidden');
+            document.getElementById('judul-form-laporan').innerText = "Edit Laporan — " + item.staf;
+            document.getElementById('warning-laporan-kosong').classList.add('hidden');
+
+            // BUG FIX 2b: Simpan ID asli persis seperti di data (bisa string dari server)
+            document.getElementById('form-lh-id').value         = String(item.id);
+            document.getElementById('form-lh-staf').value       = item.staf;
+            document.getElementById('form-lh-tanggal').value    = normalisasiTanggal(item.tanggal);
+            document.getElementById('form-lh-naik-par').value   = item.naikPar;
+            document.getElementById('form-lh-turun-par').value  = item.turunPar;
+            document.getElementById('form-lh-ang-masuk').value  = item.angMasuk;
+            document.getElementById('form-lh-ang-keluar').value = item.angKeluar;
+
+            document.getElementById('form-container-laporan').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- SIMPAN laporan (tambah baru ATAU update edit) ---
+        function simpanLaporanHarian() {
+            const idEdit    = document.getElementById('form-lh-id').value;
+            const staf      = document.getElementById('form-lh-staf').value;
+            const tanggal   = document.getElementById('form-lh-tanggal').value;
+            const naikPar   = parseFloat(document.getElementById('form-lh-naik-par').value)   || 0;
+            const turunPar  = parseFloat(document.getElementById('form-lh-turun-par').value)  || 0;
+            const angMasuk  = parseInt(document.getElementById('form-lh-ang-masuk').value)    || 0;
+            const angKeluar = parseInt(document.getElementById('form-lh-ang-keluar').value)   || 0;
+
+            if (!staf || !tanggal) {
+                document.getElementById('warning-laporan-kosong').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('warning-laporan-kosong').classList.add('hidden');
+
+            const waktuSekarang = new Date().toISOString();
+            const dataLaporan = { staf, tanggal, naikPar, turunPar, angMasuk, angKeluar };
+
+            // BUG FIX 2c: Gunakan String comparison agar update localStorage tidak gagal
+            let list = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+            if (idEdit) {
+                list = list.map(d => String(d.id) === String(idEdit) ? { ...d, ...dataLaporan, updatedAt: waktuSekarang } : d);
+            } else {
+                list.unshift({ id: Date.now(), ...dataLaporan, createdAt: waktuSekarang, updatedAt: waktuSekarang });
+            }
+            localStorage.setItem('arr_laporan_harian', JSON.stringify(list));
+
+            renderCardLaporanHarian();
+            tutupFormLaporan();
+
+            // Saat edit: sertakan id di root payload DAN di dalam data agar Apps Script
+            // bisa membaca dengan cara manapun (e.data.id, e.id, e.rowId)
+            const dataUntukServer = idEdit
+                ? { id: String(idEdit), ...dataLaporan }
+                : { ...dataLaporan };
+
+            console.log("📤 Mengirim payload ke server:", JSON.stringify({
+                action: idEdit ? "editLaporanHarian" : "simpanLaporanHarian",
+                id: idEdit ? String(idEdit) : "(baru)",
+                data: dataUntukServer
+            }, null, 2));
+
+            kirimLaporanKeServer(dataUntukServer, idEdit);
+        }
+
+        // --- Modal error server ---
+        function tampilkanModalErrorServer(pesanError, dataUntukServer, idEdit) {
+            // Hapus modal lama jika ada
+            const modalLama = document.getElementById('modal-error-server');
+            if (modalLama) modalLama.remove();
+
+            // Deteksi penyebab spesifik
+            let judulError = "Gagal Kirim ke Spreadsheet";
+            let penjelasan = pesanError;
+            let solusi = "";
+
+            if (pesanError && pesanError.includes("getDataRange")) {
+                judulError = "⚠️ Sheet Tidak Ditemukan di Server";
+                penjelasan = "Google Apps Script tidak dapat menemukan sheet <b>\"Laporan_Harian\"</b> di Spreadsheet tujuan.";
+                solusi = `
+                    <div class="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs space-y-2">
+                        <p class="font-bold text-amber-400 text-sm">🔧 Cara Perbaikan di Google Sheets:</p>
+                        <ol class="list-decimal list-inside space-y-1.5 text-slate-300">
+                            <li>Buka Google Spreadsheet yang terhubung dengan Apps Script ini.</li>
+                            <li>Pastikan ada tab/sheet bernama persis: <code class="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">Laporan_Harian</code></li>
+                            <li>Jika belum ada, buat sheet baru dengan nama tersebut (huruf besar/kecil harus sama persis).</li>
+                            <li>Pastikan baris pertama (header) berisi kolom: <code class="bg-slate-900 px-1 py-0.5 rounded text-cyan-300 font-mono">id, staf, tanggal, naikPar, turunPar, angMasuk, angKeluar</code></li>
+                            <li>Setelah sheet dibuat, klik <b>Coba Kirim Ulang</b> di bawah.</li>
+                        </ol>
+                    </div>`;
+            } else if (pesanError && pesanError.toLowerCase().includes("script")) {
+                judulError = "❌ Error di Apps Script";
+                penjelasan = pesanError;
+                solusi = `<p class="text-xs text-slate-400 mt-2">Cek log eksekusi di Google Apps Script Editor → Executions untuk detail error.</p>`;
+            }
+
+            const modal = document.createElement('div');
+            modal.id = 'modal-error-server';
+            modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[999] flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-slate-900 border border-rose-500/30 rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-fade-in">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center flex-shrink-0 text-lg">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-100 text-base">${judulError}</h3>
+                            <p class="text-slate-400 text-xs mt-1">Data laporan sudah <span class="text-emerald-400 font-semibold">tersimpan lokal</span> di perangkat ini.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 mb-2">
+                        <span class="text-slate-500">Pesan dari server:</span><br>
+                        <span class="text-rose-300 font-mono">${penjelasan}</span>
+                    </div>
+                    ${solusi}
+                    <div class="flex gap-3 mt-5">
+                        <button onclick="cobaKirimUlang(${JSON.stringify(dataUntukServer).replace(/"/g,"'")}, '${idEdit || ''}')" 
+                            class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm cursor-pointer transition-all flex items-center justify-center gap-2">
+                            <i class="fas fa-redo"></i> Coba Kirim Ulang
+                        </button>
+                        <button onclick="document.getElementById('modal-error-server').remove()" 
+                            class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-sm cursor-pointer transition-all">
+                            Tutup
+                        </button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+
+        function cobaKirimUlang(dataUntukServer, idEdit) {
+            const modal = document.getElementById('modal-error-server');
+            if (modal) modal.remove();
+            kirimLaporanKeServer(dataUntukServer, idEdit || "");
+        }
+
+        // --- Kirim data ke Apps Script ---
+        function kirimLaporanKeServer(dataUntukServer, idEdit) {
+            const action  = idEdit ? "editLaporanHarian" : "simpanLaporanHarian";
+            // Kirim id di root payload, di dalam data, DAN sebagai rowId
+            // agar Apps Script bisa membaca dengan cara apapun
+            const payload = {
+                action,
+                data: dataUntukServer
+            };
+            // Hanya sertakan id jika mode edit (bukan string kosong / null)
+            if (idEdit) {
+                payload.id    = String(idEdit);
+                payload.rowId = String(idEdit); // fallback alias untuk Apps Script
+            }
+
+            fetch(URL_LAPORAN_HARIAN, {
+                method:  "POST",
+                mode:    "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body:    JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(json => {
+                if (json.status === "success") {
+                    console.log("✅ Terima Kasih Laporan berhasil dikirim:", json.message);
+                    // Tampilkan notifikasi sukses singkat
+                    tampilkanToastSukses(idEdit ? "Laporan berhasil terkirim! ✅" : "Laporan berhasil terkirim! ✅");
+                    if (idEdit) {
+                        console.log("🔄 Memperbarui cache lokal dari server setelah edit...");
+                    }
+                } else {
+                    console.warn("⚠️ Gagal kirim ke server:", json.message);
+                    tampilkanModalErrorServer(json.message, dataUntukServer, idEdit);
+                }
+            })
+            .catch(err => {
+                console.error("❌ Koneksi ke Apps Script gagal:", err);
+                tampilkanModalErrorServer("Tidak dapat terhubung ke server. Cek koneksi internet atau URL Apps Script.", dataUntukServer, idEdit);
+            });
+        }
+
+        function tampilkanToastSukses(pesan) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-emerald-900/50 flex items-center gap-2 animate-fade-in';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${pesan}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // ── Helper: normalisasi berbagai format tanggal → "YYYY-MM-DD" ───
+        function normalisasiTanggal(raw) {
+            if (!raw) return "";
+            const s = raw.toString().trim();
+
+            // Sudah format ISO: "2026-05-29" atau "2026-05-29T..."
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+
+            // Format D/M/YYYY atau DD/MM/YYYY dari Google Sheets (Indonesia)
+            // Kita anggap selalu DD/MM/YYYY karena lokasi server Indonesia
+            const matchSlash = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (matchSlash) {
+                const [, d, m, y] = matchSlash;
+                return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            }
+
+            // Format "29-05-2026" atau "29-5-2026"
+            const matchDash = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+            if (matchDash) {
+                const [, d, m, y] = matchDash;
+                return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+            }
+
+            // Google Sheets sering kirim angka epoch serial (jumlah hari sejak 1899-12-30)
+            if (/^\d+$/.test(s)) {
+                const epoch = parseInt(s, 10);
+                if (epoch > 20000 && epoch < 80000) { // rentang tahun ~1954–2119 (lebih lebar & aman)
+                    const msPerDay = 86400000;
+                    const baseDate = new Date(Date.UTC(1899, 11, 30));
+                    const tgl = new Date(baseDate.getTime() + epoch * msPerDay);
+                    const y = tgl.getUTCFullYear();
+                    const m = String(tgl.getUTCMonth() + 1).padStart(2,'0');
+                    const d = String(tgl.getUTCDate()).padStart(2,'0');
+                    return `${y}-${m}-${d}`;
+                }
+            }
+
+            // Fallback: coba parse dengan Date lalu format ulang (pakai UTC agar tidak geser timezone)
+            const parsed = new Date(s);
+            if (!isNaN(parsed)) {
+                const y = parsed.getUTCFullYear();
+                const m = String(parsed.getUTCMonth() + 1).padStart(2,'0');
+                const d = String(parsed.getUTCDate()).padStart(2,'0');
+                return `${y}-${m}-${d}`;
+            }
+
+            return s; // kembalikan apa adanya jika semua gagal
+        }
+
+        // --- SINKRON: ambil data terbaru dari Spreadsheet ---
+        function sinkronDataLaporanHarian(btn) {
+            btn.disabled  = true;
+            btn.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-2"></i> Menyinkronkan...';
+
+            fetch(URL_LAPORAN_HARIAN + "?action=ambilLaporanHarian", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data';
+
+                if (json.status === "success") {
+                    const cacheLokalList = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+                    const dataServer = json.data.map(item => {
+                        // BUG FIX 1: gunakan normalisasiTanggal() agar tidak pernah Invalid Date
+                        const tanggalNormal = normalisasiTanggal(item.tanggal);
+                        // Pertahankan timestamp lokal jika ada
+                        const cacheLokal = cacheLokalList.find(c => String(c.id) === String(item.id));
+                        return {
+                            id:        item.id,
+                            staf:      item.staf,
+                            tanggal:   tanggalNormal,
+                            naikPar:   item.naikPar,
+                            turunPar:  item.turunPar,
+                            angMasuk:  item.angMasuk,
+                            angKeluar: item.angKeluar,
+                            createdAt: item.createdAt || (cacheLokal && cacheLokal.createdAt) || null,
+                            updatedAt: item.updatedAt || (cacheLokal && cacheLokal.updatedAt) || null
+                        };
+                    });
+                    localStorage.setItem('arr_laporan_harian', JSON.stringify(dataServer));
+                    renderCardLaporanHarian();
+                    alert("✅ Berhasil! Data laporan harian diperbarui.");
+                } else {
+                    alert("Gagal sinkron: " + json.message);
+                }
+            })
+            .catch(err => {
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data';
+                alert("Gagal terhubung ke server:\n" + err.message);
+            });
+        }
+
+        // --- RENDER kartu laporan dari localStorage ---
+        function renderCardLaporanHarian() {
+            const container = document.getElementById('container-card-laporan-harian');
+            if (!container) return;
+
+            const list = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-slate-950/20 border border-dashed border-slate-800 p-8 rounded-2xl text-center text-slate-500 text-sm italic">
+                        <i class="fas fa-clipboard text-2xl block mb-2 opacity-30"></i>
+                        Belum ada laporan tersimpan. Klik "Buat Laporan" untuk memulai.
+                    </div>`;
+                return;
+            }
+
+            let html = "";
+            list.forEach(item => {
+                const netPar     = item.turunPar - item.naikPar;
+                const netAnggota = item.angMasuk - item.angKeluar;
+                const warnaPar   = netPar >= 0 ? "text-emerald-400" : "text-rose-400";
+                const tandaPar   = netPar > 0 ? "+" : "";
+                const warnaAng   = netAnggota >= 0 ? "text-emerald-400" : "text-rose-400";
+                const tandaAng   = netAnggota > 0 ? "+" : "";
+
+                // BUG FIX 1: gunakan normalisasiTanggal() yang robust
+                const tanggalNorm = normalisasiTanggal(item.tanggal);
+                const tglObj    = tanggalNorm ? new Date(tanggalNorm + "T00:00:00") : null;
+                const tglTampil = (tglObj && !isNaN(tglObj))
+                    ? tglObj.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
+                    : (item.tanggal || "-");
+
+                html += `
+                    <div class="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl overflow-hidden shadow-lg flex flex-col animate-fade-in">
+                        <div class="bg-slate-950/80 border-b border-slate-800 px-5 py-3 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-slate-200 text-sm">${item.staf}</span>
+                                <p class="text-[11px] text-slate-500 mt-0.5">
+                                    <i class="fas fa-calendar-day text-indigo-400 mr-1"></i>${tglTampil}
+                                </p>
+                            </div>
+                            <span class="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-mono">
+                                #${item.id.toString().slice(-5)}
+                            </span>
+                        </div>
+                        <div class="p-5 flex-1 space-y-4">
+                            <div>
+                                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i class="fas fa-chart-bar text-indigo-400 text-[10px]"></i> Outstanding PAR
+                                </h4>
+                                <div class="bg-slate-900/50 rounded-xl p-3 border border-slate-800/60 space-y-1.5 text-xs">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Kenaikan PAR</span>
+                                        <span class="text-rose-400 font-mono font-semibold">${formatAngkaKeRupiah(item.naikPar)}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Penurunan PAR</span>
+                                        <span class="text-emerald-400 font-mono font-semibold">${formatAngkaKeRupiah(item.turunPar)}</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-slate-800 pt-1.5">
+                                        <span class="text-slate-400 font-medium">Net PAR</span>
+                                        <span class="${warnaPar} font-mono font-bold">${tandaPar}${formatAngkaKeRupiah(netPar)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <i class="fas fa-users text-cyan-400 text-[10px]"></i> Capaian Anggota
+                                </h4>
+                                <div class="bg-slate-900/50 rounded-xl p-3 border border-slate-800/60 space-y-1.5 text-xs">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Masuk</span>
+                                        <span class="text-slate-300 font-semibold">${item.angMasuk} orang</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-500">Keluar</span>
+                                        <span class="text-slate-300 font-semibold">${item.angKeluar} orang</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-slate-800 pt-1.5">
+                                        <span class="text-slate-400 font-medium">Net Anggota</span>
+                                        <span class="${warnaAng} font-mono font-bold">${tandaAng}${netAnggota} orang</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-4 flex gap-2 border-t border-slate-900 pt-3">
+                            <button onclick="editLaporanHarian('${item.id}')"
+                                class="w-full text-xs bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/30 text-indigo-300 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                                <i class="fas fa-edit text-[10px]"></i> Edit Laporan
+                            </button>
+                        </div>
+                        ${(item.createdAt || item.updatedAt) ? `
+                        <div class="px-5 pb-3 space-y-1 border-t border-slate-900/60">
+                            ${item.createdAt ? `
+                            <div class="flex items-center gap-1.5 text-[10px] text-slate-600">
+                                <i class="fas fa-clock text-emerald-600/70"></i>
+                                <span class="text-slate-600">Dibuat:</span>
+                                <span class="text-emerald-600/90 font-mono">${formatWaktuISO(item.createdAt)}</span>
+                            </div>` : ''}
+                            ${item.updatedAt && item.updatedAt !== item.createdAt ? `
+                            <div class="flex items-center gap-1.5 text-[10px] text-slate-600">
+                                <i class="fas fa-pen-alt text-amber-500/70"></i>
+                                <span class="text-slate-600">Diedit:</span>
+                                <span class="text-amber-500/90 font-mono">${formatWaktuISO(item.updatedAt)}</span>
+                            </div>` : ''}
+                        </div>` : ''}
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        
+        
+        function hitungDanTampilkanStatistik(tombol = null) {
+            let infoTarget = null;
+            if (tombol) {
+                infoTarget = tombol;
+                infoTarget.disabled = true;
+                infoTarget.innerHTML = `<i class="fas fa-sync-alt animate-spin mr-2"></i> Mengalkulasi...`;
+            }
+
+            const container = document.getElementById('container-card-statistik-staf');
+
+            if (!databaseAnggotaPar || databaseAnggotaPar.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full bg-slate-950/30 border border-dashed border-slate-800 p-8 rounded-2xl text-center text-slate-500 text-sm">
+                        <i class="fas fa-exclamation-circle text-2xl text-amber-500 block mb-2"></i>
+                        Data Anggota PAR kosong atau belum dimuat. Silakan sinkronkan server pada tab Data Anggota Par terlebih dahulu.
+                    </div>`;
+                if (infoTarget) {
+                    infoTarget.disabled = false;
+                    infoTarget.innerHTML = `<i class="fas fa-sync-alt"></i> Update Statistik`;
+                }
+                return;
+            }
+
+            const mapIdentitasAnggota = {};
+            databaseAnggotaPar.forEach(item => {
+                const key = (item.id + "|||" + item.nama).toLowerCase().trim();
+                if (!mapIdentitasAnggota[key]) {
+                    mapIdentitasAnggota[key] = 0;
+                }
+                mapIdentitasAnggota[key]++;
+            });
+
+            const dataStatistikStaf = {};
+            listStaf.forEach(staf => {
+                dataStatistikStaf[staf] = {
+                    totalAnggota: 0,
+                    parTpk: 0,
+                    doublePinjaman: 0,
+                    totalPinjaman: 0,
+                    totalTunggakan: 0,
+                    sudahDihitungDouble: new Set()
+                };
+            });
+
+            databaseAnggotaPar.forEach(item => {
+                const teksStafSheet = item.staf.toLowerCase().trim();
+                
+                let stafDitemukan = null;
+                for (let i = 0; i < listStaf.length; i++) {
+                    const namaStafResmi = listStaf[i].toLowerCase();
+                    if (teksStafSheet.includes(namaStafResmi)) {
+                        stafDitemukan = listStaf[i];
+                        break;
+                    }
+                }
+                
+                if (stafDitemukan) {
+                    const stats = dataStatistikStaf[stafDitemukan];
+                    stats.totalAnggota++;
+
+                    const teksTipeSheet = item.tipe ? item.tipe.toUpperCase().trim() : "";
+                    if (teksTipeSheet.includes("TPK")) {
+                        stats.parTpk++;
+                    }
+
+                    const keyIdentitas = (item.id + "|||" + item.nama).toLowerCase().trim();
+                    if (mapIdentitasAnggota[keyIdentitas] > 1) {
+                        if (!stats.sudahDihitungDouble.has(keyIdentitas)) {
+                            stats.doublePinjaman++;
+                            stats.sudahDihitungDouble.add(keyIdentitas);
+                        }
+                    }
+
+                    stats.totalPinjaman += parseRupiahKeAngka(item.totalPinj);
+                    stats.totalTunggakan += parseRupiahKeAngka(item.totalTung);
+                }
+            });
+
+            let htmlCard = "";
+            listStaf.forEach(staf => {
+                const s = dataStatistikStaf[staf];
+                htmlCard += `
+                    <div class="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-2xl p-5 shadow-xl shadow-slate-950/20 transition-all group animate-fade-in">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600/10 text-indigo-400 flex items-center justify-center font-bold text-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                    <i class="fas fa-user-tie text-base"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-200 group-hover:text-indigo-400 transition-colors text-sm md:text-base">${staf}</h4>
+                                    <p class="text-[11px] text-slate-500 font-medium tracking-wide">Staf Lapang</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 font-mono text-slate-400 font-semibold">Aktif</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-4 text-xs">
+                            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-900">
+                                <span class="text-slate-400 block mb-0.5">Total Anggota PAR</span>
+                                <span class="text-base font-extrabold text-slate-200">${s.totalAnggota} <span class="text-[10px] font-normal text-slate-500">Anggota</span></span>
+                            </div>
+                            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-900">
+                                <span class="text-slate-400 block mb-0.5">PAR di TPK</span>
+                                <span class="text-base font-extrabold text-amber-400">${s.parTpk} <span class="text-[10px] font-normal text-slate-500">Anggota</span></span>
+                            </div>
+                            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-900 col-span-2">
+                                <span class="text-slate-400 block mb-0.5">Double Pinjaman</span>
+                                <span class="text-base font-extrabold text-rose-400 flex items-center gap-1.5">
+                                    <i class="fas fa-clone text-xs opacity-60"></i> ${s.doublePinjaman} <span class="text-[10px] font-normal text-slate-500">Anggota Terdeteksi</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 border-t border-slate-800/60 pt-3 text-xs">
+                            <div class="flex justify-between items-center bg-slate-900/20 px-2 py-1 rounded">
+                                <span class="text-slate-400">Total Pinjaman:</span>
+                                <span class="font-bold text-slate-300">${formatAngkaKeRupiah(s.totalPinjaman)}</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-rose-500/5 px-2 py-1 rounded border border-rose-500/5">
+                                <span class="text-slate-400">Total Tunggakan:</span>
+                                <span class="font-extrabold text-rose-400">${formatAngkaKeRupiah(s.totalTunggakan)}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            container.innerHTML = htmlCard;
+
+            if (infoTarget) {
+                setTimeout(() => {
+                    infoTarget.disabled = false;
+                    infoTarget.innerHTML = `<i class="fas fa-sync-alt"></i> Update Statistik`;
+                }, 400);
+            }
+        }
+
+        function tampilkanDataAnggotaPAR(dataArray) {
+            const tbody = document.getElementById('tbody-anggota-par');
+            let html = "";
+            
+            if(!dataArray || dataArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 italic">Data tidak ditemukan atau kosong. Silakan periksa koneksi Server Anda.</td></tr>`;
+                return;
+            }
+
+            dataArray.forEach(item => {
+                html += `
+                    <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-900/40">
+                        <td class="py-3 px-4 font-mono font-bold text-slate-400 text-center">${item.noPinj}</td>
+                        <td class="py-3 px-4"><span class="bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-mono font-bold">${item.center}</span></td>
+                        <td class="py-3 px-4 font-mono">${item.id}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-200">${item.nama}</td>
+                        <td class="py-3 px-4 text-right text-slate-300">${item.totalPinj}</td>
+                        <td class="py-3 px-4 text-right font-medium text-rose-400">${item.totalTung}</td>
+                        <td class="py-3 px-4 text-center"><span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-[11px] font-bold">${item.tipe}</span></td>
+                        <td class="py-3 px-4 font-medium text-slate-300">${item.staf}</td>
+                    </tr>`;
+            });
+            tbody.innerHTML = html;
+
+            hitungDanTampilkanStatistik();
+        }
+
+        function muatDataDariSpreadsheet() {
+            const tbody = document.getElementById('tbody-anggota-par');
+            if(!tbody) return;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 italic"><i class="fas fa-spinner animate-spin mr-2"></i>Menghubungkan ke server cloud...</td></tr>`;
+
+            fetch(URL_WEB_APP_GS, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    databaseAnggotaPar = result.data;
+                    tampilkanDataAnggotaPAR(databaseAnggotaPar);
+                } else {
+                    throw new Error(result.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-rose-400 font-medium">Gagal memuat data dari URL server induk.</td></tr>`;
+            });
+        }
+
+        function sinkronServerPAR(btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-sync-alt animate-spin mr-2"></i> Menyinkronkan...`;
+            
+            fetch(URL_WEB_APP_GS, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            })
+            .then(response => response.json())
+            .then(result => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-sync-alt mr-2"></i> Sinkron Server`;
+                
+                if (result.status === "success") {
+                    databaseAnggotaPar = result.data;
+                    tampilkanDataAnggotaPAR(databaseAnggotaPar);
+                    alert("✅ Berhasil! Data Master Anggota PAR telah di perbarui, silahkan cek kembali.");
+                } else {
+                    throw new Error(result.message);
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-sync-alt mr-2"></i> Sinkron Server`;
+                alert("Gagal Sinkronisasi via URL: " + error.message);
+            });
+        }
+
+        function cariDataAnggotaPAR() {
+            const keyword = document.getElementById('cari-anggota-par').value.toLowerCase().trim();
+            const hasilFilter = databaseAnggotaPar.filter(item => {
+                return item.nama.toLowerCase().includes(keyword) || 
+                       item.id.toLowerCase().includes(keyword) || 
+                       item.center.toLowerCase().includes(keyword) || 
+                       item.staf.toLowerCase().includes(keyword) ||
+                       item.noPinj.toLowerCase().includes(keyword);
+            });
+            tampilkanDataAnggotaPAR(hasilFilter);
+        }
+
+        function muatProgresCabangDariSheets() {
+            const containerGrid = document.querySelector('#content-db-progres-cabang .grid');
+            containerGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400"><i class="fas fa-spinner animate-spin mr-2"></i>Memperbarui dashboard progres bulanan cabang...</div>`;
+
+            fetch(URL_PROGRES_BULANAN_MANDIRI, {
+                method: "POST",
+                mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" }
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.status === "success") {
+                    const sheetData = result.data;
+                    const bulanIndoLaporan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    let htmlCardGlobal = "";
+
+                    bulanIndoLaporan.forEach(bln => {
+                        const d = sheetData[bln] || { kenaikanPar: 0, penurunanPar: 0, parBermasalah: 0, anggotaMasuk: 0, anggotaKeluar: 0, sisaMonitor: 0 };
+                        
+                        const netPAR = d.kenaikanPar - d.penurunanPar;
+                        const netAnggota = d.anggotaMasuk - d.anggotaKeluar;
+
+                        const warnaNetPAR = netPAR < 0 ? "text-emerald-400" : "text-rose-400";
+                        const tandaNetPAR = netPAR > 0 ? "+" : "";
+
+                        const warnaNetAnggota = netAnggota < 0 ? "text-emerald-400" : "text-rose-400";
+                        const tandaNetAnggota = netAnggota > 0 ? "+" : "";
+
+                        htmlCardGlobal += `
+                            <div onclick="pilihBulanProgres('${bln}')" class="bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 hover:border-cyan-500/50 p-5 rounded-2xl cursor-pointer transition-all group shadow-xl hover:shadow-cyan-950/20 transform hover:-translate-y-1 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between border-b border-slate-800/60 pb-3 mb-4">
+                                        <div class="flex items-center gap-2.5">
+                                            <i class="fas fa-folder text-amber-500 group-hover:scale-110 transition-transform"></i>
+                                            <span class="text-sm font-bold text-slate-200 tracking-wide">${bln}</span>
+                                        </div>
+                                        <span class="text-[10px] bg-slate-900 px-2 py-0.5 rounded border border-slate-800 font-mono text-slate-500">2026</span>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h4 class="text-[11px] font-bold text-indigo-400 tracking-wider uppercase mb-2 flex items-center gap-1.5">
+                                            <i class="fas fa-chart-pie text-[10px]"></i> Outstanding PAR
+                                        </h4>
+                                        <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-950 space-y-1.5 text-[11px]">
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Kenaikan PAR</span>
+                                                <span class="font-mono text-slate-200 font-semibold">${formatAngkaKeRupiah(d.kenaikanPar)}</span>
+                                            </div>
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Penurunan PAR</span>
+                                                <span class="font-mono text-slate-200 font-semibold">${formatAngkaKeRupiah(d.penurunanPar)}</span>
+                                            </div>
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Outstanding Bermasalah</span>
+                                                <span class="font-mono text-amber-500 font-semibold">${formatAngkaKeRupiah(d.parBermasalah)}</span>
+                                            </div>
+                                            <div class="flex justify-between border-t border-slate-800/60 pt-1.5 font-medium">
+                                                <span class="text-slate-300">Hasil Net</span>
+                                                <span class="font-mono font-bold ${warnaNetPAR}">${tandaNetPAR}${formatAngkaKeRupiah(netPAR)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h4 class="text-[11px] font-bold text-cyan-400 tracking-wider uppercase mb-2 flex items-center gap-1.5">
+                                            <i class="fas fa-users text-[10px]"></i> Capaian Anggota
+                                        </h4>
+                                        <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-950 space-y-1.5 text-[11px]">
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Masuk</span>
+                                                <span class="font-mono text-slate-200 font-semibold">${d.anggotaMasuk} Anggota</span>
+                                            </div>
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Keluar</span>
+                                                <span class="font-mono text-slate-200 font-semibold">${d.anggotaKeluar} Anggota</span>
+                                            </div>
+                                            <div class="flex justify-between border-t border-slate-800/60 pt-1.5 font-medium">
+                                                <span class="text-slate-300">Hasil Net</span>
+                                                <span class="font-mono font-bold ${warnaNetAnggota}">${tandaNetAnggota}${netAnggota} Anggota</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-900/60 border border-slate-800/50 p-2.5 rounded-xl flex justify-between items-center text-xs">
+                                        <span class="text-slate-400 font-medium flex items-center gap-1.5">
+                                            <i class="fas fa-route text-[10px] text-amber-500"></i> Sisa Monitoring
+                                        </span>
+                                        <span class="font-mono font-extrabold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 text-[11px]">${d.sisaMonitor} Tunggakan</span>
+                                    </div>
+                                </div>
+                                <div class="mt-5 pt-2.5 border-t border-slate-900 flex justify-end items-center text-[11px] text-slate-500 group-hover:text-cyan-400 transition-colors">
+                                    <span>Detail Arsip <i class="fas fa-arrow-right text-[9px] ml-1"></i></span>
+                                </div>
+                            </div>`;
+                    });
+                    containerGrid.innerHTML = htmlCardGlobal;
+                }
+            })
+            .catch(err => {
+                containerGrid.innerHTML = `<div class="col-span-full text-center py-10 text-rose-400">Gagal menyinkronkan data progres cabang bulanan via server mandiri.</div>`;
+            });
+        }
+
+        function renderDashboardProgres() {
+            const list = JSON.parse(localStorage.getItem('arr_progres')) || [];
+            let htmlNaik = "";
+            let htmlTurun = "";
+
+            list.forEach(item => {
+                const currentStatus = item.status || "terkonfirmasi";
+                const badgeStatusHTML = currentStatus === "terkonfirmasi" 
+                    ? `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-check-circle text-[9px]"></i> Terkonfirmasi</span>`
+                    : `<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"><i class="fas fa-times-circle text-[9px]"></i> Tidak Terkonfirmasi</span>`;
+
+                const card = `
+                    <div class="bg-gradient-to-b from-slate-950 to-slate-900 border ${item.tipe === 'naik' ? 'border-rose-950/40' : 'border-emerald-950/40'} rounded-2xl overflow-hidden shadow-lg animate-fade-in flex flex-col justify-between">
+                        <div>
+                            <div class="${item.tipe === 'naik' ? 'bg-rose-500/10 border-rose-950/30 text-rose-400' : 'bg-emerald-500/10 border-emerald-950/30 text-emerald-400'} px-5 py-3 border-b flex justify-between items-center">
+                                <span class="font-bold tracking-wide text-sm">${item.tipe === 'naik' ? 'KENAIKAN PAR' : 'PENURUNAN PAR'}</span>
+                                <span class="text-xs ${item.tipe === 'naik' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'} px-2 py-0.5 rounded-md font-mono font-bold">${item.nom}</span>
+                            </div>
+                            <div class="p-5 space-y-3">
+                                <div class="flex justify-between border-b border-slate-800 pb-2 text-sm"><span class="text-slate-400">Nama Staf</span><span class="font-semibold text-slate-200">${item.nama}</span></div>
+                                <div class="flex justify-between border-b border-slate-800 pb-2 text-sm"><span class="text-slate-400">Atas Nama</span><span class="font-semibold text-slate-200">${item.an}</span></div>
+                                <div class="flex justify-between text-sm"><span class="text-slate-400">Center</span><span class="font-mono bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-bold">${item.ctr}</span></div>
+                            </div>
+                        </div>
+                        <div class="px-5 pb-4 pt-1 flex justify-end border-t border-slate-900 bg-slate-950/20">
+                            ${badgeStatusHTML}
+                        </div>
+                    </div>`;
+
+                if (item.tipe === 'naik') htmlNaik += card;
+                else htmlTurun += card;
+            });
+
+            const elNaik = document.getElementById('display-kenaikan-par');
+            const elTurun = document.getElementById('display-penurunan-par');
+            if(elNaik) elNaik.innerHTML = htmlNaik || `<p class="text-slate-500 text-sm italic col-span-3">Tidak ada data kenaikan.</p>`;
+            if(elTurun) elTurun.innerHTML = htmlTurun || `<p class="text-slate-500 text-sm italic col-span-3">Tidak ada data penurunan.</p>`;
+        }
+
+        function tambahDataProgres() {
+            const nama   = document.getElementById('form-p-nama').value;
+            const an     = document.getElementById('form-p-an').value.trim();
+            const ctr    = document.getElementById('form-p-ctr').value.trim();
+            const nom    = document.getElementById('form-p-nom').value.trim();
+            const tipe   = document.getElementById('form-p-tipe').value;
+            const status = document.getElementById('form-p-status').value;
+
+            if(!nama || nama === "")  { alert("Silakan pilih Nama Staf terlebih dahulu!"); return; }
+            if(!an || !ctr || !nom)   { alert("Mohon lengkapi seluruh kolom center, anggota, dan nominal!"); return; }
+            if(tipe === "Pilih")      { alert("Silakan pilih Kategori Indikator!"); return; }
+
+            const newData = { id: Date.now(), tipe, nama, an, ctr, nom, status };
+
+            // Simpan ke cache lokal & render langsung (optimistic update)
+            const list = JSON.parse(localStorage.getItem('arr_progres')) || [];
+            list.push(newData);
+            localStorage.setItem('arr_progres', JSON.stringify(list));
+            sinkronisasiSistem();
+
+            // Reset form
+            document.getElementById('form-p-nama').value   = "";
+            document.getElementById('form-p-an').value     = "";
+            document.getElementById('form-p-ctr').value    = "";
+            document.getElementById('form-p-nom').value    = "";
+
+            // Kirim ke Spreadsheet di background
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "simpanProgres", data: newData })
+            })
+            .then(r => r.json())
+            .then(json => {
+                if (json.status === "success") {
+                    alert(`✅ Data progres staf ${nama} berhasil disimpan ke Server!`);
+                } else {
+                    alert(`⚠️ Tersimpan lokal, tapi gagal kirim ke Spreadsheet:\n${json.message}`);
+                }
+            })
+            .catch(() => alert(`⚠️ Tersimpan lokal, tapi tidak dapat terhubung ke server.`));
+        }
+
+        function hapusDataProgres(id) {
+            if(!confirm("Hapus data progres dari Spreadsheet dan tampilan?")) return;
+            // Hapus dari cache lokal dulu
+            let list = JSON.parse(localStorage.getItem('arr_progres')) || [];
+            list = list.filter(item => item.id != id);
+            localStorage.setItem('arr_progres', JSON.stringify(list));
+            sinkronisasiSistem();
+            // Kirim hapus ke Spreadsheet
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "hapusProgres", data: { id } })
+            })
+            .then(r => r.json())
+            .then(json => { if (json.status !== "success") console.warn("Gagal hapus di server:", json.message); })
+            .catch(err => console.warn("Gagal koneksi saat hapus progres:", err));
+        }
+
+        function renderAdminProgresControl() {
+            const list = JSON.parse(localStorage.getItem('arr_progres')) || [];
+            let html = "";
+            list.forEach(item => {
+                const currentStatus = item.status || "terkonfirmasi";
+                const textStatusAdmin = currentStatus === "terkonfirmasi" ? "Terkonfirmasi" : "Tidak Terkonfirmasi";
+                const colorStatusAdmin = currentStatus === "terkonfirmasi" ? "text-emerald-400" : "text-rose-400";
+
+                html += `
+                    <div class="flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                        <div>
+                            <span class="font-bold block ${item.tipe === 'naik' ? 'text-rose-400' : 'text-emerald-400'}">${item.nama} (${item.tipe.toUpperCase()})</span>
+                            <p class="text-slate-400 text-[11px]">${item.ctr} • AN: ${item.an} • <span class="text-slate-300">${item.nom}</span></p>
+                            <span class="text-[10px] ${colorStatusAdmin} font-semibold block mt-0.5"><i class="fas fa-dot-circle text-[8px] mr-0.5"></i> Status: ${textStatusAdmin}</span>
+                        </div>
+                        <button onclick="hapusDataProgres(${item.id})" class="text-rose-500 hover:text-rose-400 p-2 cursor-pointer"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+            });
+            const elAdminList = document.getElementById('admin-progres-list');
+            if(elAdminList) elAdminList.innerHTML = html || `<p class="text-slate-600 italic">Belum ada data terekam.</p>`;
+        }
+
+        function renderDashboardRanking() {
+            const list = JSON.parse(localStorage.getItem('arr_ranking')) || [];
+            const kats = ['par', 'db', 'ag', 'mn'];
+            
+            kats.forEach(kategori => {
+                const boxId = kategori === 'par' ? 'rank-box-par' : kategori === 'db' ? 'rank-box-disburse' : kategori === 'ag' ? 'rank-box-anggota' : 'rank-box-monitor';
+                const borderColor = kategori === 'par' ? 'border-emerald-500/50' : kategori === 'db' ? 'border-cyan-500/50' : kategori === 'ag' ? 'border-indigo-500/50' : 'border-amber-500/50';
+                const colorBadge = kategori === 'par' ? 'bg-emerald-500/10 text-emerald-400' : kategori === 'db' ? 'bg-cyan-500/10 text-cyan-400' : kategori === 'ag' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-400';
+
+                const filtered = list.filter(item => item.kat === kategori);
+                let htmlBox = "";
+
+                filtered.forEach((item, index) => {
+                    const defaultAvatar = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=120";
+                    htmlBox += `
+                        <div class="bg-slate-950/70 p-5 rounded-2xl border border-slate-800 flex items-center gap-4 relative overflow-hidden animate-fade-in">
+                            <div class="absolute right-3 top-2 text-amber-500 font-extrabold text-lg font-mono opacity-25">#${index + 1}</div>
+                            <img src="${item.img || defaultAvatar}" alt="Foto" class="w-14 h-14 rounded-xl object-cover border-2 ${borderColor}">
+                            <div>
+                                <h4 class="font-bold text-slate-200 text-sm">| ${item.nama}</h4>
+                                <p class="text-[11px] text-slate-400 mb-1">${item.sub}</p>
+                                <span class="text-[11px] ${colorBadge} font-semibold px-2 py-0.5 rounded-md">${item.val}</span>
                             </div>
                         </div>`;
-                }).join('');
-            }).catch(e => { target.innerHTML = "Gagal memuat histori."; });
+                });
+
+                const elBox = document.getElementById(boxId);
+                if(elBox) elBox.innerHTML = htmlBox || `<p class="text-slate-600 text-xs italic">Belum ada pemenang di kategori ini.</p>`;
+            });
         }
 
-        function prepareEditLaporan(staf, tanggal, naik, turun, masuk, keluar) {
-            const form = document.getElementById('form-container');
-            if(form) form.style.display = 'block';
-            document.getElementById('input-staf').value = staf;
-            try {
-                const parts = tanggal.split('/');
-                if(parts.length === 3) {
-                    const formattedDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                    document.getElementById('input-tanggal').value = formattedDate;
+        function tambahDataRanking() {
+            const kat  = document.getElementById('form-r-kat').value;
+            const nama = document.getElementById('form-r-nama').value;
+            const sub  = document.getElementById('form-r-sub').value.trim();
+            const val  = document.getElementById('form-r-val').value.trim();
+            const img  = document.getElementById('form-r-img').value.trim();
+
+            if(!nama || nama === "") { alert("Silakan pilih Nama Staf terlebih dahulu!"); return; }
+            if(!sub || !val)         { alert("Harap isi bagian jabatan/sub dan skor nilai!"); return; }
+
+            const newData = { id: Date.now(), kat, nama, sub, val, img };
+
+            // Optimistic update ke cache lokal
+            const list = JSON.parse(localStorage.getItem('arr_ranking')) || [];
+            list.push(newData);
+            localStorage.setItem('arr_ranking', JSON.stringify(list));
+            sinkronisasiSistem();
+
+            // Reset form
+            document.getElementById('form-r-nama').value = "";
+            document.getElementById('form-r-sub').value  = "";
+            document.getElementById('form-r-val').value  = "";
+            document.getElementById('form-r-img').value  = "";
+
+            // Kirim ke Spreadsheet di background
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "simpanRanking", data: newData })
+            })
+            .then(r => r.json())
+            .then(json => {
+                if (json.status === "success") {
+                    alert(`✅ Staf ${nama} berhasil didaftarkan ke Menu Ranking!`);
+                } else {
+                    alert(`⚠️ Tersimpan lokal, tapi gagal kirim ke Spreadsheet:\n${json.message}`);
                 }
-            } catch(e) { console.log("Gagal memformat tanggal"); }
-            document.getElementById('input-kenaikan').value = naik;
-            document.getElementById('input-penurunan').value = turun;
-            document.getElementById('input-masuk').value = masuk;
-            document.getElementById('input-keluar').value = keluar;
-            const btnSubmit = document.querySelector('.btn-submit');
-            if(btnSubmit) {
-                btnSubmit.innerHTML = '<i class="fas fa-save"></i> UPDATE DATA LAPORAN';
-                btnSubmit.style.background = "var(--green-text)";
+            })
+            .catch(() => alert(`⚠️ Tersimpan lokal, tapi tidak dapat terhubung ke server.`));
+        }
+
+        function deleteDataRanking(id) {
+            if(!confirm("Keluarkan nama ini dari tabel kompetisi dan Spreadsheet?")) return;
+            let list = JSON.parse(localStorage.getItem('arr_ranking')) || [];
+            list = list.filter(item => item.id != id);
+            localStorage.setItem('arr_ranking', JSON.stringify(list));
+            sinkronisasiSistem();
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "hapusRanking", data: { id } })
+            })
+            .then(r => r.json())
+            .then(json => { if (json.status !== "success") console.warn("Gagal hapus ranking di server:", json.message); })
+            .catch(err => console.warn("Gagal koneksi saat hapus ranking:", err));
+        }
+
+        function renderAdminRankingControl() {
+            const list = JSON.parse(localStorage.getItem('arr_ranking')) || [];
+            let html = "";
+            list.forEach(item => {
+                const badgeText = item.kat === 'par' ? 'PAR' : item.kat === 'db' ? 'DISBURSE' : item.kat === 'ag' ? 'ANGGOTA' : 'MONITOR';
+                html += `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-800 rounded-xl">
+                        <div>
+                            <span class="text-slate-400 font-mono text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-indigo-400 font-bold mr-1">${badgeText}</span>
+                            <span class="font-bold text-slate-200">${item.nama}</span>
+                            <p class="text-slate-400 text-[11px] mt-0.5">${item.sub} • <span class="text-amber-400 font-medium">${item.val}</span></p>
+                        </div>
+                        <button onclick="deleteDataRanking(${item.id})" class="text-rose-500 hover:text-rose-400 p-2 cursor-pointer"><i class="fas fa-trash-alt"></i></button>
+                    </div>`;
+            });
+            const elAdminRank = document.getElementById('admin-ranking-list');
+            if(elAdminRank) elAdminRank.innerHTML = html || `<p class="text-slate-600 italic">Belum ada data ranking terpajang.</p>`;
+        }
+
+        function simpanInformasi() {
+            const teks = document.getElementById('form-info-teks').value.trim();
+            if (!teks) { alert("Isi pesan informasi tidak boleh kosong!"); return; }
+
+            // Simpan cache lokal
+            localStorage.setItem('sys_informasi', teks);
+
+            // Kirim ke Spreadsheet
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "simpanInformasi", data: { teks } })
+            })
+            .then(r => r.json())
+            .then(json => {
+                if (json.status === "success") {
+                    alert("✅ Informasi berhasil dipublikasikan ke Spreadsheet!\nAkan muncul sebagai notifikasi pop-up saat user login.");
+                } else {
+                    alert(`⚠️ Tersimpan lokal, tapi gagal kirim ke Spreadsheet:\n${json.message}`);
+                }
+            })
+            .catch(() => alert("⚠️ Tersimpan lokal, tapi tidak dapat terhubung ke server."));
+        }
+
+        function sampleInfoPopUp() {
+            // Coba ambil informasi terbaru dari Spreadsheet
+            // Jika gagal, fallback ke cache lokal
+            fetch(URL_MIS + "?action=ambilInformasi", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                let teks = "";
+                if (json.status === "success" && json.data && json.data.teks) {
+                    teks = json.data.teks;
+                    localStorage.setItem('sys_informasi', teks); // update cache
+                } else {
+                    teks = localStorage.getItem('sys_informasi') || "";
+                }
+                if (teks && teks.length > 0) {
+                    // Tampilkan notif pop-up custom (tidak blocking UI)
+                    tampilkanNotifikasiInfo(teks);
+                }
+                // Isi textarea admin jika sudah terbuka
+                const ta = document.getElementById('form-info-teks');
+                if (ta) ta.value = teks;
+            })
+            .catch(() => {
+                // Fallback ke localStorage saat offline
+                const teks = localStorage.getItem('sys_informasi') || "";
+                if (teks && teks.length > 0) tampilkanNotifikasiInfo(teks);
+            });
+        }
+
+        function tampilkanNotifikasiInfo(teks) {
+            // Buat overlay notifikasi non-blocking yang bisa di-dismiss
+            const existingNotif = document.getElementById('notif-info-overlay');
+            if (existingNotif) existingNotif.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'notif-info-overlay';
+            overlay.style.cssText = `
+                position:fixed; inset:0; z-index:9999;
+                background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
+                display:flex; align-items:center; justify-content:center; padding:16px;
+            `;
+            overlay.innerHTML = `
+                <div style="background:#0f172a; border:1px solid #334155; border-radius:20px;
+                            max-width:480px; width:100%; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.6);
+                            animation:fadeInScale .25s ease;">
+                    <style>@keyframes fadeInScale{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style>
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+                        <div style="width:42px;height:42px;border-radius:12px;background:rgba(245,158,11,.15);
+                                    display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📢</div>
+                        <div>
+                            <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0 0 2px 0;">Informasi Terbaru</h3>
+                            <p style="color:#64748b;font-size:11px;margin:0;">Pesan dari Manajemen Cabang Ciledug</p>
+                        </div>
+                    </div>
+                    <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;
+                                padding:14px 16px;margin-bottom:20px;color:#cbd5e1;
+                                font-size:13px;line-height:1.7;white-space:pre-wrap;">${teks}</div>
+                    <button onclick="document.getElementById('notif-info-overlay').remove()"
+                            style="width:100%;background:linear-gradient(135deg,#4f46e5,#0891b2);
+                                   border:none;border-radius:12px;color:#fff;font-weight:700;
+                                   font-size:14px;padding:12px;cursor:pointer;transition:opacity .2s;"
+                            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                        Ok
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            // Klik di luar untuk tutup
+            overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.remove(); });
+        }
+
+        function hapusInformasi() {
+            if(!confirm("Kosongkan informasi dari Spreadsheet dan sistem?")) return;
+            document.getElementById('form-info-teks').value = "";
+            localStorage.setItem('sys_informasi', "");
+            fetch(URL_MIS, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "hapusInformasi", data: {} })
+            })
+            .then(r => r.json())
+            .then(json => {
+                if (json.status === "success") alert("✅ Informasi berhasil dikosongkan dari Spreadsheet.");
+                else alert(`⚠️ Cache lokal dikosongkan, tapi gagal hapus di server:\n${json.message}`);
+            })
+            .catch(() => alert("⚠️ Cache lokal dikosongkan, tapi tidak dapat terhubung ke server."));
+        }
+
+        function pilihBulanProgres(bulan) {
+            alert("Membuka Arsip Progres Cabang Bulan: " + bulan);
+        }
+
+        function bukaMenuUtama() {
+            sampleInfoPopUp();
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('main-menu-page').classList.remove('hidden');
+            dropdownDashboardTerbuka = false;
+            toggleDashboardDropdown();
+            gantiTab('progres-kemarin');
+        }
+
+        function kembaliKeAwal() {
+            statusAdminTerverifikasi = false;
+            dropdownMisTerbuka = false;
+            document.getElementById('mis-submenu').classList.add('hidden');
+            document.getElementById('btn-mis-main').classList.remove('text-indigo-400');
+            document.getElementById('mis-arrow').classList.remove('rotate-180');
+            
+            if(sidebarTerbuka) toggleSidebar();
+            document.getElementById('main-menu-page').classList.add('hidden');
+            document.getElementById('landing-page').classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-menu');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebarTerbuka = !sidebarTerbuka;
+            sidebar.classList.toggle('-translate-x-full', !sidebarTerbuka);
+            overlay.classList.toggle('hidden', !sidebarTerbuka);
+        }
+
+        function toggleDashboardDropdown() {
+            const submenu = document.getElementById('dashboard-submenu');
+            const arrow = document.getElementById('dashboard-arrow');
+            const btnMain = document.getElementById('btn-dashboard-main');
+            dropdownDashboardTerbuka = !dropdownDashboardTerbuka;
+            submenu.classList.toggle('hidden', !dropdownDashboardTerbuka);
+            arrow.classList.toggle('rotate-180', dropdownDashboardTerbuka);
+            btnMain.classList.toggle('text-indigo-400', dropdownDashboardTerbuka);
+        }
+
+        function toggleDbCabangDropdown() {
+            const submenu = document.getElementById('dbcabang-submenu');
+            const arrow = document.getElementById('dbcabang-arrow');
+            const btnMain = document.getElementById('btn-dbcabang-main');
+            dropdownDbCabangTerbuka = !dropdownDbCabangTerbuka;
+            submenu.classList.toggle('hidden', !dropdownDbCabangTerbuka);
+            arrow.classList.toggle('rotate-180', dropdownDbCabangTerbuka);
+            btnMain.classList.toggle('text-indigo-400', dropdownDbCabangTerbuka);
+        }
+
+        function toggleDropdownMis() {
+            const submenu = document.getElementById('mis-submenu');
+            const arrow = document.getElementById('mis-arrow');
+            const btnMain = document.getElementById('btn-mis-main');
+
+            if (statusAdminTerverifikasi) {
+                dropdownMisTerbuka = !dropdownMisTerbuka;
+                submenu.classList.toggle('hidden', !dropdownMisTerbuka);
+                arrow.classList.toggle('rotate-180', dropdownMisTerbuka);
+                btnMain.classList.toggle('text-indigo-400', dropdownMisTerbuka);
+                return;
             }
-            if(form) form.scrollIntoView({ behavior: 'smooth' });
-            alert("MODE EDIT: Silakan ubah data " + staf + " lalu klik UPDATE DATA.");
+
+            const inputPassword = prompt("Hanya MIS Yang Mengakses, Silakan Masukkan Password:");
+            if (inputPassword === null) return;
+
+            if (inputPassword === PASSWORD_ADMIN) {
+                alert("Akses diterima. Menampilkan data rahasia MIS.");
+                statusAdminTerverifikasi = true;
+                dropdownMisTerbuka = true;
+                submenu.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+                btnMain.classList.add('text-indigo-400');
+                gantiTab('mis-progres');
+            } else {
+                alert("Password Salah! Otoritas ditolak.");
+                dropdownMisTerbuka = false;
+                submenu.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+                btnMain.classList.remove('text-indigo-400');
+            }
+        }
+
+        function gantiTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            const targetContent = document.getElementById(`content-${tabId}`);
+            if (targetContent) targetContent.classList.remove('hidden');
+
+            const buttons = document.querySelectorAll('.sub-tab-btn');
+            buttons.forEach(btn => {
+                btn.className = "sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer";
+            });
+
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-indigo-400 bg-indigo-500/10 font-semibold transition-all cursor-pointer";
+            }
+
+            if (tabId === 'db-statistik-staf') {
+                hitungDanTampilkanStatistik();
+            }
+
+            if (tabId === 'db-progres-cabang') {
+                muatProgresCabangDariSheets();
+            }
+
+            // Sinkron data MIS dari server setiap kali tab MIS dibuka
+            if (tabId === 'mis-progres')  { muatProgresDariServer(); }
+            if (tabId === 'mis-ranking')  { muatRankingDariServer(); }
+            if (tabId === 'mis-info')     { muatInformasiDariServer(); }
+
+            if (sidebarTerbuka && window.innerWidth < 768) toggleSidebar();
+        }
+
+        function buatCardListStafIndividu() {
+            const container = document.getElementById('list-card-staf-individu');
+            if (!container) return;
+            
+            let htmlCard = "";
+            listStaf.forEach(staf => {
+                htmlCard += `
+                    <div onclick="muatCapaianStafMandiri('${staf}'); document.getElementById('detail-individu-staf-box').scrollIntoView({behavior: 'smooth'});" 
+                         class="cursor-pointer bg-slate-950/60 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-900 p-4 rounded-xl text-center shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 group">
+                        <div class="w-8 h-8 mx-auto mb-2 rounded-full bg-slate-900 text-slate-400 flex items-center justify-center group-hover:bg-indigo-600/20 group-hover:text-indigo-400 transition-colors">
+                            <i class="fas fa-user text-xs"></i>
+                        </div>
+                        <span class="block font-semibold text-xs text-slate-300 group-hover:text-white transition-colors truncate">${staf}</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = htmlCard;
+        }
+
+        // =========================================================================
+        // FITUR MANDIRI: SUB MENU CAPAIAN STAF (KONEKSI SPREADSHEET 'Capaian_Staf')
+        // =========================================================================
+
+        function muatCapaianStafMandiri(namaStafTarget) {
+            const urlRequest = `${"https://script.google.com/macros/s/AKfycbwdrCdSZ1Khm_sdIActhsy6g3EhutcnVXWLfoBsJrzjFYsIpncCITYBtVhmexndG8pi/exec"}?action=getCapaianStafMandiri`;
+
+            const containerGrid = document.getElementById('grid-bulan-staf-container');
+            if(containerGrid) {
+                containerGrid.innerHTML = `<p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>`;
+            }
+
+            document.getElementById('detail-individu-staf-box').classList.remove('hidden');
+            document.getElementById('detail-Capaian-box-fallback').classList.add('hidden');
+
+            fetch(urlRequest)
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status === "success") {
+                        const dataFilter = response.data.filter(item => item.namaStaf.toLowerCase() === namaStafTarget.toLowerCase());
+                        tampilkanDetailStafMandiri(namaStafTarget, dataFilter);
+                    } else {
+                        containerGrid.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat rekap data: ${response.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Koneksi Error:", error);
+                    containerGrid.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal terhubung ke web app Google Sheets.</p>`;
+                });
+        }
+
+        function tampilkanDetailStafMandiri(namaStaf, dataBulan) {
+            document.getElementById('nama-staf-terpilih-judul').innerText = namaStaf;
+            const containerGrid = document.getElementById('grid-bulan-staf-container');
+            
+            if (!dataBulan || dataBulan.length === 0) {
+                containerGrid.innerHTML = `<p class='text-slate-500 italic text-sm col-span-full text-center py-8'>Belum ada rekapitulasi data performa untuk staf ini di sheet Capaian_Staf.</p>`;
+                return;
+            }
+            
+            let htmlContent = "";
+            
+            dataBulan.forEach(item => {
+                // Variabel untuk seksi Outstanding PAR
+                const netPar = item.kenaikanPar - item.penurunanPar;
+                const warnaNetParClass = netPar <= 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold";
+                const tandaNetPar = netPar > 0 ? "+" : "";
+
+                // Variabel untuk seksi Capaian Anggota
+                const netAnggota = item.anggotaMasuk - item.anggotaKeluar;
+                const warnaNetAnggotaClass = netAnggota >= 0 ? "text-emerald-400 font-semibold" : "text-rose-400 font-semibold";
+                const tandaNetAnggota = netAnggota > 0 ? "+" : "";
+
+                htmlContent += `
+                    <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl shadow-md hover:border-slate-700 transition duration-200">
+                        <div class="flex justify-between items-center mb-3 border-b border-slate-800/60 pb-2">
+                            <span class="font-bold text-indigo-400 tracking-wide text-sm">${item.bulan}</span>
+                            <span class="text-[10px] bg-indigo-500/10 px-2 py-0.5 rounded text-indigo-300 border border-indigo-500/20 font-medium">2026</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 bg-slate-900/50 p-1.5 rounded border-l-2 border-indigo-500">Outstanding PAR</h4>
+                            <div class="space-y-1.5 text-xs px-1">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="fas fa-trending-up text-rose-400 text-[10px]"></i> Kenaikan PAR:</span>
+                                    <span class="text-rose-400 font-mono font-medium">${formatAngkaKeRupiah(item.kenaikanPar)}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 flex items-center gap-1"><i class="fas fa-trending-down text-emerald-400 text-[10px]"></i> Penurunan PAR:</span>
+                                    <span class="text-emerald-400 font-mono font-medium">${formatAngkaKeRupiah(item.penurunanPar)}</span>
+                                </div>
+ <div class="flex justify-between items-center bg-slate-900/40 p-2 rounded mt-2 border border-slate-800/50">
+     <span class="text-slate-400 font-medium">Hasil Net:</span>
+     <span class="${warnaNetParClass} font-mono">${tandaNetPar}${formatAngkaKeRupiah(netPar)}</span>
+ </div>
+                                
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 bg-slate-900/50 p-1.5 rounded border-l-2 border-cyan-500">Capaian Anggota</h4>
+                            <div class="space-y-1.5 text-xs px-1">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Masuk:</span>
+                                    <span class="text-slate-300 font-semibold">${item.anggotaMasuk} Orang</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Keluar:</span>
+                                    <span class="text-slate-300 font-semibold">${item.anggotaKeluar} Orang</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-slate-900/40 p-2 rounded mt-2 border border-slate-800/50">
+                                    <span class="text-slate-400 font-medium">Hasil Net:</span>
+                                    <span class="${warnaNetAnggotaClass} font-mono">${tandaNetAnggota}${netAnggota} Orang</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-2 border-t border-slate-800/60 flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-400 flex items-center gap-1.5">
+                                <i class="fas fa-route text-amber-500 text-[11px]"></i> Sisa Monitoring:
+                            </span>
+                            <span class="font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-mono">${item.sisaMonitoring} Tunggakan</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            containerGrid.innerHTML = htmlContent;
+        }
+
+        function tutupDetailStafIndiv() {
+            document.getElementById('detail-individu-staf-box').classList.add('hidden');
+            document.getElementById('detail-Capaian-box-fallback').classList.remove('hidden');
         }
     </script>
 </body>
