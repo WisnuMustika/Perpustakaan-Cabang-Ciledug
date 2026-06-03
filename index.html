@@ -27,7 +27,7 @@
                 Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.0.0
             </p>
             
-            <button onclick="bukaMenuUtama()" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
+            <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
                 Mulai Akses <i class="fas fa-arrow-right ml-2 text-sm"></i>
             </button>
         </div>
@@ -1049,7 +1049,8 @@
             const container = document.getElementById('container-card-laporan-harian');
             if (!container) return;
 
-            const list = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+            const list = (JSON.parse(localStorage.getItem('arr_laporan_harian')) || [])
+                .sort((a, b) => b.id - a.id); // terbaru di atas
 
             if (list.length === 0) {
                 container.innerHTML = `
@@ -1743,12 +1744,14 @@
             .catch(() => alert("⚠️ Tersimpan lokal, tapi tidak dapat terhubung ke server."));
         }
 
-        function sampleInfoPopUp(onOkCallback) {
+        function sampleInfoPopUp(onOkCallback, onReadyCallback) {
             // Langsung tampilkan dari cache lokal (instan)
             const teksCached = localStorage.getItem('sys_informasi') || "";
 
             // Fungsi untuk menampilkan pop-up dengan callback navigasi
             function tampilkanDenganCallback(teks) {
+                // Reset tombol loading sebelum menampilkan pop-up
+                if (onReadyCallback) onReadyCallback();
                 if (teks && teks.length > 0) {
                     tampilkanNotifikasiInfo(teks, onOkCallback);
                 } else {
@@ -1848,15 +1851,32 @@
             alert("Membuka Arsip Progres Cabang Bulan: " + bulan);
         }
 
-        function bukaMenuUtama() {
+        function bukaMenuUtama(btnEl) {
+            const btn = btnEl || document.getElementById('btn-mulai-akses');
+
+            // Tampilkan efek loading pada tombol
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memuat...';
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+            btn.classList.remove('hover:-translate-y-1');
+
+            // Fungsi restore tombol ke semula
+            function resetBtn() {
+                btn.disabled = false;
+                btn.innerHTML = 'Mulai Akses <i class="fas fa-arrow-right ml-2 text-sm"></i>';
+                btn.classList.remove('opacity-80', 'cursor-not-allowed');
+                btn.classList.add('hover:-translate-y-1');
+            }
+
             // Tampilkan pop-up notif dulu; navigasi ke menu dilakukan setelah OK diklik
             sampleInfoPopUp(function() {
+                resetBtn();
                 document.getElementById('landing-page').classList.add('hidden');
                 document.getElementById('main-menu-page').classList.remove('hidden');
                 dropdownDashboardTerbuka = false;
                 toggleDashboardDropdown();
                 gantiTab('progres-kemarin');
-            });
+            }, resetBtn);
         }
 
         function kembaliKeAwal() {
