@@ -978,37 +978,60 @@
         }
 
         // --- SINKRON: ambil data terbaru dari Spreadsheet ---
+        // --- Inti logik sinkron (dipakai tombol manual & auto) ---
+        function prosesDataSinkronLaporan(json) {
+            if (json.status !== "success") return false;
+            const cacheLokalList = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+            const dataServer = json.data.map(item => {
+                const tanggalNormal = normalisasiTanggal(item.tanggal);
+                const cacheLokal = cacheLokalList.find(c => String(c.id) === String(item.id));
+                return {
+                    id:        item.id,
+                    staf:      item.staf,
+                    tanggal:   tanggalNormal,
+                    naikPar:   item.naikPar,
+                    turunPar:  item.turunPar,
+                    angMasuk:  item.angMasuk,
+                    angKeluar: item.angKeluar,
+                    createdAt: item.createdAt || (cacheLokal && cacheLokal.createdAt) || null,
+                    updatedAt: item.updatedAt || (cacheLokal && cacheLokal.updatedAt) || null
+                };
+            });
+            localStorage.setItem('arr_laporan_harian', JSON.stringify(dataServer));
+            renderCardLaporanHarian();
+            return true;
+        }
+
+        // --- Auto sinkron saat tab dibuka (tanpa alert) ---
+        function autoSinkronLaporanHarian() {
+            renderCardLaporanHarian(); // tampilkan cache lokal dulu agar tidak kosong
+            const btnSinkron = document.querySelector('#content-db-laporan-harian .bg-emerald-600');
+            if (btnSinkron) {
+                btnSinkron.disabled = true;
+                btnSinkron.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-2"></i> Memuat...';
+            }
+            fetch(URL_LAPORAN_HARIAN + "?action=ambilLaporanHarian", { method: "GET", mode: "cors" })
+            .then(res => res.json())
+            .then(json => {
+                if (btnSinkron) { btnSinkron.disabled = false; btnSinkron.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data'; }
+                prosesDataSinkronLaporan(json);
+            })
+            .catch(() => {
+                if (btnSinkron) { btnSinkron.disabled = false; btnSinkron.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data'; }
+            });
+        }
+
+        // --- Tombol Sinkron Data manual (dengan alert) ---
         function sinkronDataLaporanHarian(btn) {
             btn.disabled  = true;
             btn.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-2"></i> Menyinkronkan...';
-
             fetch(URL_LAPORAN_HARIAN + "?action=ambilLaporanHarian", { method: "GET", mode: "cors" })
             .then(res => res.json())
             .then(json => {
                 btn.disabled  = false;
                 btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data';
-
-                if (json.status === "success") {
-                    const cacheLokalList = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
-                    const dataServer = json.data.map(item => {
-                        // BUG FIX 1: gunakan normalisasiTanggal() agar tidak pernah Invalid Date
-                        const tanggalNormal = normalisasiTanggal(item.tanggal);
-                        // Pertahankan timestamp lokal jika ada
-                        const cacheLokal = cacheLokalList.find(c => String(c.id) === String(item.id));
-                        return {
-                            id:        item.id,
-                            staf:      item.staf,
-                            tanggal:   tanggalNormal,
-                            naikPar:   item.naikPar,
-                            turunPar:  item.turunPar,
-                            angMasuk:  item.angMasuk,
-                            angKeluar: item.angKeluar,
-                            createdAt: item.createdAt || (cacheLokal && cacheLokal.createdAt) || null,
-                            updatedAt: item.updatedAt || (cacheLokal && cacheLokal.updatedAt) || null
-                        };
-                    });
-                    localStorage.setItem('arr_laporan_harian', JSON.stringify(dataServer));
-                    renderCardLaporanHarian();
+                const berhasil = prosesDataSinkronLaporan(json);
+                if (berhasil) {
                     alert("✅ Berhasil! Data laporan harian diperbarui.");
                 } else {
                     alert("Gagal sinkron: " + json.message);
@@ -1720,35 +1743,41 @@
             .catch(() => alert("⚠️ Tersimpan lokal, tapi tidak dapat terhubung ke server."));
         }
 
-        function sampleInfoPopUp() {
-            // Coba ambil informasi terbaru dari Spreadsheet
-            // Jika gagal, fallback ke cache lokal
+        function sampleInfoPopUp(onOkCallback) {
+            // Langsung tampilkan dari cache lokal (instan)
+            const teksCached = localStorage.getItem('sys_informasi') || "";
+
+            // Fungsi untuk menampilkan pop-up dengan callback navigasi
+            function tampilkanDenganCallback(teks) {
+                if (teks && teks.length > 0) {
+                    tampilkanNotifikasiInfo(teks, onOkCallback);
+                } else {
+                    // Tidak ada informasi → langsung jalankan callback (masuk menu)
+                    if (onOkCallback) onOkCallback();
+                }
+            }
+
+            // Update cache di background dari server, lalu tampilkan
             fetch(URL_MIS + "?action=ambilInformasi", { method: "GET", mode: "cors" })
             .then(res => res.json())
             .then(json => {
-                let teks = "";
+                let teks = teksCached;
                 if (json.status === "success" && json.data && json.data.teks) {
                     teks = json.data.teks;
                     localStorage.setItem('sys_informasi', teks); // update cache
-                } else {
-                    teks = localStorage.getItem('sys_informasi') || "";
                 }
-                if (teks && teks.length > 0) {
-                    // Tampilkan notif pop-up custom (tidak blocking UI)
-                    tampilkanNotifikasiInfo(teks);
-                }
+                tampilkanDenganCallback(teks);
                 // Isi textarea admin jika sudah terbuka
                 const ta = document.getElementById('form-info-teks');
                 if (ta) ta.value = teks;
             })
             .catch(() => {
                 // Fallback ke localStorage saat offline
-                const teks = localStorage.getItem('sys_informasi') || "";
-                if (teks && teks.length > 0) tampilkanNotifikasiInfo(teks);
+                tampilkanDenganCallback(teksCached);
             });
         }
 
-        function tampilkanNotifikasiInfo(teks) {
+        function tampilkanNotifikasiInfo(teks, onOkCallback) {
             // Buat overlay notifikasi non-blocking yang bisa di-dismiss
             const existingNotif = document.getElementById('notif-info-overlay');
             if (existingNotif) existingNotif.remove();
@@ -1760,6 +1789,12 @@
                 background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
                 display:flex; align-items:center; justify-content:center; padding:16px;
             `;
+
+            function tutupDanLanjut() {
+                overlay.remove();
+                if (onOkCallback) onOkCallback();
+            }
+
             overlay.innerHTML = `
                 <div style="background:#0f172a; border:1px solid #334155; border-radius:20px;
                             max-width:480px; width:100%; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.6);
@@ -1776,18 +1811,20 @@
                     <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;
                                 padding:14px 16px;margin-bottom:20px;color:#cbd5e1;
                                 font-size:13px;line-height:1.7;white-space:pre-wrap;">${teks}</div>
-                    <button onclick="document.getElementById('notif-info-overlay').remove()"
+                    <button id="btn-notif-ok"
                             style="width:100%;background:linear-gradient(135deg,#4f46e5,#0891b2);
                                    border:none;border-radius:12px;color:#fff;font-weight:700;
                                    font-size:14px;padding:12px;cursor:pointer;transition:opacity .2s;"
                             onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                        Ok
+                        Ok, Lanjutkan
                     </button>
                 </div>
             `;
             document.body.appendChild(overlay);
-            // Klik di luar untuk tutup
-            overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.remove(); });
+
+            // Pasang event ke tombol OK setelah di-append
+            document.getElementById('btn-notif-ok').addEventListener('click', tutupDanLanjut);
+            // Klik di luar TIDAK menutup supaya user wajib baca dulu
         }
 
         function hapusInformasi() {
@@ -1812,24 +1849,83 @@
         }
 
         function bukaMenuUtama() {
-            sampleInfoPopUp();
-            document.getElementById('landing-page').classList.add('hidden');
-            document.getElementById('main-menu-page').classList.remove('hidden');
-            dropdownDashboardTerbuka = false;
-            toggleDashboardDropdown();
-            gantiTab('progres-kemarin');
+            // Tampilkan pop-up notif dulu; navigasi ke menu dilakukan setelah OK diklik
+            sampleInfoPopUp(function() {
+                document.getElementById('landing-page').classList.add('hidden');
+                document.getElementById('main-menu-page').classList.remove('hidden');
+                dropdownDashboardTerbuka = false;
+                toggleDashboardDropdown();
+                gantiTab('progres-kemarin');
+            });
         }
 
         function kembaliKeAwal() {
-            statusAdminTerverifikasi = false;
-            dropdownMisTerbuka = false;
-            document.getElementById('mis-submenu').classList.add('hidden');
-            document.getElementById('btn-mis-main').classList.remove('text-indigo-400');
-            document.getElementById('mis-arrow').classList.remove('rotate-180');
-            
-            if(sidebarTerbuka) toggleSidebar();
-            document.getElementById('main-menu-page').classList.add('hidden');
-            document.getElementById('landing-page').classList.remove('hidden');
+            tampilkanKonfirmasiKeluar();
+        }
+
+        function tampilkanKonfirmasiKeluar() {
+            const existingModal = document.getElementById('modal-konfirmasi-keluar');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'modal-konfirmasi-keluar';
+            modal.style.cssText = `
+                position:fixed; inset:0; z-index:9999;
+                background:rgba(0,0,0,0.65); backdrop-filter:blur(4px);
+                display:flex; align-items:center; justify-content:center; padding:16px;
+            `;
+            modal.innerHTML = `
+                <div style="background:#0f172a; border:1px solid #334155; border-radius:20px;
+                            max-width:400px; width:100%; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.6);
+                            animation:fadeInScale .2s ease;">
+                    <style>@keyframes fadeInScale{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style>
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                        <div style="width:44px;height:44px;border-radius:12px;background:rgba(239,68,68,.12);
+                                    display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🚪</div>
+                        <div>
+                            <h3 style="color:#f1f5f9;font-weight:700;font-size:15px;margin:0 0 3px 0;">Keluar Sistem?</h3>
+                            <p style="color:#64748b;font-size:12px;margin:0;">Sesi aktif Anda akan diakhiri.</p>
+                        </div>
+                    </div>
+                    <p style="color:#94a3b8;font-size:13px;line-height:1.6;margin-bottom:22px;
+                              background:#1e293b;border:1px solid #334155;border-radius:12px;padding:12px 14px;">
+                        Apakah Anda yakin ingin keluar dari Sistem Internal Cabang Ciledug?
+                    </p>
+                    <div style="display:flex;gap:10px;">
+                        <button id="btn-konfirmasi-keluar-ya"
+                                style="flex:1;background:linear-gradient(135deg,#dc2626,#b91c1c);
+                                       border:none;border-radius:12px;color:#fff;font-weight:700;
+                                       font-size:13px;padding:11px;cursor:pointer;transition:opacity .2s;"
+                                onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                            <i class="fas fa-sign-out-alt" style="margin-right:6px;"></i> Ya, Keluar
+                        </button>
+                        <button id="btn-konfirmasi-keluar-tidak"
+                                style="flex:1;background:#1e293b;border:1px solid #334155;border-radius:12px;
+                                       color:#94a3b8;font-weight:600;font-size:13px;padding:11px;
+                                       cursor:pointer;transition:opacity .2s;"
+                                onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('btn-konfirmasi-keluar-ya').addEventListener('click', function() {
+                modal.remove();
+                statusAdminTerverifikasi = false;
+                dropdownMisTerbuka = false;
+                document.getElementById('mis-submenu').classList.add('hidden');
+                document.getElementById('btn-mis-main').classList.remove('text-indigo-400');
+                document.getElementById('mis-arrow').classList.remove('rotate-180');
+                if(sidebarTerbuka) toggleSidebar();
+                document.getElementById('main-menu-page').classList.add('hidden');
+                document.getElementById('landing-page').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-konfirmasi-keluar-tidak').addEventListener('click', function() {
+                modal.remove();
+            });
         }
 
         function toggleSidebar() {
@@ -1916,6 +2012,10 @@
 
             if (tabId === 'db-progres-cabang') {
                 muatProgresCabangDariSheets();
+            }
+
+            if (tabId === 'db-laporan-harian') {
+                autoSinkronLaporanHarian();
             }
 
             // Sinkron data MIS dari server setiap kali tab MIS dibuka
