@@ -302,7 +302,24 @@
             </section>
 
             <!-- SUB MENU: ISI LAPORAN HARIAN -->
-            <section id="content-db-laporan-harian" class="tab-content hidden animate-fade-in">
+            <section id="content-db-laporan-harian" class="tab-content hidden animate-fade-in relative">
+
+                <!-- Loading Overlay Fullscreen saat Auto Sinkron -->
+                <div id="loading-overlay-laporan" class="hidden absolute inset-0 z-50 bg-slate-900/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-4" style="min-height: 300px;">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                        <i class="fas fa-sync-alt fa-spin text-indigo-400 text-2xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-slate-200 font-semibold text-base">Mengambil Data Terbaru...</p>
+                        <p class="text-slate-500 text-sm mt-1">Mohon tunggu, sedang terhubung ke server</p>
+                    </div>
+                    <div class="flex gap-1.5 mt-1">
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+                    </div>
+                </div>
+
                 <header class="mb-6">
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
                         <i class="fas fa-file-invoice text-amber-400"></i> Form Isi Laporan Harian
@@ -312,7 +329,7 @@
 
                 <!-- Tombol Utama Pengendali -->
                 <div class="flex flex-wrap gap-4 mb-6">
-                    <button onclick="bukaFormLaporan()" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-950/40 transition-all flex items-center gap-2">
+                    <button id="btn-buat-laporan" onclick="bukaFormLaporan()" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-950/40 transition-all flex items-center gap-2">
                         <i class="fas fa-plus-circle"></i> Buat Laporan
                     </button>
                     <button onclick="sinkronDataLaporanHarian(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
@@ -1002,22 +1019,49 @@
             return true;
         }
 
+        // --- Helper: tampilkan / sembunyikan loading overlay laporan harian ---
+        function setLoadingLaporanHarian(aktif) {
+            const overlay    = document.getElementById('loading-overlay-laporan');
+            const btnBuat    = document.getElementById('btn-buat-laporan');
+            const btnSinkron = document.querySelector('#content-db-laporan-harian button.bg-emerald-600');
+
+            if (aktif) {
+                if (overlay) overlay.classList.remove('hidden');
+                if (btnBuat) {
+                    btnBuat.disabled = true;
+                    btnBuat.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    btnBuat.classList.remove('hover:bg-indigo-500', 'cursor-pointer');
+                }
+                if (btnSinkron) {
+                    btnSinkron.disabled = true;
+                    btnSinkron.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-2"></i> Memuat...';
+                }
+            } else {
+                if (overlay) overlay.classList.add('hidden');
+                if (btnBuat) {
+                    btnBuat.disabled = false;
+                    btnBuat.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    btnBuat.classList.add('hover:bg-indigo-500', 'cursor-pointer');
+                }
+                if (btnSinkron) {
+                    btnSinkron.disabled = false;
+                    btnSinkron.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data';
+                }
+            }
+        }
+
         // --- Auto sinkron saat tab dibuka (tanpa alert) ---
         function autoSinkronLaporanHarian() {
             renderCardLaporanHarian(); // tampilkan cache lokal dulu agar tidak kosong
-            const btnSinkron = document.querySelector('#content-db-laporan-harian .bg-emerald-600');
-            if (btnSinkron) {
-                btnSinkron.disabled = true;
-                btnSinkron.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-2"></i> Memuat...';
-            }
+            setLoadingLaporanHarian(true);
             fetch(URL_LAPORAN_HARIAN + "?action=ambilLaporanHarian", { method: "GET", mode: "cors" })
             .then(res => res.json())
             .then(json => {
-                if (btnSinkron) { btnSinkron.disabled = false; btnSinkron.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data'; }
+                setLoadingLaporanHarian(false);
                 prosesDataSinkronLaporan(json);
             })
             .catch(() => {
-                if (btnSinkron) { btnSinkron.disabled = false; btnSinkron.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sinkron Data'; }
+                setLoadingLaporanHarian(false);
             });
         }
 
