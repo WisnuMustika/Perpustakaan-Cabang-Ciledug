@@ -1117,11 +1117,12 @@
                 const warnaAng   = netAnggota >= 0 ? "text-emerald-400" : "text-rose-400";
                 const tandaAng   = netAnggota > 0 ? "+" : "";
 
-                // BUG FIX 1: gunakan normalisasiTanggal() yang robust
-                const tanggalNorm = normalisasiTanggal(item.tanggal);
-                const tglObj    = tanggalNorm ? new Date(tanggalNorm + "T00:00:00") : null;
-                const tglTampil = (tglObj && !isNaN(tglObj))
-                    ? tglObj.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
+                // Tanggal header: prioritaskan createdAt, fallback ke item.tanggal
+                const tglHeaderObj = item.createdAt
+                    ? new Date(item.createdAt)
+                    : (() => { const n = normalisasiTanggal(item.tanggal); return n ? new Date(n + "T00:00:00") : null; })();
+                const tglTampil = (tglHeaderObj && !isNaN(tglHeaderObj))
+                    ? tglHeaderObj.toLocaleDateString('id-ID', { weekday:'short', day:'numeric', month:'short', year:'numeric' })
                     : (item.tanggal || "-");
 
                 html += `
