@@ -1110,9 +1110,9 @@
 
             let html = "";
             list.forEach(item => {
-                const netPar     = item.turunPar - item.naikPar;
+                const netPar     = item.naikPar - item.turunPar;
                 const netAnggota = item.angMasuk - item.angKeluar;
-                const warnaPar   = netPar >= 0 ? "text-emerald-400" : "text-rose-400";
+                const warnaPar   = netPar <= 0 ? "text-emerald-400" : "text-rose-400";
                 const tandaPar   = netPar > 0 ? "+" : "";
                 const warnaAng   = netAnggota >= 0 ? "text-emerald-400" : "text-rose-400";
                 const tandaAng   = netAnggota > 0 ? "+" : "";
