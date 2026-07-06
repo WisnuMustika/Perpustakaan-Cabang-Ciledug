@@ -24,7 +24,10 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.1.0 | Last Update : 20 Juni 2026 : Perbaiki Logika atau Fungsi Hasil Akhir Di Menu Laporan
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.0 | Last Update : 05 Juli 2026 :
+                1.Menu Baru.
+                2.Detail Double Pinjaman Bisa Di Lihat.
+                3.Warning Di Isi Laporan
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -99,6 +102,9 @@
                             </button>
                             <button onclick="gantiTab('db-laporan-harian')" id="btn-db-laporan-harian" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-file-invoice text-[10px] w-4 text-center"></i> Isi Laporan Harian
+                            </button>
+                            <button onclick="gantiTab('db-monitoring-staf')" id="btn-db-monitoring-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-binoculars text-[10px] w-4 text-center"></i> Monitoring By Staf
                             </button>
                         </div>
                     </div>
@@ -408,6 +414,21 @@
                 </div>
             </section>
 
+            <!-- SUB MENU: MONITORING BY STAF -->
+            <section id="content-db-monitoring-staf" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
+                    </h2>
+                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (akumulasi Januari - Desember)</p>
+                </header>
+
+                <div id="container-monitoring-staf" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>
+                </div>
+            </section>
+
+
             <section id="content-mis-progres" class="tab-content hidden animate-fade-in">
                 <header class="mb-6 border-b border-slate-800 pb-4">
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
@@ -544,6 +565,30 @@
         </main>
     </div>
 
+    <!-- MODAL: Detail Double Pinjaman -->
+    <div id="modal-double-pinjaman" class="hidden fixed inset-0 z-[999] flex items-end sm:items-center justify-center" style="background:rgba(2,6,23,0.80);backdrop-filter:blur(6px);" onclick="tutupModalDouble(event)">
+        <div class="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+            <!-- Header modal -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                        <i class="fas fa-clone text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-double-judul" class="font-bold text-slate-100 text-sm">Double Pinjaman</h3>
+                        <p class="text-[11px] text-slate-500">Anggota dengan nomor ID yang sama</p>
+                    </div>
+                </div>
+                <button onclick="tutupModalDouble()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all cursor-pointer">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            <!-- Body modal: list anggota -->
+            <div id="modal-double-body" class="overflow-y-auto px-5 py-4 space-y-3 flex-1">
+            </div>
+        </div>
+    </div>
+
     <script>
         const URL_WEB_APP_GS = "https://script.google.com/macros/s/AKfycbyYbzfLx2UQF874wmHYlAcW0b-P8FjQMQ212YwEBUkfL09_yipPwpMAjj_6y1BYkbIhOA/exec"; 
         const URL_PROGRES_BULANAN_MANDIRI = "https://script.google.com/macros/s/AKfycbwci2_fXzVwlDDIh5QUzG_xFS3wcP-nuu12PQ6SISVWBFLAx0T0DeLzAPhoKJKeb_1rHA/exec";
@@ -567,6 +612,7 @@
         ];
 
         let databaseAnggotaPar = [];
+        let dataDoublePerStaf = {};   // global: detail anggota double pinjaman per staf
 
         const defaultProgresList = [
             { id: 1, tipe: "naik", nama: "Casdi", an: "Ibu Siti Aminah", ctr: "CTR-04B", nom: "Rp 2.450.000", status: "tidak" },
@@ -735,6 +781,7 @@
 
         // --- Buka form untuk membuat laporan BARU ---
         function bukaFormLaporan() {
+            alert("PERHATIAN !!!\n\nSAAT ISI LAPORAN, CUKUP MASUKAN ANGKA SAJA.\n\nTANPA SIMBOL +/- DI DEPAN ANGKA.\nATAU PUN\nTANPA TANDA ./, DI ANTARA ANGKA.");
             document.getElementById('form-container-laporan').classList.remove('hidden');
             document.getElementById('judul-form-laporan').innerText = "Formulir Laporan Baru";
             document.getElementById('warning-laporan-kosong').classList.add('hidden');
@@ -1232,7 +1279,7 @@
 
             const mapIdentitasAnggota = {};
             databaseAnggotaPar.forEach(item => {
-                const key = (item.id + "|||" + item.nama).toLowerCase().trim();
+                const key = String(item.id).toLowerCase().trim();
                 if (!mapIdentitasAnggota[key]) {
                     mapIdentitasAnggota[key] = 0;
                 }
@@ -1240,6 +1287,7 @@
             });
 
             const dataStatistikStaf = {};
+            dataDoublePerStaf = {};   // reset global setiap kali hitung ulang
             listStaf.forEach(staf => {
                 dataStatistikStaf[staf] = {
                     totalAnggota: 0,
@@ -1249,6 +1297,7 @@
                     totalTunggakan: 0,
                     sudahDihitungDouble: new Set()
                 };
+                dataDoublePerStaf[staf] = [];   // array detail anggota double
             });
 
             databaseAnggotaPar.forEach(item => {
@@ -1272,12 +1321,14 @@
                         stats.parTpk++;
                     }
 
-                    const keyIdentitas = (item.id + "|||" + item.nama).toLowerCase().trim();
+                    const keyIdentitas = String(item.id).toLowerCase().trim();
                     if (mapIdentitasAnggota[keyIdentitas] > 1) {
                         if (!stats.sudahDihitungDouble.has(keyIdentitas)) {
                             stats.doublePinjaman++;
                             stats.sudahDihitungDouble.add(keyIdentitas);
                         }
+                        // Kumpulkan semua baris anggota double (termasuk duplikatnya)
+                        dataDoublePerStaf[stafDitemukan].push(item);
                     }
 
                     stats.totalPinjaman += parseRupiahKeAngka(item.totalPinj);
@@ -1312,8 +1363,11 @@
                                 <span class="text-slate-400 block mb-0.5">PAR di TPK</span>
                                 <span class="text-base font-extrabold text-amber-400">${s.parTpk} <span class="text-[10px] font-normal text-slate-500">Anggota</span></span>
                             </div>
-                            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-900 col-span-2">
-                                <span class="text-slate-400 block mb-0.5">Double Pinjaman</span>
+                            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-900 col-span-2 ${s.doublePinjaman > 0 ? 'cursor-pointer hover:border-rose-500/40 hover:bg-rose-500/5 transition-all active:scale-[0.98]' : ''}" ${s.doublePinjaman > 0 ? `onclick="bukaModalDouble('${staf}')"` : ''}>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400 block mb-0.5">Double Pinjaman</span>
+                                    ${s.doublePinjaman > 0 ? `<span class="text-[10px] text-rose-400 flex items-center gap-1"><i class="fas fa-chevron-right"></i> Lihat Detail</span>` : ''}
+                                </div>
                                 <span class="text-base font-extrabold text-rose-400 flex items-center gap-1.5">
                                     <i class="fas fa-clone text-xs opacity-60"></i> ${s.doublePinjaman} <span class="text-[10px] font-normal text-slate-500">Anggota Terdeteksi</span>
                                 </span>
@@ -2086,6 +2140,10 @@
                 autoSinkronLaporanHarian();
             }
 
+            if (tabId === 'db-monitoring-staf') {
+                muatMonitoringByStaf();
+            }
+
             // Sinkron data MIS dari server setiap kali tab MIS dibuka
             if (tabId === 'mis-progres')  { muatProgresDariServer(); }
             if (tabId === 'mis-ranking')  { muatRankingDariServer(); }
@@ -2227,6 +2285,136 @@
             document.getElementById('detail-individu-staf-box').classList.add('hidden');
             document.getElementById('detail-Capaian-box-fallback').classList.remove('hidden');
         }
+
+        // =========================================================================
+        // MODAL DETAIL DOUBLE PINJAMAN
+        // =========================================================================
+
+        function bukaModalDouble(namaStaf) {
+            const data = dataDoublePerStaf[namaStaf] || [];
+            const modal = document.getElementById('modal-double-pinjaman');
+            const body  = document.getElementById('modal-double-body');
+            document.getElementById('modal-double-judul').innerText = `Double Pinjaman — ${namaStaf}`;
+
+            if (data.length === 0) {
+                body.innerHTML = `<p class="text-slate-500 text-sm italic text-center py-6">Tidak ada data double pinjaman untuk staf ini.</p>`;
+            } else {
+                // Kelompokkan per ID agar duplikat tampil berdekatan
+                const grupById = {};
+                data.forEach(item => {
+                    const key = String(item.id).toLowerCase().trim();
+                    if (!grupById[key]) grupById[key] = [];
+                    grupById[key].push(item);
+                });
+
+                let html = "";
+                Object.values(grupById).forEach(grup => {
+                    html += `
+                        <div class="bg-slate-950/60 border border-rose-500/20 rounded-xl overflow-hidden">
+                            <div class="bg-rose-500/10 px-4 py-2 flex items-center gap-2">
+                                <i class="fas fa-id-card text-rose-400 text-xs"></i>
+                                <span class="text-xs font-bold text-rose-300 font-mono">ID: ${grup[0].id}</span>
+                                <span class="ml-auto text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded border border-rose-500/30">${grup.length}x pinjaman</span>
+                            </div>
+                            <div class="divide-y divide-slate-800/60">
+                                ${grup.map(item => `
+                                <div class="px-4 py-3 space-y-1.5 text-xs">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Nama</span>
+                                        <span class="font-semibold text-slate-200">${item.nama}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Center</span>
+                                        <span class="font-mono text-indigo-400">${item.center}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">No. Pinjaman</span>
+                                        <span class="font-mono text-slate-300">${item.noPinj}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Total Pinjaman</span>
+                                        <span class="font-bold text-slate-300">${item.totalPinj}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Total Tunggakan</span>
+                                        <span class="font-bold text-rose-400">${item.totalTung}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Tipe</span>
+                                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded">${item.tipe}</span>
+                                    </div>
+                                </div>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                body.innerHTML = html;
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function tutupModalDouble(event) {
+            if (event && event.target !== document.getElementById('modal-double-pinjaman')) return;
+            document.getElementById('modal-double-pinjaman').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+
+        // =========================================================================
+        // FITUR MANDIRI: SUB MENU MONITORING BY STAF (TOTAL SISA TUNGGAKAN JAN-DES)
+        // =========================================================================
+
+        function muatMonitoringByStaf() {
+            const urlRequest = `${"https://script.google.com/macros/s/AKfycbwdrCdSZ1Khm_sdIActhsy6g3EhutcnVXWLfoBsJrzjFYsIpncCITYBtVhmexndG8pi/exec"}?action=getCapaianStafMandiri`;
+            const container = document.getElementById('container-monitoring-staf');
+
+            container.innerHTML = `<p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>`;
+
+            fetch(urlRequest)
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status === "success") {
+                        tampilkanMonitoringByStaf(response.data);
+                    } else {
+                        container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data monitoring: ${response.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Koneksi Error:", error);
+                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal terhubung ke web app Google Sheets.</p>`;
+                });
+        }
+
+        function tampilkanMonitoringByStaf(dataSemua) {
+            const container = document.getElementById('container-monitoring-staf');
+            let htmlCard = "";
+
+            listStaf.forEach(staf => {
+                // Ambil semua data Januari - Desember milik staf ini lalu totalkan sisa tunggakannya
+                const dataStaf = (dataSemua || []).filter(item => item.namaStaf.toLowerCase() === staf.toLowerCase());
+                const totalTunggakan = dataStaf.reduce((acc, item) => acc + (Number(item.sisaMonitoring) || 0), 0);
+
+                htmlCard += `
+                    <div class="bg-slate-950/60 border border-slate-800 hover:border-amber-500/40 p-4 rounded-2xl shadow-md transition-all">
+                        <div class="flex items-center gap-3 mb-3 border-b border-slate-800/60 pb-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-100 text-sm truncate">${staf}</h3>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                            <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
+                            <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlCard || `<p class="text-slate-500 italic text-sm col-span-full text-center py-8">Belum ada data staf.</p>`;
+        }
+
     </script>
 </body>
 </html>
