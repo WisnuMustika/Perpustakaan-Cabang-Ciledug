@@ -24,10 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.0 | Last Update : 05 Juli 2026 :
-                1.Menu Baru.
-                2.Detail Double Pinjaman Bisa Di Lihat.
-                3.Warning Di Isi Laporan
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.1 | Last Update : 08 Juli 2026 : Hasil Akhir Di Statistik Par Per Staf dan Monitoring Per Staf
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -251,6 +248,34 @@
                     </button>
                 </div>
 
+                <!-- Ringkasan Total Keseluruhan -->
+                <div id="ringkasan-statistik-total" class="hidden mb-6 grid grid-cols-3 gap-3">
+                    <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3 text-center">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-users text-xs"></i>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight mb-1">Total Anggota PAR</p>
+                        <p id="total-anggota-par-bersih" class="text-xl font-extrabold text-emerald-400">0</p>
+                        <p class="text-[9px] text-slate-500 mt-0.5">(PAR - Double)</p>
+                    </div>
+                    <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3 text-center">
+                        <div class="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-clone text-xs"></i>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight mb-1">Total Double Pinjaman</p>
+                        <p id="total-double-pinjaman" class="text-xl font-extrabold text-rose-400">0</p>
+                        <p class="text-[9px] text-slate-500 mt-0.5">Anggota</p>
+                    </div>
+                    <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-3 text-center">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center mx-auto mb-2">
+                            <i class="fas fa-exclamation-triangle text-xs"></i>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight mb-1">Total PAR di TPK</p>
+                        <p id="total-par-tpk" class="text-xl font-extrabold text-amber-400">0</p>
+                        <p class="text-[9px] text-slate-500 mt-0.5">Anggota</p>
+                    </div>
+                </div>
+
                 <div id="container-card-statistik-staf" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <p class="text-slate-400 italic text-sm text-center py-8 col-span-full">Memuat indikator data and statistik per staf...</p>
                 </div>
@@ -421,6 +446,12 @@
                         <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
                     </h2>
                     <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (akumulasi Januari - Desember)</p>
+                    <div id="total-keseluruhan-monitoring" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
+                        <i class="fas fa-calculator text-amber-400 text-sm"></i>
+                        <span class="text-sm text-slate-300">Total Keseluruhan Semua Staf:</span>
+                        <span id="angka-total-monitoring" class="font-mono font-extrabold text-amber-400 text-base tracking-wide"></span>
+                        <span class="text-xs text-slate-500">tunggakan</span>
+                    </div>
                 </header>
 
                 <div id="container-monitoring-staf" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -1388,6 +1419,22 @@
             });
 
             container.innerHTML = htmlCard;
+
+            // Hitung grand total semua staf
+            let grandTotalAnggota = 0;
+            let grandTotalDouble  = 0;
+            let grandTotalTpk     = 0;
+            listStaf.forEach(staf => {
+                const s = dataStatistikStaf[staf];
+                if (!s) return;
+                grandTotalAnggota += (s.totalAnggota - s.doublePinjaman);
+                grandTotalDouble  += s.doublePinjaman;
+                grandTotalTpk     += s.parTpk;
+            });
+            document.getElementById('total-anggota-par-bersih').textContent = grandTotalAnggota;
+            document.getElementById('total-double-pinjaman').textContent    = grandTotalDouble;
+            document.getElementById('total-par-tpk').textContent            = grandTotalTpk;
+            document.getElementById('ringkasan-statistik-total').classList.remove('hidden');
 
             if (infoTarget) {
                 setTimeout(() => {
@@ -2390,11 +2437,13 @@
         function tampilkanMonitoringByStaf(dataSemua) {
             const container = document.getElementById('container-monitoring-staf');
             let htmlCard = "";
+            let grandTotal = 0;
 
             listStaf.forEach(staf => {
                 // Ambil semua data Januari - Desember milik staf ini lalu totalkan sisa tunggakannya
                 const dataStaf = (dataSemua || []).filter(item => item.namaStaf.toLowerCase() === staf.toLowerCase());
                 const totalTunggakan = dataStaf.reduce((acc, item) => acc + (Number(item.sisaMonitoring) || 0), 0);
+                grandTotal += totalTunggakan;
 
                 htmlCard += `
                     <div class="bg-slate-950/60 border border-slate-800 hover:border-amber-500/40 p-4 rounded-2xl shadow-md transition-all">
@@ -2413,6 +2462,12 @@
             });
 
             container.innerHTML = htmlCard || `<p class="text-slate-500 italic text-sm col-span-full text-center py-8">Belum ada data staf.</p>`;
+
+            // Tampilkan total keseluruhan
+            const elTotal = document.getElementById('total-keseluruhan-monitoring');
+            const elAngka = document.getElementById('angka-total-monitoring');
+            elAngka.textContent = grandTotal.toLocaleString('id-ID');
+            elTotal.classList.remove('hidden');
         }
 
     </script>
