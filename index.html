@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.1 | Last Update : 08 Juli 2026 : Hasil Akhir Di Statistik Par Per Staf dan Monitoring Per Staf
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.2 | Last Update : 14 Juli 2026 : Menampilkan Data Anggota Yang Belum Di Monitoring
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -122,6 +122,9 @@
                             </button>
                             <button onclick="gantiTab('mis-info')" id="btn-mis-info" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-bell text-[10px] w-4 text-center"></i> Update Information
+                            </button>
+                            <button onclick="gantiTab('mis-belum-monitoring')" id="btn-mis-belum-monitoring" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-clipboard-list text-[10px] w-4 text-center"></i> Data Belum Dimonitoring
                             </button>
                         </div>
                     </div>
@@ -445,7 +448,7 @@
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
                         <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
                     </h2>
-                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (akumulasi Januari - Desember)</p>
+                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Dari Januari 2026 sampai dengan Desember 2026)</p>
                     <div id="total-keseluruhan-monitoring" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
                         <i class="fas fa-calculator text-amber-400 text-sm"></i>
                         <span class="text-sm text-slate-300">Total Keseluruhan Semua Staf:</span>
@@ -593,6 +596,68 @@
                 </div>
             </section>
 
+            <section id="content-mis-belum-monitoring" class="tab-content hidden animate-fade-in">
+                <header class="mb-6 border-b border-slate-800 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-clipboard-list text-rose-400"></i> Data Belum Dimonitoring
+                    </h2>
+                    <p class="text-slate-400 text-sm">Daftar pinjaman cair yang belum dilakukan monitoring oleh staf lapang.</p>
+                </header>
+
+                <!-- Panel Pengaturan Link Mandiri -->
+                <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800 mb-6">
+                    <h3 class="text-slate-200 font-bold mb-3 flex items-center gap-2 text-sm">
+                        <i class="fas fa-link text-cyan-400"></i> Pengaturan Link Spreadsheet Mandiri
+                    </h3>
+                    <p class="text-slate-500 text-xs mb-3">Tempelkan URL Web App (hasil Deploy Google Apps Script) dari Spreadsheet "Data Belum Dimonitoring" milik Anda sendiri. Link akan tersimpan di perangkat ini.</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input id="input-link-belum-monitoring" type="text" placeholder="https://script.google.com/macros/s/xxxxxxxx/exec" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-indigo-500">
+                        <button onclick="simpanLinkBelumMonitoring()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs cursor-pointer transition-all shadow-md whitespace-nowrap">
+                            <i class="fas fa-save mr-1"></i> Simpan Link
+                        </button>
+                        <button onclick="hapusLinkBelumMonitoring()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 font-medium px-4 py-2 rounded-lg text-xs cursor-pointer transition-all whitespace-nowrap">
+                            <i class="fas fa-times mr-1"></i> Hapus
+                        </button>
+                    </div>
+                    <p id="status-link-belum-monitoring" class="text-[11px] text-slate-500 mt-2"></p>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <button onclick="sinkronBelumMonitoring(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
+                            <i class="fas fa-sync-alt"></i> Sinkron Server
+                        </button>
+                    </div>
+                    <div class="max-w-md relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fas fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="cari-belum-monitoring" onkeyup="cariBelumMonitoring()" placeholder="Cari berdasarkan nama, id, no pinjaman, center, atau staf..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/40 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse whitespace-nowrap text-xs md:text-sm">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-300 font-semibold border-b border-slate-800 tracking-wide">
+                                    <th class="py-3.5 px-4 text-center">No</th>
+                                    <th class="py-3.5 px-4">Id</th>
+                                    <th class="py-3.5 px-4">No Pinjaman</th>
+                                    <th class="py-3.5 px-4">Nama Anggota</th>
+                                    <th class="py-3.5 px-4">Kode Center</th>
+                                    <th class="py-3.5 px-4">Tanggal Cair</th>
+                                    <th class="py-3.5 px-4">Nama Staf</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-belum-monitoring" class="divide-y divide-slate-900 text-slate-300">
+                                <tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Belum ada data. Klik "Sinkron Server" untuk memuat data.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -616,6 +681,28 @@
             </div>
             <!-- Body modal: list anggota -->
             <div id="modal-double-body" class="overflow-y-auto px-5 py-4 space-y-3 flex-1">
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Data Belum Dimonitoring Per Staf -->
+    <div id="modal-belum-monitoring-staf" class="hidden fixed inset-0 z-[999] flex items-end sm:items-center justify-center" style="background:rgba(2,6,23,0.80);backdrop-filter:blur(6px);" onclick="tutupModalBelumMonitoringStaf(event)">
+        <div class="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-belum-monitoring-judul" class="font-bold text-slate-100 text-sm">Belum Dimonitoring</h3>
+                        <p class="text-[11px] text-slate-500">Daftar anggota yang belum dimonitoring</p>
+                    </div>
+                </div>
+                <button onclick="tutupModalBelumMonitoringStaf()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all cursor-pointer">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            <div id="modal-belum-monitoring-body" class="overflow-y-auto px-5 py-4 space-y-3 flex-1">
             </div>
         </div>
     </div>
@@ -2195,6 +2282,11 @@
             if (tabId === 'mis-progres')  { muatProgresDariServer(); }
             if (tabId === 'mis-ranking')  { muatRankingDariServer(); }
             if (tabId === 'mis-info')     { muatInformasiDariServer(); }
+            if (tabId === 'mis-belum-monitoring') {
+                inisialisasiLinkBelumMonitoring();
+                sinkronBelumMonitoring(null, stafFilterTargetBelumMonitoring);
+                stafFilterTargetBelumMonitoring = null;
+            }
 
             if (sidebarTerbuka && window.innerWidth < 768) toggleSidebar();
         }
@@ -2413,6 +2505,73 @@
         // FITUR MANDIRI: SUB MENU MONITORING BY STAF (TOTAL SISA TUNGGAKAN JAN-DES)
         // =========================================================================
 
+        // Diklik dari tombol "Lihat Data Belum Dimonitoring" pada card staf
+        // Menampilkan langsung daftar nama anggota dalam modal (data diambil dari
+        // link spreadsheet mandiri yang sama dengan sub menu Data Belum Dimonitoring)
+        function bukaModalBelumMonitoringStaf(namaStaf) {
+            const url = localStorage.getItem(KEY_LINK_BELUM_MONITORING);
+            const modal = document.getElementById('modal-belum-monitoring-staf');
+            const judul = document.getElementById('modal-belum-monitoring-judul');
+            const body = document.getElementById('modal-belum-monitoring-body');
+
+            judul.textContent = `Belum Dimonitoring — ${namaStaf}`;
+
+            if (!url) {
+                body.innerHTML = `<p class="text-amber-400 text-sm text-center py-8">Data Base Masih Kosong, Silahkan Hubungi MIS Untuk Menampilkan Data</p>`;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+
+            body.innerHTML = `<p class="text-slate-400 italic text-sm text-center py-8"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat data...</p>`;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            ambilDataBelumMonitoringDariServer()
+                .then(data => {
+                    const hasilFilter = (data || []).filter(item =>
+                        String(item.namaStaf || "").toLowerCase().trim() === namaStaf.toLowerCase().trim()
+                    );
+                    renderModalBelumMonitoringStaf(hasilFilter);
+                })
+                .catch(error => {
+                    body.innerHTML = `<p class="text-rose-400 text-sm text-center py-8">Gagal memuat data: ${error.message}</p>`;
+                });
+        }
+
+        function renderModalBelumMonitoringStaf(list) {
+            const body = document.getElementById('modal-belum-monitoring-body');
+
+            if (!list || list.length === 0) {
+                body.innerHTML = `<p class="text-slate-500 italic text-sm text-center py-8">🎉 Tidak ada data belum dimonitoring untuk staf ini.</p>`;
+                return;
+            }
+
+            let html = `<p class="text-xs text-slate-400 mb-3">${list.length} anggota belum dimonitoring:</p><div class="space-y-2">`;
+            list.forEach((item, idx) => {
+                html += `
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+                        <div class="flex items-start justify-between gap-2 mb-1.5">
+                            <span class="font-bold text-slate-100 text-sm">${idx + 1}. ${item.namaAnggota || "-"}</span>
+                            <span class="bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-mono font-bold text-[11px] shrink-0">${item.kodeCenter || "-"}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-400">
+                            <div>Id: <span class="text-slate-300 font-mono">${item.id || "-"}</span></div>
+                            <div>No Pinjaman: <span class="text-slate-300 font-mono">${item.noPinjaman || "-"}</span></div>
+                            <div class="col-span-2">Tanggal Cair: <span class="text-slate-300">${formatTglCairBelumMonitoring(item.tanggalCair)}</span></div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div>`;
+            body.innerHTML = html;
+        }
+
+        function tutupModalBelumMonitoringStaf(event) {
+            if (event && event.target !== document.getElementById('modal-belum-monitoring-staf')) return;
+            document.getElementById('modal-belum-monitoring-staf').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
         function muatMonitoringByStaf() {
             const urlRequest = `${"https://script.google.com/macros/s/AKfycbwdrCdSZ1Khm_sdIActhsy6g3EhutcnVXWLfoBsJrzjFYsIpncCITYBtVhmexndG8pi/exec"}?action=getCapaianStafMandiri`;
             const container = document.getElementById('container-monitoring-staf');
@@ -2457,6 +2616,9 @@
                             <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
                             <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
                         </div>
+                        <button onclick="bukaModalBelumMonitoringStaf('${staf}')" class="w-full mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 py-2 rounded-lg cursor-pointer transition-all">
+                            <i class="fas fa-eye"></i> Lihat Data Belum Dimonitoring
+                        </button>
                     </div>
                 `;
             });
@@ -2468,6 +2630,153 @@
             const elAngka = document.getElementById('angka-total-monitoring');
             elAngka.textContent = grandTotal.toLocaleString('id-ID');
             elTotal.classList.remove('hidden');
+        }
+
+        // =========================================================================
+        // FITUR MANDIRI: SUB MENU DATA BELUM DIMONITORING (SPREADSHEET TERPISAH)
+        // =========================================================================
+        const KEY_LINK_BELUM_MONITORING = 'url_belum_monitoring_mandiri';
+        let databaseBelumMonitoring = [];
+        let stafFilterTargetBelumMonitoring = null;
+
+        // Muat link tersimpan (localStorage) ke kolom input saat tab dibuka
+        function inisialisasiLinkBelumMonitoring() {
+            const input = document.getElementById('input-link-belum-monitoring');
+            const status = document.getElementById('status-link-belum-monitoring');
+            const savedUrl = localStorage.getItem(KEY_LINK_BELUM_MONITORING) || "";
+            if (input) input.value = savedUrl;
+            if (status) {
+                status.textContent = savedUrl
+                    ? "✅ Link tersimpan di perangkat ini."
+                    : "⚠️ Belum ada link tersimpan. Masukkan URL Web App GAS Anda lalu klik Simpan Link.";
+            }
+        }
+
+        // Simpan link mandiri (URL Web App GAS) ke localStorage
+        function simpanLinkBelumMonitoring() {
+            const input = document.getElementById('input-link-belum-monitoring');
+            const url = (input.value || "").trim();
+            if (!url.startsWith("https://script.google.com/")) {
+                alert("URL tidak valid. Pastikan Anda menempel URL hasil Deploy Web App Google Apps Script (diawali https://script.google.com/).");
+                return;
+            }
+            localStorage.setItem(KEY_LINK_BELUM_MONITORING, url);
+            document.getElementById('status-link-belum-monitoring').textContent = "✅ Link tersimpan di perangkat ini.";
+            alert("✅ Link berhasil disimpan! Silakan klik 'Sinkron Server' untuk memuat data.");
+            sinkronBelumMonitoring();
+        }
+
+        // Hapus link mandiri yang tersimpan
+        function hapusLinkBelumMonitoring() {
+            if (!confirm("Hapus link spreadsheet mandiri yang tersimpan di perangkat ini?")) return;
+            localStorage.removeItem(KEY_LINK_BELUM_MONITORING);
+            document.getElementById('input-link-belum-monitoring').value = "";
+            document.getElementById('status-link-belum-monitoring').textContent = "⚠️ Belum ada link tersimpan. Masukkan URL Web App GAS Anda lalu klik Simpan Link.";
+            databaseBelumMonitoring = [];
+            document.getElementById('tbody-belum-monitoring').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Belum ada data. Klik "Sinkron Server" untuk memuat data.</td></tr>`;
+        }
+
+        // Format tanggal cair (menangani ISO string ataupun serial number dari Google Sheets)
+        function formatTglCairBelumMonitoring(value) {
+            if (!value && value !== 0) return "-";
+            let dateObj = null;
+            if (typeof value === "number") {
+                // Serial number Google Sheets (basis 30 Des 1899)
+                dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
+            } else {
+                dateObj = new Date(value);
+            }
+            if (isNaN(dateObj.getTime())) return String(value);
+            return dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // Helper inti: ambil data dari spreadsheet mandiri via URL yang tersimpan (return Promise)
+        function ambilDataBelumMonitoringDariServer() {
+            const url = localStorage.getItem(KEY_LINK_BELUM_MONITORING);
+            if (!url) return Promise.reject(new Error("Link Spreadsheet Mandiri belum diatur."));
+
+            return fetch(`${url}?action=getBelumMonitoring`, { method: "GET", mode: "cors" })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        databaseBelumMonitoring = result.data || [];
+                        return databaseBelumMonitoring;
+                    }
+                    throw new Error(result.message || "Gagal memuat data.");
+                });
+        }
+
+        // Dipakai oleh tombol "Sinkron Server" pada tab Data Belum Dimonitoring
+        function sinkronBelumMonitoring(btn, stafFilter) {
+            const tbody = document.getElementById('tbody-belum-monitoring');
+
+            if (!localStorage.getItem(KEY_LINK_BELUM_MONITORING)) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-amber-400 italic">Silakan masukkan & simpan Link Spreadsheet Mandiri terlebih dahulu di atas.</td></tr>`;
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-sync-alt animate-spin mr-2"></i> Menyinkronkan...`;
+            }
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 italic"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</td></tr>`;
+
+            ambilDataBelumMonitoringDariServer()
+                .then(data => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-sync-alt"></i> Sinkron Server`;
+                    }
+                    if (stafFilter) {
+                        const kolomCari = document.getElementById('cari-belum-monitoring');
+                        if (kolomCari) kolomCari.value = stafFilter;
+                        cariBelumMonitoring();
+                    } else {
+                        tampilkanBelumMonitoring(data);
+                    }
+                })
+                .catch(error => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-sync-alt"></i> Sinkron Server`;
+                    }
+                    console.error("Error:", error);
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-rose-400 font-medium">Gagal memuat data. Periksa kembali Link Spreadsheet Mandiri Anda.</td></tr>`;
+                });
+        }
+
+        function tampilkanBelumMonitoring(dataArray) {
+            const tbody = document.getElementById('tbody-belum-monitoring');
+            if (!dataArray || dataArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Tidak ada data belum dimonitoring. 🎉</td></tr>`;
+                return;
+            }
+            let html = "";
+            dataArray.forEach((item, idx) => {
+                html += `
+                    <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-900/40">
+                        <td class="py-3 px-4 text-center text-slate-500">${idx + 1}</td>
+                        <td class="py-3 px-4 font-mono">${item.id ?? "-"}</td>
+                        <td class="py-3 px-4 font-mono font-bold text-slate-300">${item.noPinjaman ?? "-"}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-200">${item.namaAnggota ?? "-"}</td>
+                        <td class="py-3 px-4"><span class="bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-mono font-bold">${item.kodeCenter ?? "-"}</span></td>
+                        <td class="py-3 px-4 text-slate-300">${formatTglCairBelumMonitoring(item.tanggalCair)}</td>
+                        <td class="py-3 px-4 font-medium text-amber-400">${item.namaStaf ?? "-"}</td>
+                    </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function cariBelumMonitoring() {
+            const keyword = document.getElementById('cari-belum-monitoring').value.toLowerCase().trim();
+            const hasilFilter = databaseBelumMonitoring.filter(item => {
+                return String(item.namaAnggota ?? "").toLowerCase().includes(keyword) ||
+                       String(item.id ?? "").toLowerCase().includes(keyword) ||
+                       String(item.noPinjaman ?? "").toLowerCase().includes(keyword) ||
+                       String(item.kodeCenter ?? "").toLowerCase().includes(keyword) ||
+                       String(item.namaStaf ?? "").toLowerCase().includes(keyword);
+            });
+            tampilkanBelumMonitoring(hasilFilter);
         }
 
     </script>
