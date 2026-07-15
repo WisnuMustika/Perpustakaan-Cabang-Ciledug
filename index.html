@@ -448,7 +448,7 @@
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
                         <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
                     </h2>
-                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Dari Januari 2026 sampai dengan Desember 2026)</p>
+                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Januari 2026 Sampai Dengan Desember 2026)</p>
                     <div id="total-keseluruhan-monitoring" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
                         <i class="fas fa-calculator text-amber-400 text-sm"></i>
                         <span class="text-sm text-slate-300">Total Keseluruhan Semua Staf:</span>
@@ -604,24 +604,6 @@
                     <p class="text-slate-400 text-sm">Daftar pinjaman cair yang belum dilakukan monitoring oleh staf lapang.</p>
                 </header>
 
-                <!-- Panel Pengaturan Link Mandiri -->
-                <div class="bg-slate-950/40 p-5 rounded-2xl border border-slate-800 mb-6">
-                    <h3 class="text-slate-200 font-bold mb-3 flex items-center gap-2 text-sm">
-                        <i class="fas fa-link text-cyan-400"></i> Pengaturan Link Spreadsheet Mandiri
-                    </h3>
-                    <p class="text-slate-500 text-xs mb-3">Tempelkan URL Web App (hasil Deploy Google Apps Script) dari Spreadsheet "Data Belum Dimonitoring" milik Anda sendiri. Link akan tersimpan di perangkat ini.</p>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <input id="input-link-belum-monitoring" type="text" placeholder="https://script.google.com/macros/s/xxxxxxxx/exec" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-indigo-500">
-                        <button onclick="simpanLinkBelumMonitoring()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs cursor-pointer transition-all shadow-md whitespace-nowrap">
-                            <i class="fas fa-save mr-1"></i> Simpan Link
-                        </button>
-                        <button onclick="hapusLinkBelumMonitoring()" class="bg-slate-800 hover:bg-slate-700 text-rose-400 font-medium px-4 py-2 rounded-lg text-xs cursor-pointer transition-all whitespace-nowrap">
-                            <i class="fas fa-times mr-1"></i> Hapus
-                        </button>
-                    </div>
-                    <p id="status-link-belum-monitoring" class="text-[11px] text-slate-500 mt-2"></p>
-                </div>
-
                 <div class="space-y-4 mb-6">
                     <div>
                         <button onclick="sinkronBelumMonitoring(this)" class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 transition-all flex items-center gap-2">
@@ -714,6 +696,12 @@
         // ▼ URL Web App GS untuk Rekap Data MIS (Progres, Ranking, Informasi)
         // Ganti dengan URL hasil Deploy dari Code_MIS_WebApp.gs
         const URL_MIS = "https://script.google.com/macros/s/AKfycbzd0g0XlLhlfxzuO-8P0y90stWp4piAfyVa28eUSIs-2j1Yv1STCmojWDq66o4--1cW/exec";
+
+        // GANTI URL DI BAWAH INI dengan URL Web App hasil Deploy dari Spreadsheet
+        // "Belum_Monitoring" milik Anda. Karena ditulis langsung di sini (bukan
+        // localStorage), semua user yang membuka dashboard akan otomatis membaca
+        // data yang sama tanpa perlu setting apapun di perangkat masing-masing.
+        const URL_BELUM_MONITORING_MANDIRI = "https://script.google.com/macros/s/AKfycbw0TtX3tj3urL7pw_Im5ZCKb4tBxR7ExSMigDzGfs_spBPqnzgMRT3o-0hA3AZ5B0oc/exec";
 
         const PASSWORD_ADMIN = "mztxa2026";
         let statusAdminTerverifikasi = false;
@@ -2283,7 +2271,6 @@
             if (tabId === 'mis-ranking')  { muatRankingDariServer(); }
             if (tabId === 'mis-info')     { muatInformasiDariServer(); }
             if (tabId === 'mis-belum-monitoring') {
-                inisialisasiLinkBelumMonitoring();
                 sinkronBelumMonitoring(null, stafFilterTargetBelumMonitoring);
                 stafFilterTargetBelumMonitoring = null;
             }
@@ -2507,17 +2494,16 @@
 
         // Diklik dari tombol "Lihat Data Belum Dimonitoring" pada card staf
         // Menampilkan langsung daftar nama anggota dalam modal (data diambil dari
-        // link spreadsheet mandiri yang sama dengan sub menu Data Belum Dimonitoring)
+        // URL_BELUM_MONITORING_MANDIRI yang sudah di-hardcode di script)
         function bukaModalBelumMonitoringStaf(namaStaf) {
-            const url = localStorage.getItem(KEY_LINK_BELUM_MONITORING);
             const modal = document.getElementById('modal-belum-monitoring-staf');
             const judul = document.getElementById('modal-belum-monitoring-judul');
             const body = document.getElementById('modal-belum-monitoring-body');
 
             judul.textContent = `Belum Dimonitoring — ${namaStaf}`;
 
-            if (!url) {
-                body.innerHTML = `<p class="text-amber-400 text-sm text-center py-8">Data Base Masih Kosong, Silahkan Hubungi MIS Untuk Menampilkan Data</p>`;
+            if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
+                body.innerHTML = `<p class="text-amber-400 text-sm text-center py-8">URL_BELUM_MONITORING_MANDIRI belum diisi di dalam script.<br>Hubungi admin/developer untuk mengisi URL Web App-nya.</p>`;
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
                 return;
@@ -2634,47 +2620,12 @@
 
         // =========================================================================
         // FITUR MANDIRI: SUB MENU DATA BELUM DIMONITORING (SPREADSHEET TERPISAH)
+        // URL Web App diatur langsung di konstanta URL_BELUM_MONITORING_MANDIRI
+        // (lihat bagian atas script), BUKAN di localStorage per-perangkat, supaya
+        // semua user membaca sumber data yang sama.
         // =========================================================================
-        const KEY_LINK_BELUM_MONITORING = 'url_belum_monitoring_mandiri';
         let databaseBelumMonitoring = [];
         let stafFilterTargetBelumMonitoring = null;
-
-        // Muat link tersimpan (localStorage) ke kolom input saat tab dibuka
-        function inisialisasiLinkBelumMonitoring() {
-            const input = document.getElementById('input-link-belum-monitoring');
-            const status = document.getElementById('status-link-belum-monitoring');
-            const savedUrl = localStorage.getItem(KEY_LINK_BELUM_MONITORING) || "";
-            if (input) input.value = savedUrl;
-            if (status) {
-                status.textContent = savedUrl
-                    ? "✅ Link tersimpan di perangkat ini."
-                    : "⚠️ Belum ada link tersimpan. Masukkan URL Web App GAS Anda lalu klik Simpan Link.";
-            }
-        }
-
-        // Simpan link mandiri (URL Web App GAS) ke localStorage
-        function simpanLinkBelumMonitoring() {
-            const input = document.getElementById('input-link-belum-monitoring');
-            const url = (input.value || "").trim();
-            if (!url.startsWith("https://script.google.com/")) {
-                alert("URL tidak valid. Pastikan Anda menempel URL hasil Deploy Web App Google Apps Script (diawali https://script.google.com/).");
-                return;
-            }
-            localStorage.setItem(KEY_LINK_BELUM_MONITORING, url);
-            document.getElementById('status-link-belum-monitoring').textContent = "✅ Link tersimpan di perangkat ini.";
-            alert("✅ Link berhasil disimpan! Silakan klik 'Sinkron Server' untuk memuat data.");
-            sinkronBelumMonitoring();
-        }
-
-        // Hapus link mandiri yang tersimpan
-        function hapusLinkBelumMonitoring() {
-            if (!confirm("Hapus link spreadsheet mandiri yang tersimpan di perangkat ini?")) return;
-            localStorage.removeItem(KEY_LINK_BELUM_MONITORING);
-            document.getElementById('input-link-belum-monitoring').value = "";
-            document.getElementById('status-link-belum-monitoring').textContent = "⚠️ Belum ada link tersimpan. Masukkan URL Web App GAS Anda lalu klik Simpan Link.";
-            databaseBelumMonitoring = [];
-            document.getElementById('tbody-belum-monitoring').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Belum ada data. Klik "Sinkron Server" untuk memuat data.</td></tr>`;
-        }
 
         // Format tanggal cair (menangani ISO string ataupun serial number dari Google Sheets)
         function formatTglCairBelumMonitoring(value) {
@@ -2690,12 +2641,13 @@
             return dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        // Helper inti: ambil data dari spreadsheet mandiri via URL yang tersimpan (return Promise)
+        // Helper inti: ambil data dari spreadsheet via URL yang sudah di-hardcode di script (return Promise)
         function ambilDataBelumMonitoringDariServer() {
-            const url = localStorage.getItem(KEY_LINK_BELUM_MONITORING);
-            if (!url) return Promise.reject(new Error("Link Spreadsheet Mandiri belum diatur."));
+            if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
+                return Promise.reject(new Error("URL_BELUM_MONITORING_MANDIRI belum diisi di dalam script."));
+            }
 
-            return fetch(`${url}?action=getBelumMonitoring`, { method: "GET", mode: "cors" })
+            return fetch(`${URL_BELUM_MONITORING_MANDIRI}?action=getBelumMonitoring`, { method: "GET", mode: "cors" })
                 .then(response => response.json())
                 .then(result => {
                     if (result.status === "success") {
@@ -2710,8 +2662,8 @@
         function sinkronBelumMonitoring(btn, stafFilter) {
             const tbody = document.getElementById('tbody-belum-monitoring');
 
-            if (!localStorage.getItem(KEY_LINK_BELUM_MONITORING)) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-amber-400 italic">Silakan masukkan & simpan Link Spreadsheet Mandiri terlebih dahulu di atas.</td></tr>`;
+            if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-amber-400 italic">URL_BELUM_MONITORING_MANDIRI belum diisi di dalam script (hubungi admin/developer).</td></tr>`;
                 return;
             }
 
@@ -2741,7 +2693,7 @@
                         btn.innerHTML = `<i class="fas fa-sync-alt"></i> Sinkron Server`;
                     }
                     console.error("Error:", error);
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-rose-400 font-medium">Gagal memuat data. Periksa kembali Link Spreadsheet Mandiri Anda.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-rose-400 font-medium">Gagal memuat data dari server.</td></tr>`;
                 });
         }
 
