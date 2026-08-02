@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.2.3
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.3.0
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -675,11 +675,12 @@
                                     <th class="py-3.5 px-4">Brand</th>
                                     <th class="py-3.5 px-4">Model / Tipe</th>
                                     <th class="py-3.5 px-4">Nama Perangkat</th>
+                                    <th class="py-3.5 px-4">Lokasi</th>
                                     <th class="py-3.5 px-4">Menu Diakses</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-device-akses" class="divide-y divide-slate-900 text-slate-300">
-                                <tr><td colspan="6" class="text-center py-8 text-slate-500 italic">Belum ada data. Klik "Sinkron Server" untuk memuat data.</td></tr>
+                                <tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Belum ada data. Klik "Sinkron Server" untuk memuat data.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -809,7 +810,7 @@
         // Script "Device Akses" (script terpisah, lihat file Code_DeviceAkses_WebApp.gs
         // yang disertakan). Backend ini mencatat setiap klik "Mulai Akses" ke Spreadsheet
         // ("Brand", "Model", "NamaPerangkat", "WaktuAkses") lalu menampilkannya di sini.
-        const URL_DEVICE_AKSES = "https://script.google.com/macros/s/AKfycbzVb6zJJIdcbhnMpIEYVrFSSlnAAyXerBEH6PWpt9UlEzVFyrAaKzQPiGnXiFKXSHLY/exec";
+        const URL_DEVICE_AKSES = "https://script.google.com/macros/s/AKfycbxic0tMT6wGSAg7nujOhhn3XbFemZIAXY7JZRO_-97NLfkoeTGbolSaqOh9IUnV27U4cQ/exec";
 
         const PASSWORD_ADMIN = "mztxa2026";
         let statusAdminTerverifikasi = false;
@@ -2311,6 +2312,30 @@
         let _deviceSessionId = null;
         let _menuDiaksesSesiIni = new Set();
 
+        // Deteksi lokasi (kota/alamat + koordinat) berdasarkan alamat IP user.
+        // Tidak butuh izin browser, tapi akurasinya hanya sampai level kota.
+        async function _deteksiLokasiIP() {
+            try {
+                const ctrl = new AbortController();
+                const timeout = setTimeout(() => ctrl.abort(), 4000); // jangan sampai macet lama
+                const res = await fetch("https://ipwho.is/", { signal: ctrl.signal });
+                clearTimeout(timeout);
+                const j = await res.json();
+
+                if (!j || j.success === false) return null;
+
+                const bagianAlamat = [j.city, j.region, j.country].filter(Boolean);
+                return {
+                    lokasi: bagianAlamat.join(', ') || '-',
+                    latitude: j.latitude || '',
+                    longitude: j.longitude || '',
+                    ip: j.ip || ''
+                };
+            } catch (e) {
+                return null; // gagal deteksi (timeout/offline/API down) -> lanjut tanpa lokasi
+            }
+        }
+
         // Kirim catatan akses ke Spreadsheet (non-blocking, tidak mengganggu alur login)
         async function catatDeviceAkses() {
             try {
@@ -2318,12 +2343,18 @@
                 _deviceSessionId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
                 _menuDiaksesSesiIni = new Set();
 
+                const lokasi = await _deteksiLokasiIP(); // { lokasi, latitude, longitude, ip } atau null
+
                 const payload = {
                     waktu: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
                     brand: brand,
                     model: model,
                     namaPerangkat: namaPerangkat,
-                    sessionId: _deviceSessionId
+                    sessionId: _deviceSessionId,
+                    lokasi: lokasi ? lokasi.lokasi : '-',
+                    latitude: lokasi ? lokasi.latitude : '',
+                    longitude: lokasi ? lokasi.longitude : '',
+                    ip: lokasi ? lokasi.ip : ''
                 };
                 fetch(URL_DEVICE_AKSES, {
                     method: "POST", mode: "cors",
@@ -2394,7 +2425,7 @@
             if (!tbody) return;
 
             if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-500 italic">Belum ada data perangkat yang tercatat.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Belum ada data perangkat yang tercatat.</td></tr>';
                 return;
             }
 
@@ -2405,9 +2436,24 @@
                     <td class="py-3 px-4 font-medium text-slate-200">${item.brand || '-'}</td>
                     <td class="py-3 px-4">${item.model || '-'}</td>
                     <td class="py-3 px-4">${item.namaPerangkat || '-'}</td>
+                    <td class="py-3 px-4 whitespace-normal">${_renderLokasi(item)}</td>
                     <td class="py-3 px-4 whitespace-normal max-w-xs">${_renderBadgeMenuDiakses(item.menuDiakses)}</td>
                 </tr>
             `).join('');
+        }
+
+        // Tampilkan nama kota/alamat, dengan link ke Google Maps jika ada koordinat.
+        function _renderLokasi(item) {
+            const nama = (item.lokasi && String(item.lokasi).trim() && item.lokasi !== '-')
+                ? item.lokasi : null;
+
+            if (!nama) return '<span class="text-slate-500 italic">-</span>';
+
+            if (item.latitude && item.longitude) {
+                const mapsUrl = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+                return `<a href="${mapsUrl}" target="_blank" rel="noopener" class="text-emerald-400 hover:text-emerald-300 underline decoration-dotted">${nama}</a>`;
+            }
+            return nama;
         }
 
         // Ubah string "Menu A, Menu B" dari sheet menjadi badge-badge kecil.
@@ -2432,7 +2478,8 @@
                 (item.brand || '').toLowerCase().includes(q) ||
                 (item.model || '').toLowerCase().includes(q) ||
                 (item.namaPerangkat || '').toLowerCase().includes(q) ||
-                (item.menuDiakses || '').toLowerCase().includes(q)
+                (item.menuDiakses || '').toLowerCase().includes(q) ||
+                (item.lokasi || '').toLowerCase().includes(q)
             );
             renderTabelDeviceAkses(hasil);
         }
