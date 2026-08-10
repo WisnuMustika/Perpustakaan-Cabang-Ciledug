@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.3.0
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.3.1
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -424,7 +424,7 @@
                             </div>
                         </div>
                         <div class="flex gap-3 pt-2">
-                            <button onclick="simpanLaporanHarian()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-md cursor-pointer">
+                            <button id="btn-simpan-laporan" onclick="simpanLaporanHarian()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2 rounded-xl text-sm transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i class="fas fa-save mr-1"></i> Simpan Laporan
                             </button>
                             <button onclick="tutupFormLaporan()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm cursor-pointer">
@@ -1011,6 +1011,18 @@
             clearFormLaporanHarian();
         }
 
+        // --- Kembalikan tombol Simpan ke kondisi normal (siap dipakai lagi) ---
+        // Dipanggil setelah respons server diterima (sukses / gagal), BUKAN saat form ditutup,
+        // supaya tombol tetap terkunci selama proses kirim berlangsung (anti duplikat).
+        function resetTombolSimpanLaporan() {
+            sedangKirimLaporan = false;
+            const btnSimpan = document.getElementById('btn-simpan-laporan');
+            if (btnSimpan) {
+                btnSimpan.disabled = false;
+                btnSimpan.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan Laporan';
+            }
+        }
+
         // --- Reset semua field form ---
         function clearFormLaporanHarian() {
             document.getElementById('form-lh-id').value         = "";
@@ -1046,7 +1058,11 @@
         }
 
         // --- SIMPAN laporan (tambah baru ATAU update edit) ---
+        let sedangKirimLaporan = false; // guard anti klik-ganda / anti duplikat
+
         function simpanLaporanHarian() {
+            if (sedangKirimLaporan) return; // cegah klik ganda saat masih proses kirim
+
             const idEdit    = document.getElementById('form-lh-id').value;
             const staf      = document.getElementById('form-lh-staf').value;
             const tanggal   = document.getElementById('form-lh-tanggal').value;
@@ -1061,6 +1077,13 @@
             }
             document.getElementById('warning-laporan-kosong').classList.add('hidden');
 
+            sedangKirimLaporan = true;
+            const btnSimpan = document.getElementById('btn-simpan-laporan');
+            if (btnSimpan) {
+                btnSimpan.disabled = true;
+                btnSimpan.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Mengirim...';
+            }
+
             const waktuSekarang = new Date().toISOString();
             const dataLaporan = { staf, tanggal, naikPar, turunPar, angMasuk, angKeluar };
 
@@ -1073,8 +1096,9 @@
             }
             localStorage.setItem('arr_laporan_harian', JSON.stringify(list));
 
-            renderCardLaporanHarian();
-            tutupFormLaporan();
+            // Render list & tutup form BELUM dilakukan di sini.
+            // Keduanya baru dijalankan setelah user klik OK di modal notifikasi sukses,
+            // supaya notif "berhasil tersimpan" muncul dulu sebelum tampilan list berubah.
 
             // Saat edit: sertakan id di root payload DAN di dalam data agar Apps Script
             // bisa membaca dengan cara manapun (e.data.id, e.id, e.rowId)
@@ -1186,28 +1210,62 @@
             .then(json => {
                 if (json.status === "success") {
                     console.log("✅ Terima Kasih Laporan berhasil dikirim:", json.message);
-                    // Tampilkan notifikasi sukses singkat
-                    tampilkanToastSukses(idEdit ? "Laporan berhasil terkirim! ✅" : "Laporan berhasil terkirim! ✅");
+                    resetTombolSimpanLaporan();
+                    // Tampilkan modal sukses dulu. Baru setelah user klik OK,
+                    // list laporan dirender ulang dan form ditutup.
+                    tampilkanModalSuksesLaporan(
+                        idEdit ? "Laporan berhasil diperbarui!" : "Laporan berhasil terkirim!",
+                        () => {
+                            renderCardLaporanHarian();
+                            tutupFormLaporan();
+                        }
+                    );
                     if (idEdit) {
                         console.log("🔄 Memperbarui cache lokal dari server setelah edit...");
                     }
                 } else {
                     console.warn("⚠️ Gagal kirim ke server:", json.message);
+                    resetTombolSimpanLaporan();
                     tampilkanModalErrorServer(json.message, dataUntukServer, idEdit);
                 }
             })
             .catch(err => {
                 console.error("❌ Koneksi ke Apps Script gagal:", err);
+                resetTombolSimpanLaporan();
                 tampilkanModalErrorServer("Tidak dapat terhubung ke server. Cek koneksi internet atau URL Apps Script.", dataUntukServer, idEdit);
             });
         }
 
-        function tampilkanToastSukses(pesan) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] bg-emerald-600 text-white text-sm font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-emerald-900/50 flex items-center gap-2 animate-fade-in';
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${pesan}`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+        // --- Modal sukses simpan laporan (butuh klik OK, tidak hilang otomatis) ---
+        // Mencegah user mengira laporan gagal tersimpan lalu mengisi ulang data yang sama (duplikat)
+        // Parameter onOk: fungsi yang dijalankan SETELAH user klik OK (misal render list & tutup form)
+        function tampilkanModalSuksesLaporan(pesan, onOk) {
+            const modalLama = document.getElementById('modal-sukses-laporan');
+            if (modalLama) modalLama.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'modal-sukses-laporan';
+            modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-fade-in';
+            modal.innerHTML = `
+                <div class="bg-slate-900 border border-emerald-600/40 rounded-2xl p-6 max-w-sm w-full shadow-2xl shadow-emerald-950/50 text-center">
+                    <div class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-emerald-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-slate-100 font-bold text-lg mb-1">Berhasil!</h3>
+                    <p class="text-slate-400 text-sm mb-5">${pesan}</p>
+                    <button id="btn-ok-sukses-laporan"
+                        class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm cursor-pointer transition-all">
+                        OK
+                    </button>
+                </div>`;
+            document.body.appendChild(modal);
+
+            const btnOk = document.getElementById('btn-ok-sukses-laporan');
+            btnOk.addEventListener('click', () => {
+                modal.remove();
+                if (typeof onOk === 'function') onOk();
+            });
+            btnOk.focus();
         }
 
         // ── Helper: normalisasi berbagai format tanggal → "YYYY-MM-DD" ───
