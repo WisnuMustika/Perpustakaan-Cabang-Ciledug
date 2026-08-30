@@ -377,6 +377,23 @@
                     </button>
                 </div>
 
+                <!-- Ringkasan: Staf Belum Laporan & Total Hasil Laporan -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="text-sm font-bold text-slate-300 mb-1 flex items-center gap-2">
+                            <i class="fas fa-user-clock text-rose-400"></i> Staf Belum Laporan
+                        </h3>
+                        <p id="ringkasan-tanggal-label" class="text-[11px] text-slate-500 mb-3">Memuat data...</p>
+                        <div id="ringkasan-staf-belum-lapor" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                            <i class="fas fa-calculator text-indigo-400"></i> Total Hasil Laporan
+                        </h3>
+                        <div id="ringkasan-total-laporan"></div>
+                    </div>
+                </div>
+
                 <!-- Formulir Tambah/Edit Laporan (Hidden by default) -->
                 <div id="form-container-laporan" class="hidden bg-slate-950/60 border border-slate-800 p-6 rounded-2xl max-w-xl mb-8 animate-fade-in">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
@@ -820,9 +837,9 @@
         let dropdownMisTerbuka = false;
 
         const listStaf = [
-            "Casdi", "Nono Sutrisno",  "Iset Panji Nugraha", 
+            "Casdi", " M Abunudin", "Nono Sutrisno",  "Iset Panji Nugraha", 
             "Eka Ramadhan", "Perdi Irawan Saputra", "Indah Rahmayani", "Muhammad Sandi", 
-            "Lola Dwi Setiawan", "Rangga Erlando", "Ari Sundapa", 
+            "Rangga Erlando", "Ari Sundapa", 
             "Desta Adi Triana", "Agil Leo Saputra"
         ];
 
@@ -853,6 +870,7 @@
             muatDataDariSpreadsheet();
             buatCardListStafIndividu();
             renderCardLaporanHarian();
+            renderRingkasanLaporanHarian();
             // Muat semua data MIS dari Spreadsheet saat halaman pertama dibuka
             muatSemuaDataMIS();
         };
@@ -1217,6 +1235,7 @@
                         idEdit ? "Laporan berhasil diperbarui!" : "Laporan berhasil terkirim!",
                         () => {
                             renderCardLaporanHarian();
+                            renderRingkasanLaporanHarian();
                             tutupFormLaporan();
                         }
                     );
@@ -1339,6 +1358,7 @@
             });
             localStorage.setItem('arr_laporan_harian', JSON.stringify(dataServer));
             renderCardLaporanHarian();
+            renderRingkasanLaporanHarian();
             return true;
         }
 
@@ -1376,6 +1396,7 @@
         // --- Auto sinkron saat tab dibuka (tanpa alert) ---
         function autoSinkronLaporanHarian() {
             renderCardLaporanHarian(); // tampilkan cache lokal dulu agar tidak kosong
+            renderRingkasanLaporanHarian();
             setLoadingLaporanHarian(true);
             fetch(URL_LAPORAN_HARIAN + "?action=ambilLaporanHarian", { method: "GET", mode: "cors" })
             .then(res => res.json())
@@ -1525,8 +1546,105 @@
             container.innerHTML = html;
         }
 
-        
-        
+        // Cari tanggal laporan paling baru dari kumpulan data (dipakai sebagai acuan "hari ini")
+        function getTanggalTerbaruLaporan(list) {
+            if (!list || list.length === 0) return null;
+            let maxTgl = null;
+            list.forEach(item => {
+                const t = normalisasiTanggal(item.tanggal);
+                if (t && (!maxTgl || t > maxTgl)) maxTgl = t;
+            });
+            return maxTgl;
+        }
+
+        // Ringkasan: 1) staf yang belum lapor & 2) total hasil laporan yang sudah diisi
+        function renderRingkasanLaporanHarian() {
+            const containerBelum = document.getElementById('ringkasan-staf-belum-lapor');
+            const containerTotal = document.getElementById('ringkasan-total-laporan');
+            const labelTanggal   = document.getElementById('ringkasan-tanggal-label');
+            if (!containerBelum || !containerTotal) return;
+
+            const list = JSON.parse(localStorage.getItem('arr_laporan_harian')) || [];
+            const tglTerbaru = getTanggalTerbaruLaporan(list);
+
+            // Hanya data pada tanggal laporan paling baru yang dianggap "batch hari ini"
+            const listHariIni = tglTerbaru
+                ? list.filter(item => normalisasiTanggal(item.tanggal) === tglTerbaru)
+                : [];
+
+            // Nama staf yang sudah mengisi laporan pada tanggal tersebut
+            const setSudahLapor = new Set(listHariIni.map(item => (item.staf || "").toLowerCase().trim()));
+            const stafBelumLapor = listStaf.filter(nama => !setSudahLapor.has(nama.toLowerCase().trim()));
+
+            if (labelTanggal) {
+                if (tglTerbaru) {
+                    const dObj = new Date(tglTerbaru + "T00:00:00");
+                    const tglBagus = !isNaN(dObj)
+                        ? dObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                        : tglTerbaru;
+                    labelTanggal.textContent = `Berdasarkan laporan tanggal ${tglBagus}`;
+                } else {
+                    labelTanggal.textContent = `Belum ada data laporan`;
+                }
+            }
+
+            if (stafBelumLapor.length === 0) {
+                containerBelum.innerHTML = `
+                    <div class="flex items-center gap-2 text-emerald-400 text-xs">
+                        <i class="fas fa-check-circle"></i> Semua staf sudah mengisi laporan.
+                    </div>`;
+            } else {
+                containerBelum.innerHTML = stafBelumLapor.map(nama => `
+                    <span class="inline-flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs px-3 py-1.5 rounded-lg">
+                        <i class="fas fa-user-clock text-[10px]"></i> ${nama}
+                    </span>`).join("");
+            }
+
+            const totalNaikPar  = listHariIni.reduce((s, i) => s + (Number(i.naikPar)   || 0), 0);
+            const totalTurunPar = listHariIni.reduce((s, i) => s + (Number(i.turunPar)  || 0), 0);
+            const totalNetPar   = totalNaikPar - totalTurunPar;
+            const totalMasuk    = listHariIni.reduce((s, i) => s + (Number(i.angMasuk)  || 0), 0);
+            const totalKeluar   = listHariIni.reduce((s, i) => s + (Number(i.angKeluar) || 0), 0);
+            const totalNetAng   = totalMasuk - totalKeluar;
+
+            const warnaNetPar = totalNetPar <= 0 ? "text-emerald-400" : "text-rose-400";
+            const tandaNetPar = totalNetPar > 0 ? "+" : "";
+            const warnaNetAng = totalNetAng >= 0 ? "text-emerald-400" : "text-rose-400";
+            const tandaNetAng = totalNetAng > 0 ? "+" : "";
+
+            containerTotal.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total Kenaikan PAR</p>
+                        <p class="text-rose-400 font-mono font-bold text-sm">${formatAngkaKeRupiah(totalNaikPar)}</p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Total Penurunan PAR</p>
+                        <p class="text-emerald-400 font-mono font-bold text-sm">${formatAngkaKeRupiah(totalTurunPar)}</p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Net PAR</p>
+                        <p class="${warnaNetPar} font-mono font-bold text-sm">${tandaNetPar}${formatAngkaKeRupiah(totalNetPar)}</p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Anggota Masuk</p>
+                        <p class="text-slate-300 font-mono font-bold text-sm">${totalMasuk} orang</p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Anggota Keluar</p>
+                        <p class="text-slate-300 font-mono font-bold text-sm">${totalKeluar} orang</p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800/60 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Net Anggota</p>
+                        <p class="${warnaNetAng} font-mono font-bold text-sm">${tandaNetAng}${totalNetAng} orang</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-[10px] text-slate-500 flex items-center gap-1.5">
+                    <i class="fas fa-clipboard-check text-indigo-400"></i>
+                    ${listHariIni.length} dari ${listStaf.length} staf sudah mengisi laporan
+                </div>`;
+        }
+
         function hitungDanTampilkanStatistik(tombol = null) {
             let infoTarget = null;
             if (tombol) {
