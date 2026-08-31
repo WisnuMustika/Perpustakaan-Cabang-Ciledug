@@ -377,11 +377,11 @@
                     </button>
                 </div>
 
-                <!-- Ringkasan: Staf Belum Laporan & Total Hasil Laporan -->
+                <!-- Ringkasan: Staf Belum Lapor & Total Hasil Laporan -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                     <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
                         <h3 class="text-sm font-bold text-slate-300 mb-1 flex items-center gap-2">
-                            <i class="fas fa-user-clock text-rose-400"></i> Staf Belum Laporan
+                            <i class="fas fa-user-clock text-rose-400"></i> Staf Belum Lapor
                         </h3>
                         <p id="ringkasan-tanggal-label" class="text-[11px] text-slate-500 mb-3">Memuat data...</p>
                         <div id="ringkasan-staf-belum-lapor" class="flex flex-wrap gap-2"></div>
@@ -837,9 +837,9 @@
         let dropdownMisTerbuka = false;
 
         const listStaf = [
-            "Casdi", " M Abunudin", "Nono Sutrisno",  "Iset Panji Nugraha", 
+            "Casdi", "Nono Sutrisno",  "Iset Panji Nugraha", 
             "Eka Ramadhan", "Perdi Irawan Saputra", "Indah Rahmayani", "Muhammad Sandi", 
-            "Rangga Erlando", "Ari Sundapa", 
+            "Lola Dwi Setiawan", "Rangga Erlando", "Ari Sundapa", 
             "Desta Adi Triana", "Agil Leo Saputra"
         ];
 
@@ -1292,8 +1292,20 @@
             if (!raw) return "";
             const s = raw.toString().trim();
 
-            // Sudah format ISO: "2026-05-29" atau "2026-05-29T..."
-            if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0, 10);
+            // Sudah format ISO MURNI tanpa jam: "2026-05-29" — tidak ada zona waktu yang
+            // perlu dikoreksi, aman dipakai langsung.
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+            // Format ISO DENGAN jam, mis. "2026-08-30T17:00:00.000Z" — ini hasil
+            // serialisasi Google Apps Script dari objek Date yang sebenarnya mewakili
+            // tengah malam WIB (UTC+7). Kalau langsung dipotong 10 karakter pertama
+            // (seperti sebelumnya), tanggalnya MUNDUR SATU HARI — mis. 31 Agustus WIB
+            // malah tercatat 30 Agustus. Jadi harus dikonversi dulu ke zona waktu
+            // Asia/Jakarta sebelum diambil tanggal kalendernya.
+            if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+                const d = new Date(s);
+                if (!isNaN(d)) return formatTanggalJakarta(d);
+            }
 
             // Format D/M/YYYY atau DD/MM/YYYY dari Google Sheets (Indonesia)
             // Kita anggap selalu DD/MM/YYYY karena lokasi server Indonesia
@@ -1324,16 +1336,18 @@
                 }
             }
 
-            // Fallback: coba parse dengan Date lalu format ulang (pakai UTC agar tidak geser timezone)
+            // Fallback: coba parse dengan Date, lalu ambil tanggal kalender versi WIB
+            // (bukan UTC) supaya tidak ikut mundur satu hari.
             const parsed = new Date(s);
-            if (!isNaN(parsed)) {
-                const y = parsed.getUTCFullYear();
-                const m = String(parsed.getUTCMonth() + 1).padStart(2,'0');
-                const d = String(parsed.getUTCDate()).padStart(2,'0');
-                return `${y}-${m}-${d}`;
-            }
+            if (!isNaN(parsed)) return formatTanggalJakarta(parsed);
 
             return s; // kembalikan apa adanya jika semua gagal
+        }
+
+        // Ambil tanggal kalender (YYYY-MM-DD) dari objek Date, dikonversi ke zona waktu
+        // WIB (Asia/Jakarta) — supaya tidak mundur satu hari akibat selisih UTC vs WIB (+7 jam).
+        function formatTanggalJakarta(dateObj) {
+            return dateObj.toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });
         }
 
         // --- SINKRON: ambil data terbaru dari Spreadsheet ---
@@ -1437,8 +1451,18 @@
             const container = document.getElementById('container-card-laporan-harian');
             if (!container) return;
 
+            // Urutkan berdasarkan TANGGAL asli (terbaru di atas) — bukan ID, karena ID di
+            // sistem ini tidak selalu berurutan berdasarkan waktu (lihat catatan di
+            // getTanggalTerbaruLaporan). Kalau tanggalnya sama, ID dipakai sebagai pemisah.
             const list = (JSON.parse(localStorage.getItem('arr_laporan_harian')) || [])
-                .sort((a, b) => b.id - a.id); // terbaru di atas
+                .sort((a, b) => {
+                    const ta = normalisasiTanggal(a.tanggal);
+                    const tb = normalisasiTanggal(b.tanggal);
+                    const waktuA = /^\d{4}-\d{2}-\d{2}$/.test(ta) ? new Date(ta + "T00:00:00Z").getTime() : -Infinity;
+                    const waktuB = /^\d{4}-\d{2}-\d{2}$/.test(tb) ? new Date(tb + "T00:00:00Z").getTime() : -Infinity;
+                    if (waktuB !== waktuA) return waktuB - waktuA;
+                    return b.id - a.id;
+                });
 
             if (list.length === 0) {
                 container.innerHTML = `
@@ -1546,13 +1570,27 @@
             container.innerHTML = html;
         }
 
-        // Cari tanggal laporan paling baru dari kumpulan data (dipakai sebagai acuan "hari ini")
+        // Cari tanggal laporan paling baru dari kumpulan data (dipakai sebagai acuan "hari ini").
+        // CATATAN: sempat dicoba pakai "ID terbesar = laporan terbaru", tapi ternyata ID di
+        // sistem ini TIDAK selalu berurutan berdasarkan waktu (laporan yang dibuat di HP
+        // sebelum sempat sinkron bisa dapat ID sementara yang jauh lebih besar walau
+        // tanggalnya lebih lama). Jadi patokan yang benar dan pasti akurat adalah
+        // membandingkan NILAI TANGGAL asli setiap laporan secara langsung (bukan ID),
+        // dengan validasi format ISO yang ketat supaya tidak salah baca tanggal yang gagal
+        // dinormalisasi.
         function getTanggalTerbaruLaporan(list) {
             if (!list || list.length === 0) return null;
-            let maxTgl = null;
+            let maxTgl  = null;
+            let maxTime = -Infinity;
             list.forEach(item => {
                 const t = normalisasiTanggal(item.tanggal);
-                if (t && (!maxTgl || t > maxTgl)) maxTgl = t;
+                if (t && /^\d{4}-\d{2}-\d{2}$/.test(t)) { // hanya terima format ISO yang valid
+                    const waktu = new Date(t + "T00:00:00Z").getTime();
+                    if (!isNaN(waktu) && waktu > maxTime) {
+                        maxTime = waktu;
+                        maxTgl  = t;
+                    }
+                }
             });
             return maxTgl;
         }
@@ -1641,7 +1679,7 @@
                 </div>
                 <div class="mt-3 text-[10px] text-slate-500 flex items-center gap-1.5">
                     <i class="fas fa-clipboard-check text-indigo-400"></i>
-                    ${listHariIni.length} dari ${listStaf.length} staf sudah mengisi laporan
+                    ${setSudahLapor.size} dari ${listStaf.length} staf sudah mengisi laporan
                 </div>`;
         }
 
