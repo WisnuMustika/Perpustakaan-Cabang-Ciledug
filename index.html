@@ -86,7 +86,7 @@
                         </button>
                         <div id="dbcabang-submenu" class="hidden pl-9 mt-1 space-y-1">
                             <button onclick="gantiTab('db-anggota-par')" id="btn-db-anggota-par" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                                <i class="fas fa-users text-[10px] w-4 text-center"></i> Data Anggota Par
+                                <i class="fas fa-users text-[10px] w-4 text-center"></i> Data Anggota Par Cabang
                             </button>
                             <button onclick="gantiTab('db-statistik-staf')" id="btn-db-statistik-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-chart-line text-[10px] w-4 text-center"></i> Statistik Par Per Staf
@@ -102,6 +102,9 @@
                             </button>
                             <button onclick="gantiTab('db-monitoring-staf')" id="btn-db-monitoring-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-binoculars text-[10px] w-4 text-center"></i> Monitoring By Staf
+                            </button>
+                            <button onclick="gantiTab('db-validasi-anggota')" id="btn-db-validasi-anggota" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-user-check text-[10px] w-4 text-center"></i> Validasi Data Anggota
                             </button>
                         </div>
                     </div>
@@ -482,6 +485,56 @@
                 </div>
             </section>
 
+            <!-- SUB MENU: VALIDASI DATA ANGGOTA -->
+            <section id="content-db-validasi-anggota" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-user-check text-emerald-400"></i> Validasi Data Anggota
+                    </h2>
+                    <p class="text-slate-400 text-sm">Pilih nama staf untuk melihat dan memvalidasi data anggotanya.</p>
+                </header>
+
+                <!-- TAMPILAN 1: LIST NAMA STAF -->
+                <div id="validasi-anggota-view-staf">
+                    <div id="container-validasi-anggota-staf" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        <p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>
+                    </div>
+                </div>
+
+                <!-- TAMPILAN 2: TABEL DATA ANGGOTA PER STAF -->
+                <div id="validasi-anggota-view-tabel" class="hidden">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+                        <button onclick="kembaliKeListStafValidasi()" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-sm px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 w-fit">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </button>
+                        <h3 id="judul-staf-validasi-anggota" class="text-lg font-bold text-slate-100"></h3>
+                    </div>
+
+                    <div class="relative mb-5 max-w-md">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                        <input type="text" id="cari-validasi-anggota" onkeyup="cariValidasiAnggota()" placeholder="Cari berdasarkan nama, id, atau center..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    </div>
+
+                    <div class="bg-slate-950/40 border border-slate-800 rounded-2xl overflow-x-auto">
+                        <table class="w-full text-sm text-left whitespace-nowrap">
+                            <thead class="bg-slate-900/60 text-slate-400 text-xs uppercase">
+                                <tr>
+                                    <th class="py-3 px-4 text-center">Nomor</th>
+                                    <th class="py-3 px-4">Kode Center</th>
+                                    <th class="py-3 px-4">No ID</th>
+                                    <th class="py-3 px-4">Nama Anggota</th>
+                                    <th class="py-3 px-4">Kondisi Center</th>
+                                    <th class="py-3 px-4">Hari</th>
+                                    <th class="py-3 px-4">Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-validasi-anggota" class="divide-y divide-slate-900 text-slate-300">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
 
             <section id="content-mis-progres" class="tab-content hidden animate-fade-in">
                 <header class="mb-6 border-b border-slate-800 pb-4">
@@ -829,6 +882,13 @@
         // ("Brand", "Model", "NamaPerangkat", "WaktuAkses") lalu menampilkannya di sini.
         const URL_DEVICE_AKSES = "https://script.google.com/macros/s/AKfycbxic0tMT6wGSAg7nujOhhn3XbFemZIAXY7JZRO_-97NLfkoeTGbolSaqOh9IUnV27U4cQ/exec";
 
+        // GANTI URL DI BAWAH INI dengan URL Web App hasil Deploy dari Google Apps
+        // Script "Validasi Data Anggota" (spreadsheet berisi daftar anggota per staf
+        // beserta kolom Keterangan). Endpoint ini harus mendukung:
+        //   GET  ?action=getValidasiAnggota           -> { status, data: [...] }
+        //   POST { action: "updateKeterangan", id, keterangan }
+        const URL_VALIDASI_ANGGOTA = "https://script.google.com/macros/s/AKfycbzbwZEJ6V9_ACSxpGo2glmZQsvOKb2oiHWst8OhJ-1rora1wQkmjXa9vZveyKpTW8T9/exec";
+
         const PASSWORD_ADMIN = "mztxa2026";
         let statusAdminTerverifikasi = false;
         let sidebarTerbuka = false;
@@ -837,10 +897,10 @@
         let dropdownMisTerbuka = false;
 
         const listStaf = [
-            "Casdi", " M. Abunudin","Nono Sutrisno",  "Iset Panji Nugraha", 
+            "Casdi", "Nono Sutrisno",  "Iset Panji Nugraha", 
             "Eka Ramadhan", "Perdi Irawan Saputra", "Indah Rahmayani", "Muhammad Sandi", 
             "Rangga Erlando", "Ari Sundapa", 
-            "Desta Adi Triana", "Agil Leo Saputra", " Lola Dwi Setiawan"
+            "Desta Adi Triana", "Agil Leo Saputra"," Muhamad Rizki Nugraha", " Lola Dwi Setiawan"
         ];
 
         let databaseAnggotaPar = [];
@@ -2514,6 +2574,7 @@
             'db-Capaian-staf': 'Capaian Staf',
             'db-laporan-harian': 'Isi Laporan Harian',
             'db-monitoring-staf': 'Monitoring By Staf',
+            'db-validasi-anggota': 'Validasi Data Anggota',
             'mis-progres': 'Update Progres Kemarin',
             'mis-ranking': 'Update Ranking',
             'mis-info': 'Update Information',
@@ -2897,6 +2958,13 @@
                 muatMonitoringByStaf();
             }
 
+            if (tabId === 'db-validasi-anggota') {
+                document.getElementById('validasi-anggota-view-tabel').classList.add('hidden');
+                document.getElementById('validasi-anggota-view-staf').classList.remove('hidden');
+                stafAktifValidasiAnggota = null;
+                sinkronValidasiAnggota(null);
+            }
+
             // Sinkron data MIS dari server setiap kali tab MIS dibuka
             if (tabId === 'mis-progres')  { muatProgresDariServer(); }
             if (tabId === 'mis-ranking')  { muatRankingDariServer(); }
@@ -3250,6 +3318,172 @@
             const elAngka = document.getElementById('angka-total-monitoring');
             elAngka.textContent = grandTotal.toLocaleString('id-ID');
             elTotal.classList.remove('hidden');
+        }
+
+        // =========================================================================
+        // FITUR MANDIRI: SUB MENU VALIDASI DATA ANGGOTA
+        // Tampilan 1: list nama staf (dari listStaf). Klik satu staf -> Tampilan 2:
+        // tabel anggota staf tsb dengan dropdown Keterangan (Ketemu/Tidak Ketemu)
+        // yang langsung menyimpan perubahan ke Google Sheets lewat URL_VALIDASI_ANGGOTA.
+        // =========================================================================
+        let databaseValidasiAnggota = [];
+        let stafAktifValidasiAnggota = null;
+
+        function sinkronValidasiAnggota(btn) {
+            const containerStaf = document.getElementById('container-validasi-anggota-staf');
+
+            if (!URL_VALIDASI_ANGGOTA || URL_VALIDASI_ANGGOTA.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
+                containerStaf.innerHTML = `<p class="text-amber-400 italic text-sm col-span-full text-center py-8">URL_VALIDASI_ANGGOTA belum diisi di dalam script (hubungi admin/developer).</p>`;
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-sync-alt animate-spin mr-2"></i> Menyinkronkan...`;
+            }
+            containerStaf.innerHTML = `<p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>`;
+
+            fetch(`${URL_VALIDASI_ANGGOTA}?action=getValidasiAnggota`, { method: "GET", mode: "cors" })
+                .then(response => response.json())
+                .then(result => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-sync-alt"></i> Sinkron Server`;
+                    }
+                    if (result.status === "success") {
+                        databaseValidasiAnggota = result.data || [];
+                        tampilkanListStafValidasi();
+                    } else {
+                        throw new Error(result.message || "Gagal memuat data.");
+                    }
+                })
+                .catch(error => {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-sync-alt"></i> Sinkron Server`;
+                    }
+                    console.error("Error:", error);
+                    containerStaf.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-8">Gagal memuat data dari server.</p>`;
+                });
+        }
+
+        // Tampilkan card per nama staf (dari listStaf yang sudah ada di sistem),
+        // beserta jumlah anggota yang belum divalidasi sebagai info cepat.
+        function tampilkanListStafValidasi() {
+            const containerStaf = document.getElementById('container-validasi-anggota-staf');
+            let html = "";
+
+            listStaf.forEach(staf => {
+                const dataStaf = databaseValidasiAnggota.filter(item => String(item.namaStaf ?? "").toLowerCase() === staf.toLowerCase());
+                const belumDivalidasi = dataStaf.filter(item => (item.keterangan || "belum").toLowerCase() === "belum").length;
+
+                html += `
+                    <button onclick="bukaTabelValidasiAnggota('${staf}')" class="text-left cursor-pointer bg-slate-950/60 border border-slate-800 hover:border-indigo-500/40 p-4 rounded-2xl shadow-md transition-all">
+                        <div class="flex items-center gap-3 mb-3 border-b border-slate-800/60 pb-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-100 text-sm truncate">${staf}</h3>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                            <span class="text-xs text-slate-400 font-medium">Total Anggota:</span>
+                            <span class="font-mono font-bold text-slate-200 text-xs">${dataStaf.length}</span>
+                        </div>
+                        ${belumDivalidasi > 0 ? `<p class="text-[11px] text-amber-400 font-semibold mt-2"><i class="fas fa-exclamation-circle mr-1"></i>${belumDivalidasi} belum divalidasi</p>` : `<p class="text-[11px] text-emerald-400 font-semibold mt-2"><i class="fas fa-check-circle mr-1"></i>Semua sudah divalidasi</p>`}
+                    </button>`;
+            });
+
+            containerStaf.innerHTML = html || `<p class="text-slate-500 italic text-sm col-span-full text-center py-8">Belum ada data staf.</p>`;
+        }
+
+        // Buka tampilan tabel untuk satu staf yang diklik
+        function bukaTabelValidasiAnggota(namaStaf) {
+            stafAktifValidasiAnggota = namaStaf;
+
+            document.getElementById('validasi-anggota-view-staf').classList.add('hidden');
+            document.getElementById('validasi-anggota-view-tabel').classList.remove('hidden');
+            document.getElementById('judul-staf-validasi-anggota').textContent = `Data Anggota — ${namaStaf}`;
+
+            const kolomCari = document.getElementById('cari-validasi-anggota');
+            if (kolomCari) kolomCari.value = "";
+
+            const dataStaf = databaseValidasiAnggota.filter(item => String(item.namaStaf ?? "").toLowerCase() === namaStaf.toLowerCase());
+            tampilkanTabelValidasiAnggota(dataStaf);
+        }
+
+        function kembaliKeListStafValidasi() {
+            stafAktifValidasiAnggota = null;
+            document.getElementById('validasi-anggota-view-tabel').classList.add('hidden');
+            document.getElementById('validasi-anggota-view-staf').classList.remove('hidden');
+            tampilkanListStafValidasi();
+        }
+
+        function tampilkanTabelValidasiAnggota(dataArray) {
+            const tbody = document.getElementById('tbody-validasi-anggota');
+            if (!dataArray || dataArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Tidak ada data anggota untuk staf ini.</td></tr>`;
+                return;
+            }
+
+            let html = "";
+            dataArray.forEach((item, idx) => {
+                const ket = (item.keterangan || "belum").toLowerCase();
+                html += `
+                    <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-900/40" data-id="${item.id ?? ""}">
+                        <td class="py-3 px-4 text-center text-slate-500">${idx + 1}</td>
+                        <td class="py-3 px-4"><span class="bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-mono font-bold">${item.kodeCenter ?? "-"}</span></td>
+                        <td class="py-3 px-4 font-mono">${item.id ?? "-"}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-200">${item.namaAnggota ?? "-"}</td>
+                        <td class="py-3 px-4 text-slate-300">${item.kondisiCenter ?? "-"}</td>
+                        <td class="py-3 px-4 text-slate-300">${item.hari ?? "-"}</td>
+                        <td class="py-3 px-4">
+                            <select onchange="updateKeteranganValidasi('${item.id ?? ""}', this.value, this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                <option value="belum" ${ket === "belum" ? "selected" : ""}>-- Belum --</option>
+                                <option value="ketemu" ${ket === "ketemu" ? "selected" : ""}>✓ Ketemu</option>
+                                <option value="tidak_ketemu" ${ket === "tidak_ketemu" ? "selected" : ""}>✗ Tidak Ketemu</option>
+                            </select>
+                        </td>
+                    </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function cariValidasiAnggota() {
+            const keyword = document.getElementById('cari-validasi-anggota').value.toLowerCase().trim();
+            const dataStaf = databaseValidasiAnggota.filter(item => String(item.namaStaf ?? "").toLowerCase() === String(stafAktifValidasiAnggota ?? "").toLowerCase());
+            const hasilFilter = dataStaf.filter(item => {
+                return String(item.namaAnggota ?? "").toLowerCase().includes(keyword) ||
+                       String(item.id ?? "").toLowerCase().includes(keyword) ||
+                       String(item.kodeCenter ?? "").toLowerCase().includes(keyword);
+            });
+            tampilkanTabelValidasiAnggota(hasilFilter);
+        }
+
+        function updateKeteranganValidasi(id, keterangan, selectEl) {
+            if (selectEl) selectEl.disabled = true;
+
+            // Update cache lokal dulu supaya UI langsung responsif
+            const idx = databaseValidasiAnggota.findIndex(item => String(item.id) === String(id));
+            if (idx !== -1) databaseValidasiAnggota[idx].keterangan = keterangan;
+
+            fetch(URL_VALIDASI_ANGGOTA, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "updateKeterangan", data: { id, keterangan } })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (selectEl) selectEl.disabled = false;
+                if (result.status !== "success") {
+                    console.warn("Gagal simpan keterangan di server:", result.message);
+                    alert("Gagal menyimpan perubahan ke server: " + result.message);
+                }
+            })
+            .catch(err => {
+                if (selectEl) selectEl.disabled = false;
+                console.warn("Gagal koneksi saat update keterangan:", err);
+                alert("Gagal terhubung ke server saat menyimpan perubahan.");
+            });
         }
 
         // =========================================================================
