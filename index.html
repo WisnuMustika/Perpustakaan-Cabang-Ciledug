@@ -74,6 +74,9 @@
                             <button onclick="gantiTab('ranking')" id="btn-ranking" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-circle text-[6px]"></i> 🏆 Ranking
                             </button>
+                            <button onclick="gantiTab('daftar-pustaka')" id="btn-daftar-pustaka" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-circle text-[6px]"></i> 📚 Daftar Pustaka
+                            </button>
                         </div>
                     </div>
 
@@ -196,6 +199,172 @@
                             <span>Kategori: Rajin Monitoring</span>
                         </h3>
                         <div id="rank-box-monitor" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DAFTAR PUSTAKA - Dokumentasi Menu dan Sub Menu -->
+            <section id="content-daftar-pustaka" class="tab-content hidden animate-fade-in">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold text-slate-100 flex items-center gap-3">
+                        <i class="fas fa-book text-cyan-400"></i> Daftar Pustaka
+                    </h2>
+                    <p class="text-slate-400 mt-2">Panduan lengkap fungsi setiap menu dan sub menu dalam sistem</p>
+                </header>
+
+                <!-- Bagian 1: MENU DASHBOARD -->
+                <div class="space-y-8">
+                    <div class="bg-gradient-to-r from-slate-900/80 to-slate-950/80 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all">
+                        <h3 class="text-2xl font-bold text-indigo-400 mb-4 flex items-center gap-3">
+                            <i class="fas fa-chart-pie text-indigo-500"></i> Dashboard
+                        </h3>
+                        <div class="space-y-6 ml-4">
+                            <!-- Sub Menu 1: Progres Hari Kemarin -->
+                            <div class="border-l-3 border-indigo-500 pl-4">
+                                <h4 class="text-lg font-bold text-slate-100 flex items-center gap-2 mb-2">
+                                    <i class="fas fa-check-circle text-emerald-400"></i> 📑 Progres Hari Kemarin
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Untuk Melihat Hasil Kinerja Di Hari Kemarin
+                                </p>
+                                <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 space-y-1">
+                                    <p>✓ Menampilkan data kenaikan PAR (Perlu Evaluasi)</p>
+                                    <p>✓ Menampilkan data penurunan PAR (Prestasi Baik)</p>
+                                    <p>✓ Update otomatis setiap harinya</p>
+                                    <p>✓ Membantu evaluasi performa staf dan cabang</p>
+                                </div>
+                            </div>
+
+                            <!-- Sub Menu 2: Ranking -->
+                            <div class="border-l-3 border-yellow-500 pl-4">
+                                <h4 class="text-lg font-bold text-slate-100 flex items-center gap-2 mb-2">
+                                    <i class="fas fa-trophy text-yellow-400"></i> 🏆 Ranking
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Untuk Melihat Hasil Capaian Terbaik Di Bulan Sebelumnya
+                                </p>
+                                <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 space-y-1">
+                                    <p>✓ Ranking Penurunan PAR Terbanyak</p>
+                                    <p>✓ Ranking Disburse (Pencairan) Terbanyak</p>
+                                    <p>✓ Ranking Anggota Masuk Terbanyak</p>
+                                    <p>✓ Ranking Rajin Monitoring</p>
+                                    <p>✓ Update setiap pergantian bulan</p>
+                                </div>
+                            </div>
+
+                            <!-- Sub Menu 3: Daftar Pustaka -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-lg font-bold text-slate-100 flex items-center gap-2 mb-2">
+                                    <i class="fas fa-book text-cyan-400"></i> 📚 Daftar Pustaka
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-3">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Menjelaskan Fungsi Setiap Menu dan Sub Menu
+                                </p>
+                                <div class="bg-slate-900/50 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 space-y-1">
+                                    <p>✓ Dokumentasi lengkap semua menu utama</p>
+                                    <p>✓ Penjelasan detail setiap sub menu</p>
+                                    <p>✓ Informasi tentang fungsi dan kegunaan</p>
+                                    <p>✓ Jadwal pembaruan data untuk setiap fitur</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bagian 2: MENU DATABASE CABANG -->
+                    <div class="bg-gradient-to-r from-slate-900/80 to-slate-950/80 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all">
+                        <h3 class="text-2xl font-bold text-cyan-400 mb-4 flex items-center gap-3">
+                            <i class="fas fa-network-wired text-cyan-500"></i> Database Cabang
+                        </h3>
+                        <div class="space-y-5 ml-4">
+                            <!-- Sub Menu 1: Data Anggota Par -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-users text-blue-400"></i> Data Anggota Par Cabang
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Deliquency Anggota Bermasalah Yang Ada Di Cabang, dengan tampilan yang di sederhana kan.
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
+                            </div>
+
+                            <!-- Sub Menu 2: Statistik Par Per Staf -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-chart-line text-purple-400"></i> Statistik Par Per Staf
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Total Anggota Bermasalah, Par di TPK, Double Pinjaman, Total Pinjaman dan Total Tunggakan Per Staf
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
+                            </div>
+
+                            <!-- Sub Menu 3: Progres Cabang -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-calendar-alt text-orange-400"></i> Progres Cabang
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Hasil capaian cabang setiap bulanan nya
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Bulan</p>
+                            </div>
+
+                            <!-- Sub Menu 4: Capaian Staf -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-user-tie text-green-400"></i> Capaian Staf
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Hasil capaian pribadi Staf setiap bulan nya
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Bulan</p>
+                            </div>
+
+                            <!-- Sub Menu 5: Isi Laporan Harian -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-file-invoice text-red-400"></i> Isi Laporan Harian
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Laporan harian Staf yang di isi setiap hari nya
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
+                            </div>
+
+                            <!-- Sub Menu 6: Monitoring By Staf -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Rekap atau sisa tunggakan monitoring staf
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
+                            </div>
+
+                            <!-- Sub Menu 7: Validasi Data Anggota -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-user-check text-lime-400"></i> Validasi Data Anggota
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Kekurangan data yang ada di arsip digital
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Sesuai Kebutuhan</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Catatan Penting -->
+                    <div class="bg-amber-950/40 border border-amber-800/50 rounded-2xl p-6">
+                        <h4 class="text-lg font-bold text-amber-400 flex items-center gap-3 mb-3">
+                            <i class="fas fa-info-circle"></i> Informasi Penting
+                        </h4>
+                        <div class="text-sm text-slate-300 space-y-2">
+                            <p>💡 <span class="font-semibold">Data Real-time:</span> Semua data yang ditampilkan dalam sistem ini dihubungkan langsung dengan database server terpusat untuk memastikan akurasi dan kecepatan informasi.</p>
+                            <p>🔄 <span class="font-semibold">Jadwal Update:</span> Data yang ditandai "Update Setiap Hari" akan diperbarui secara otomatis setiap harinya. Data yang ditandai "Update Setiap Bulan" diperbarui pada periode bulanan.</p>
+                            <p>📱 <span class="font-semibold">Akses Multi-Device:</span> Sistem dapat diakses dari berbagai perangkat (desktop, tablet, smartphone) untuk kemudahan akses di lapangan maupun di kantor.</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -471,7 +640,7 @@
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
                         <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
                     </h2>
-                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Januari 2026 Sampai Dengan Desember 2026)</p>
+                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Januari 2026 Sampai Dengan Desember 2026) Hanya Pencairan Umum dan Mikrobisnis Saja</p>
                     <div id="total-keseluruhan-monitoring" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
                         <i class="fas fa-calculator text-amber-400 text-sm"></i>
                         <span class="text-sm text-slate-300">Total Keseluruhan Semua Staf:</span>
