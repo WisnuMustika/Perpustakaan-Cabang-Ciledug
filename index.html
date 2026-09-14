@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.3.1
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.0 | Last Update : 14 September 2026
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -1056,7 +1056,7 @@
         // beserta kolom Keterangan). Endpoint ini harus mendukung:
         //   GET  ?action=getValidasiAnggota           -> { status, data: [...] }
         //   POST { action: "updateKeterangan", id, keterangan }
-        const URL_VALIDASI_ANGGOTA = "https://script.google.com/macros/s/AKfycbzbwZEJ6V9_ACSxpGo2glmZQsvOKb2oiHWst8OhJ-1rora1wQkmjXa9vZveyKpTW8T9/exec";
+        const URL_VALIDASI_ANGGOTA = "https://script.google.com/macros/s/AKfycbwVL2scOcgjzeyb1GQrXkMCSeui_bN5PJNkEim8ajBhKnG0nftu2puDC7kV7IZpnUGo/exec";
 
         const PASSWORD_ADMIN = "mztxa2026";
         let statusAdminTerverifikasi = false;
@@ -1066,8 +1066,8 @@
         let dropdownMisTerbuka = false;
 
         const listStaf = [
-            "Casdi", "M. Abunudin", "Nono Sutrisno", "Eka Ramadhan", "Perdi Irawan Saputra", "Indah Rahmayani", "Muhammad Sandi", 
-            "Rangga Erlando", "Ari Sundapa", 
+            "Nono Sutrisno", "Eka Ramadhan", "Perdi Irawan Saputra", "Indah Rahmayani", "Dikky Hermawan", "Muhammad Sandi", 
+            "Ikeu Ekayanti", "Rangga Erlando", "Ari Sundapa", 
             "Desta Adi Triana", "Agil Leo Saputra","Muhamad Rizki Nugraha"
         ];
 
@@ -1075,18 +1075,18 @@
         let dataDoublePerStaf = {};   // global: detail anggota double pinjaman per staf
 
         const defaultProgresList = [
-            { id: 1, tipe: "naik", nama: "Casdi", an: "Ibu Siti Aminah", ctr: "CTR-04B", nom: "Rp 2.450.000", status: "tidak" },
-            { id: 2, tipe: "turun", nama: "Nono Sutrisno", an: "Ibu Nurhayati", ctr: "CTR-07C", nom: "Rp 3.120.000", status: "terkonfirmasi" }
+            { id: 1, tipe: "naik", nama: "Cristiano Ronaldo", an: "Ibu Siti Aminah", ctr: "CTR-04B", nom: "Rp 2.450.000", status: "tidak" },
+            { id: 2, tipe: "turun", nama: "Bruno Fernandes", an: "Ibu Nurhayati", ctr: "CTR-07C", nom: "Rp 3.120.000", status: "terkonfirmasi" }
         ];
 
         const defaultRankingList = [
-            { id: 1, kat: "par", nama: "Iset Panji Nugraha", sub: "Staf Lapang 03", val: "Penurunan: -4.2%", img: "" },
-            { id: 2, kat: "db", nama: "Eka Ramadhan", sub: "Staf Lapang 12", val: "Total: Rp 125 Juta", img: "" }
+            { id: 1, kat: "par", nama: "Cristiano Ronaldo", sub: "Staf Lapang 03", val: "Penurunan: -4.2%", img: "" },
+            { id: 2, kat: "db", nama: "Bruno Fernandes", sub: "Staf Lapang 12", val: "Total: Rp 125 Juta", img: "" }
         ];
 
         // Default mock data untuk Laporan Harian jika belum ada data tersimpan di localstorage
         const defaultLaporanHarian = [
-            { id: 1716983000000, staf: "Casdi", tanggal: "2026-05-29", naikPar: 250000, turunPar: 1500000, angMasuk: 3, angKeluar: 1 }
+            { id: 1716983000000, staf: "Lola Dwi Setiawan", tanggal: "2026-05-29", naikPar: 250000, turunPar: 1500000, angMasuk: 3, angKeluar: 1 }
         ];
 
         window.onload = function() {
@@ -3589,13 +3589,15 @@
         function tampilkanTabelValidasiAnggota(dataArray) {
             const tbody = document.getElementById('tbody-validasi-anggota');
             if (!dataArray || dataArray.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">Tidak ada data anggota untuk staf ini.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 italic">Tidak ada data anggota untuk staf ini.</td></tr>`;
                 return;
             }
 
             let html = "";
             dataArray.forEach((item, idx) => {
                 const ket = (item.keterangan || "belum").toLowerCase();
+                const hari = item.hari || "Selasa"; // Default value jika kosong
+                
                 html += `
                     <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-900/40" data-id="${item.id ?? ""}">
                         <td class="py-3 px-4 text-center text-slate-500">${idx + 1}</td>
@@ -3603,7 +3605,18 @@
                         <td class="py-3 px-4 font-mono">${item.id ?? "-"}</td>
                         <td class="py-3 px-4 font-semibold text-slate-200">${item.namaAnggota ?? "-"}</td>
                         <td class="py-3 px-4 text-slate-300">${item.kondisiCenter ?? "-"}</td>
-                        <td class="py-3 px-4 text-slate-300">${item.hari ?? "-"}</td>
+                        <td class="py-3 px-4">
+                            <select onchange="updateHariValidasi('${item.id ?? ""}', this.value, this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                                <option value="">-- Pilih Hari --</option>
+                                <option value="Senin" ${hari === "Senin" ? "selected" : ""}>Senin</option>
+                                <option value="Selasa" ${hari === "Selasa" ? "selected" : ""}>Selasa</option>
+                                <option value="Rabu" ${hari === "Rabu" ? "selected" : ""}>Rabu</option>
+                                <option value="Kamis" ${hari === "Kamis" ? "selected" : ""}>Kamis</option>
+                                <option value="Jumat" ${hari === "Jumat" ? "selected" : ""}>Jumat</option>
+                                <option value="Sabtu" ${hari === "Sabtu" ? "selected" : ""}>Sabtu</option>
+                                <option value="Minggu" ${hari === "Minggu" ? "selected" : ""}>Minggu</option>
+                            </select>
+                        </td>
                         <td class="py-3 px-4">
                             <select onchange="updateKeteranganValidasi('${item.id ?? ""}', this.value, this)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer">
                                 <option value="belum" ${ket === "belum" ? "selected" : ""}>-- Belum --</option>
@@ -3622,7 +3635,9 @@
             const hasilFilter = dataStaf.filter(item => {
                 return String(item.namaAnggota ?? "").toLowerCase().includes(keyword) ||
                        String(item.id ?? "").toLowerCase().includes(keyword) ||
-                       String(item.kodeCenter ?? "").toLowerCase().includes(keyword);
+                       String(item.kodeCenter ?? "").toLowerCase().includes(keyword) ||
+                       String(item.hari ?? "").toLowerCase().includes(keyword) ||
+                       String(item.keterangan ?? "").toLowerCase().includes(keyword);
             });
             tampilkanTabelValidasiAnggota(hasilFilter);
         }
@@ -3645,12 +3660,43 @@
                 if (result.status !== "success") {
                     console.warn("Gagal simpan keterangan di server:", result.message);
                     alert("Gagal menyimpan perubahan ke server: " + result.message);
+                } else {
+                    console.log("✅ Keterangan berhasil diupdate:", keterangan);
                 }
             })
             .catch(err => {
                 if (selectEl) selectEl.disabled = false;
-                console.warn("Gagal koneksi saat update keterangan:", err);
-                alert("Gagal terhubung ke server saat menyimpan perubahan.");
+                console.error("❌ Error update keterangan:", err);
+                alert("Gagal menghubungi server. Cek koneksi internet Anda.");
+            });
+        }
+
+        function updateHariValidasi(id, hari, selectEl) {
+            if (selectEl) selectEl.disabled = true;
+
+            // Update cache lokal dulu supaya UI langsung responsif
+            const idx = databaseValidasiAnggota.findIndex(item => String(item.id) === String(id));
+            if (idx !== -1) databaseValidasiAnggota[idx].hari = hari;
+
+            fetch(URL_VALIDASI_ANGGOTA, {
+                method: "POST", mode: "cors",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "updateHari", data: { id, hari } })
+            })
+            .then(r => r.json())
+            .then(result => {
+                if (selectEl) selectEl.disabled = false;
+                if (result.status !== "success") {
+                    console.warn("Gagal simpan hari di server:", result.message);
+                    alert("Gagal menyimpan perubahan ke server: " + result.message);
+                } else {
+                    console.log("✅ Hari berhasil diupdate:", hari);
+                }
+            })
+            .catch(err => {
+                if (selectEl) selectEl.disabled = false;
+                console.error("❌ Error update hari:", err);
+                alert("Gagal menghubungi server. Cek koneksi internet Anda.");
             });
         }
 
