@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.0 | Last Update : 14 September 2026
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.1 | Last Update : 28 September 2026
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -105,9 +105,6 @@
                             </button>
                             <button onclick="gantiTab('db-monitoring-staf')" id="btn-db-monitoring-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                 <i class="fas fa-binoculars text-[10px] w-4 text-center"></i> Monitoring By Staf
-                            </button>
-                            <button onclick="gantiTab('db-validasi-anggota')" id="btn-db-validasi-anggota" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                                <i class="fas fa-user-check text-[10px] w-4 text-center"></i> Validasi Data Anggota
                             </button>
                         </div>
                     </div>
@@ -3429,36 +3426,118 @@
         }
 
         function muatMonitoringByStaf() {
-            const urlRequest = `${"https://script.google.com/macros/s/AKfycbwdrCdSZ1Khm_sdIActhsy6g3EhutcnVXWLfoBsJrzjFYsIpncCITYBtVhmexndG8pi/exec"}?action=getCapaianStafMandiri`;
+            // Endpoint lama untuk data total tunggakan monitoring.
+            // Tidak diubah agar fungsi submenu lain tetap menggunakan endpoint-nya masing-masing.
+            const urlMonitoring = `${"https://script.google.com/macros/s/AKfycbwdrCdSZ1Khm_sdIActhsy6g3EhutcnVXWLfoBsJrzjFYsIpncCITYBtVhmexndG8pi/exec"}?action=getCapaianStafMandiri`;
+
+            // Endpoint spreadsheet Belum_Monitoring yang sudah digunakan oleh
+            // fitur "Lihat Data Belum Dimonitoring".
+            // Jika Code.gs server sudah mengirim kolom Jumlah Anggota sebagai
+            // jumlahAnggota, nilainya akan digunakan di card.
+            const urlJumlahAnggota = `${URL_BELUM_MONITORING_MANDIRI}?action=getBelumMonitoring`;
+
             const container = document.getElementById('container-monitoring-staf');
 
             container.innerHTML = `<p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>`;
 
-            fetch(urlRequest)
-                .then(response => response.json())
-                .then(response => {
-                    if (response.status === "success") {
-                        tampilkanMonitoringByStaf(response.data);
-                    } else {
-                        container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data monitoring: ${response.message}</p>`;
+            Promise.all([
+                fetch(urlMonitoring).then(response => response.json()),
+                fetch(urlJumlahAnggota).then(response => response.json())
+            ])
+                .then(([responseMonitoring, responseJumlahAnggota]) => {
+                    if (responseMonitoring.status !== "success") {
+                        throw new Error(responseMonitoring.message || "Data monitoring gagal dimuat.");
                     }
+
+                    // Data jumlah anggota dibuat opsional supaya fungsi Monitoring By Staf
+                    // tetap dapat menampilkan data lama apabila endpoint kedua sedang tidak tersedia.
+                    const dataJumlahAnggota = responseJumlahAnggota && responseJumlahAnggota.status === "success"
+                        ? (responseJumlahAnggota.data || [])
+                        : [];
+
+                    tampilkanMonitoringByStaf(responseMonitoring.data || [], dataJumlahAnggota);
                 })
                 .catch(error => {
-                    console.error("Koneksi Error:", error);
-                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal terhubung ke web app Google Sheets.</p>`;
+                    console.error("Koneksi Error Monitoring By Staf:", error);
+                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data Monitoring By Staf: ${error.message || 'Terjadi kesalahan koneksi.'}</p>`;
                 });
         }
 
-        function tampilkanMonitoringByStaf(dataSemua) {
+        function tampilkanMonitoringByStaf(dataSemua, dataJumlahAnggota) {
             const container = document.getElementById('container-monitoring-staf');
             let htmlCard = "";
             let grandTotal = 0;
 
+            // ============================================================
+            // BUAT MAP JUMLAH ANGGOTA PER STAF
+            // ============================================================
+            const jumlahAnggotaByStaf = {};
+
+            (dataJumlahAnggota || []).forEach(item => {
+                const nama = String(item.namaStaf || '').trim();
+                if (!nama) return;
+
+                const key = nama.toLowerCase().replace(/\s+/g, ' ');
+
+                // Prioritas: nilai manual "Jumlah Anggota" dari spreadsheet.
+                // Beberapa versi Code.gs mungkin memakai nama property berbeda,
+                // sehingga dibuat fleksibel tanpa mengubah struktur submenu lain.
+                const nilai = item.jumlahAnggota ??
+                              item.jumlah_anggota ??
+                              item.totalAnggota ??
+                              item.anggota;
+
+                if (nilai !== undefined && nilai !== null && nilai !== '') {
+                    jumlahAnggotaByStaf[key] = Number(nilai) || 0;
+                }
+            });
+
+            // Jika endpoint monitoring sudah mengirim jumlahAnggota,
+            // gunakan juga sebagai fallback.
+            (dataSemua || []).forEach(item => {
+                const nama = String(item.namaStaf || '').trim();
+                if (!nama) return;
+
+                const key = nama.toLowerCase().replace(/\s+/g, ' ');
+                const nilai = item.jumlahAnggota ?? item.jumlah_anggota ?? item.totalAnggota ?? item.anggota;
+
+                if (jumlahAnggotaByStaf[key] === undefined && nilai !== undefined && nilai !== null && nilai !== '') {
+                    jumlahAnggotaByStaf[key] = Number(nilai) || 0;
+                }
+            });
+
             listStaf.forEach(staf => {
-                // Ambil semua data Januari - Desember milik staf ini lalu totalkan sisa tunggakannya
-                const dataStaf = (dataSemua || []).filter(item => item.namaStaf.toLowerCase() === staf.toLowerCase());
-                const totalTunggakan = dataStaf.reduce((acc, item) => acc + (Number(item.sisaMonitoring) || 0), 0);
+                const namaStafNormal = String(staf || '').trim().toLowerCase();
+
+                // Data monitoring lama tetap digunakan untuk menghitung total tunggakan.
+                const dataStaf = (dataSemua || []).filter(item =>
+                    String(item.namaStaf || '').trim().toLowerCase() === namaStafNormal
+                );
+
+                const totalTunggakan = dataStaf.reduce(
+                    (acc, item) => acc + (Number(item.sisaMonitoring) || 0),
+                    0
+                );
+
                 grandTotal += totalTunggakan;
+
+                // Ambil jumlah anggota manual berdasarkan NamaStaf.
+                let jumlahAnggota = Number(jumlahAnggotaByStaf[namaStafNormal]) || 0;
+
+                // Fallback pencocokan nama jika ada perbedaan spasi/penulisan kecil.
+                if (jumlahAnggota === 0) {
+                    const kandidat = Object.keys(jumlahAnggotaByStaf)
+                        .filter(key => key === namaStafNormal || key.startsWith(namaStafNormal + ' ') || namaStafNormal.startsWith(key + ' '))
+                        .sort((a, b) => b.length - a.length);
+
+                    if (kandidat.length > 0) {
+                        jumlahAnggota = Number(jumlahAnggotaByStaf[kandidat[0]]) || 0;
+                    }
+                }
+
+                // Maksimal monitoring tertunggak = Jumlah Anggota x 5%,
+                // dan selalu dibulatkan ke atas.
+                const maksimalMonitoringTertunggak = Math.ceil(jumlahAnggota * 0.05);
 
                 htmlCard += `
                     <div class="bg-slate-950/60 border border-slate-800 hover:border-amber-500/40 p-4 rounded-2xl shadow-md transition-all">
@@ -3468,10 +3547,24 @@
                             </div>
                             <h3 class="font-bold text-slate-100 text-sm truncate">${staf}</h3>
                         </div>
-                        <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
-                            <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
-                            <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                                <span class="text-xs text-slate-400 font-medium">Jumlah Anggota:</span>
+                                <span class="font-mono font-bold text-slate-200 bg-slate-800/70 px-2 py-1 rounded border border-slate-700 text-xs">${jumlahAnggota.toLocaleString('id-ID')}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-indigo-500/5 p-2.5 rounded-xl border border-indigo-500/15">
+                                <span class="text-xs text-slate-400 font-medium">Maksimal Monitoring yang Tertunggak:</span>
+                                <span class="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20 text-xs">${maksimalMonitoringTertunggak.toLocaleString('id-ID')}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                                <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
+                                <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
+                            </div>
                         </div>
+
                         <button onclick="bukaModalBelumMonitoringStaf('${staf}')" class="w-full mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 py-2 rounded-lg cursor-pointer transition-all">
                             <i class="fas fa-eye"></i> Lihat Data Belum Dimonitoring
                         </button>
@@ -3744,7 +3837,7 @@
         function sinkronBelumMonitoring(btn, stafFilter) {
             const tbody = document.getElementById('tbody-belum-monitoring');
 
-            if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
+            if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("https://script.google.com/macros/s/AKfycbw0TtX3tj3urL7pw_Im5ZCKb4tBxR7ExSMigDzGfs_spBPqnzgMRT3o-0hA3AZ5B0oc/exec")) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-amber-400 italic">URL_BELUM_MONITORING_MANDIRI belum diisi di dalam script (hubungi admin/developer).</td></tr>`;
                 return;
             }
