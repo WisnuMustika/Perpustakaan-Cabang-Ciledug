@@ -3563,6 +3563,11 @@
                                 <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
                                 <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
                             </div>
+                            ${totalTunggakan > maksimalMonitoringTertunggak ? `
+                            <div class="flex items-center gap-2 bg-rose-500/10 border border-rose-500/40 rounded-xl p-3" role="status">
+                                <i class="fas fa-exclamation-triangle text-rose-400"></i>
+                                <span class="text-xs font-bold text-rose-300">Rekomendasi BBM di tahan</span>
+                            </div>` : ''}
                         </div>
 
                         <button onclick="bukaModalBelumMonitoringStaf('${staf}')" class="w-full mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 py-2 rounded-lg cursor-pointer transition-all">
