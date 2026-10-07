@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.1 | Last Update : 28 September 2026
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.2 | Last Update : 07 Oktober 2026
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -967,6 +967,29 @@
                     <i class="fas fa-times text-xs"></i>
                 </button>
             </div>
+
+            <!-- Pencarian anggota belum monitoring -->
+            <div class="px-5 pt-3 shrink-0">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"></i>
+                    <input
+                        type="text"
+                        id="cari-modal-belum-monitoring"
+                        oninput="cariModalBelumMonitoringStaf()"
+                        placeholder="Cari nama, ID, no. pinjaman, atau center..."
+                        autocomplete="off"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-9 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                    <button
+                        id="btn-reset-cari-modal-belum-monitoring"
+                        type="button"
+                        onclick="resetCariModalBelumMonitoringStaf()"
+                        class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-all cursor-pointer"
+                        title="Hapus pencarian">
+                        <i class="fas fa-times text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
             <div id="modal-belum-monitoring-body" class="overflow-y-auto px-5 py-4 space-y-3 flex-1">
             </div>
         </div>
@@ -3362,12 +3385,24 @@
         // Diklik dari tombol "Lihat Data Belum Dimonitoring" pada card staf
         // Menampilkan langsung daftar nama anggota dalam modal (data diambil dari
         // URL_BELUM_MONITORING_MANDIRI yang sudah di-hardcode di script)
+        // Data yang sedang ditampilkan pada modal Monitoring By Staf.
+        // Disimpan terpisah agar pencarian hanya bekerja pada staf yang sedang dipilih.
+        let dataModalBelumMonitoringStaf = [];
+
         function bukaModalBelumMonitoringStaf(namaStaf) {
             const modal = document.getElementById('modal-belum-monitoring-staf');
             const judul = document.getElementById('modal-belum-monitoring-judul');
             const body = document.getElementById('modal-belum-monitoring-body');
+            const kolomCari = document.getElementById('cari-modal-belum-monitoring');
 
             judul.textContent = `Belum Dimonitoring — ${namaStaf}`;
+            dataModalBelumMonitoringStaf = [];
+
+            if (kolomCari) {
+                kolomCari.value = '';
+                const btnReset = document.getElementById('btn-reset-cari-modal-belum-monitoring');
+                if (btnReset) btnReset.classList.add('hidden');
+            }
 
             if (!URL_BELUM_MONITORING_MANDIRI || URL_BELUM_MONITORING_MANDIRI.includes("GANTI_DENGAN_URL_DEPLOY_ANDA")) {
                 body.innerHTML = `<p class="text-amber-400 text-sm text-center py-8">URL_BELUM_MONITORING_MANDIRI belum diisi di dalam script.<br>Hubungi admin/developer untuk mengisi URL Web App-nya.</p>`;
@@ -3382,10 +3417,15 @@
 
             ambilDataBelumMonitoringDariServer()
                 .then(data => {
-                    const hasilFilter = (data || []).filter(item =>
+                    dataModalBelumMonitoringStaf = (data || []).filter(item =>
                         String(item.namaStaf || "").toLowerCase().trim() === namaStaf.toLowerCase().trim()
                     );
-                    renderModalBelumMonitoringStaf(hasilFilter);
+                    renderModalBelumMonitoringStaf(dataModalBelumMonitoringStaf);
+
+                    // Langsung fokus ke kolom pencarian setelah data selesai dimuat.
+                    if (kolomCari) {
+                        setTimeout(() => kolomCari.focus(), 100);
+                    }
                 })
                 .catch(error => {
                     body.innerHTML = `<p class="text-rose-400 text-sm text-center py-8">Gagal memuat data: ${error.message}</p>`;
@@ -3419,10 +3459,60 @@
             body.innerHTML = html;
         }
 
+        // Pencarian realtime pada daftar anggota di modal.
+        // Bisa mencari berdasarkan nama anggota, ID, nomor pinjaman, atau center.
+        function cariModalBelumMonitoringStaf() {
+            const kolomCari = document.getElementById('cari-modal-belum-monitoring');
+            const btnReset = document.getElementById('btn-reset-cari-modal-belum-monitoring');
+            if (!kolomCari) return;
+
+            const keyword = kolomCari.value.toLowerCase().trim();
+
+            if (btnReset) {
+                btnReset.classList.toggle('hidden', keyword === '');
+            }
+
+            const hasilFilter = dataModalBelumMonitoringStaf.filter(item => {
+                return String(item.namaAnggota || '').toLowerCase().includes(keyword) ||
+                       String(item.id || '').toLowerCase().includes(keyword) ||
+                       String(item.noPinjaman || '').toLowerCase().includes(keyword) ||
+                       String(item.kodeCenter || '').toLowerCase().includes(keyword);
+            });
+
+            if (keyword && hasilFilter.length === 0) {
+                document.getElementById('modal-belum-monitoring-body').innerHTML =
+                    `<div class="text-center py-8">
+                        <i class="fas fa-search text-slate-600 text-2xl mb-2"></i>
+                        <p class="text-slate-400 text-sm">Nama/data yang dicari tidak ditemukan.</p>
+                        <p class="text-slate-600 text-xs mt-1">Coba gunakan nama, ID, no. pinjaman, atau center.</p>
+                    </div>`;
+                return;
+            }
+
+            renderModalBelumMonitoringStaf(hasilFilter);
+        }
+
+        function resetCariModalBelumMonitoringStaf() {
+            const kolomCari = document.getElementById('cari-modal-belum-monitoring');
+            if (!kolomCari) return;
+
+            kolomCari.value = '';
+            const btnReset = document.getElementById('btn-reset-cari-modal-belum-monitoring');
+            if (btnReset) btnReset.classList.add('hidden');
+
+            renderModalBelumMonitoringStaf(dataModalBelumMonitoringStaf);
+            kolomCari.focus();
+        }
+
         function tutupModalBelumMonitoringStaf(event) {
             if (event && event.target !== document.getElementById('modal-belum-monitoring-staf')) return;
             document.getElementById('modal-belum-monitoring-staf').classList.add('hidden');
             document.body.style.overflow = '';
+
+            const kolomCari = document.getElementById('cari-modal-belum-monitoring');
+            if (kolomCari) kolomCari.value = '';
+            const btnReset = document.getElementById('btn-reset-cari-modal-belum-monitoring');
+            if (btnReset) btnReset.classList.add('hidden');
         }
 
         function muatMonitoringByStaf() {
@@ -3539,6 +3629,28 @@
                 // dan selalu dibulatkan ke atas.
                 const maksimalMonitoringTertunggak = Math.ceil(jumlahAnggota * 0.05);
 
+                // ============================================================
+                // ALASAN REKOMENDASI BBM DITAHAN
+                // 1. Total tunggakan > maksimal monitoring tertunggak.
+                // 2. Ada anggota yang belum dimonitoring > 14 hari sejak tanggal cair.
+                // Data tanggal cair diambil dari sumber yang sama dengan
+                // tombol "Lihat Data Belum Dimonitoring".
+                // ============================================================
+                const dataBelumMonitoringStaf = (dataJumlahAnggota || []).filter(item =>
+                    String(item.namaStaf || '').trim().toLowerCase() === namaStafNormal
+                );
+
+                const adaBelumMonitoringLebih14Hari = dataBelumMonitoringStaf.some(item =>
+                    isBelumMonitoringLebih14Hari(item.tanggalCair)
+                );
+
+                const alasanTunggakan = totalTunggakan > maksimalMonitoringTertunggak;
+                const adaRekomendasiBBM = alasanTunggakan || adaBelumMonitoringLebih14Hari;
+
+                // Jika total tunggakan masih di bawah batas maksimal monitoring,
+                // tampilkan notifikasi bahwa BBM dapat cair.
+                const bbmCair = totalTunggakan < maksimalMonitoringTertunggak;
+
                 htmlCard += `
                     <div class="bg-slate-950/60 border border-slate-800 hover:border-amber-500/40 p-4 rounded-2xl shadow-md transition-all">
                         <div class="flex items-center gap-3 mb-3 border-b border-slate-800/60 pb-3">
@@ -3563,11 +3675,29 @@
                                 <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
                                 <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
                             </div>
-                            ${totalTunggakan > maksimalMonitoringTertunggak ? `
-                            <div class="flex items-center gap-2 bg-rose-500/10 border border-rose-500/40 rounded-xl p-3" role="status">
-                                <i class="fas fa-exclamation-triangle text-rose-400"></i>
-                                <span class="text-xs font-bold text-rose-300">Rekomendasi BBM di tahan</span>
-                            </div>` : ''}
+                            ${adaRekomendasiBBM ? `
+                            <div class="bg-rose-500/10 border border-rose-500/40 rounded-xl p-3" role="status">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="fas fa-exclamation-triangle text-rose-400"></i>
+                                    <span class="text-xs font-bold text-rose-300">Rekomendasi BBM di tahan</span>
+                                </div>
+                                <div class="space-y-1.5 pl-5">
+                                    ${alasanTunggakan ? `
+                                    <div class="text-[11px] leading-relaxed text-rose-200">
+                                        <span class="font-bold">• Alasan Pertama:</span> Jumlah tunggakan lebih besar dari maksimal monitoring yang tertunggak (Jumlah Anggota dikali 5%).
+                                    </div>` : ''}
+                                    ${adaBelumMonitoringLebih14Hari ? `
+                                    <div class="text-[11px] leading-relaxed text-rose-200">
+                                        <span class="font-bold">• Alasan Kedua:</span> Belum di monitoring lebih dari 2 minggu / 14 hari setelah tanggal cair.
+                                    </div>` : ''}
+                                </div>
+                            </div>` : (bbmCair ? `
+                            <div class="bg-emerald-500/10 border border-emerald-500/40 rounded-xl p-3" role="status">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-check-circle text-emerald-400"></i>
+                                    <span class="text-xs font-bold text-emerald-300">Alhamdulillah BBM cair 🥳</span>
+                                </div>
+                            </div>` : '')}
                         </div>
 
                         <button onclick="bukaModalBelumMonitoringStaf('${staf}')" class="w-full mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 py-2 rounded-lg cursor-pointer transition-all">
@@ -3806,6 +3936,28 @@
         // =========================================================================
         let databaseBelumMonitoring = [];
         let stafFilterTargetBelumMonitoring = null;
+
+        // Cek apakah tanggal cair sudah lebih dari 14 hari dari hari ini.
+        // Menangani ISO string maupun serial number Google Sheets.
+        function isBelumMonitoringLebih14Hari(value) {
+            if (!value && value !== 0) return false;
+
+            let dateObj = null;
+            if (typeof value === 'number') {
+                dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
+            } else {
+                dateObj = new Date(value);
+            }
+
+            if (isNaN(dateObj.getTime())) return false;
+
+            const hariIni = new Date();
+            hariIni.setHours(0, 0, 0, 0);
+            dateObj.setHours(0, 0, 0, 0);
+
+            const selisihHari = Math.floor((hariIni.getTime() - dateObj.getTime()) / 86400000);
+            return selisihHari > 14;
+        }
 
         // Format tanggal cair (menangani ISO string ataupun serial number dari Google Sheets)
         function formatTglCairBelumMonitoring(value) {
