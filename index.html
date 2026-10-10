@@ -24,7 +24,7 @@
                 SELAMAT DATANG DI SISTEM INTERNAL
             </h1>
             <p class="text-slate-400 text-lg mb-8">
-                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.2 | Last Update : 07 Oktober 2026
+                Database Cabang Ciledug 2026 | By : Wisnu Mustika Adhi | v3.4.3 | Last Update : 12 Oktober 2026
             </p>
             
             <button id="btn-mulai-akses" onclick="bukaMenuUtama(this)" class="cursor-pointer bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg">
@@ -104,7 +104,10 @@
                                 <i class="fas fa-file-invoice text-[10px] w-4 text-center"></i> Isi Laporan Harian
                             </button>
                             <button onclick="gantiTab('db-monitoring-staf')" id="btn-db-monitoring-staf" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                                <i class="fas fa-binoculars text-[10px] w-4 text-center"></i> Monitoring By Staf
+                                <i class="fas fa-binoculars text-[10px] w-4 text-center"></i> Monitoring 2026
+                            </button>
+                            <button onclick="gantiTab('db-monitoring-2025')" id="btn-db-monitoring-2025" class="sub-tab-btn w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg text-left text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                <i class="fas fa-history text-[10px] w-4 text-center"></i> Monitoring 2025
                             </button>
                         </div>
                     </div>
@@ -328,13 +331,24 @@
                                 <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
                             </div>
 
-                            <!-- Sub Menu 6: Monitoring By Staf -->
+                            <!-- Sub Menu 6: Monitoring 2026 -->
                             <div class="border-l-3 border-cyan-500 pl-4">
                                 <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
-                                    <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
+                                    <i class="fas fa-binoculars text-amber-400"></i> Monitoring 2026
                                 </h4>
                                 <p class="text-slate-400 text-sm mb-2">
                                     <span class="font-semibold text-slate-300">Fungsi:</span> Rekap atau sisa tunggakan monitoring staf
+                                </p>
+                                <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
+                            </div>
+
+                            <!-- Sub Menu: Monitoring 2025 -->
+                            <div class="border-l-3 border-cyan-500 pl-4">
+                                <h4 class="text-base font-bold text-slate-100 flex items-center gap-2 mb-1">
+                                    <i class="fas fa-history text-amber-400"></i> Monitoring 2025
+                                </h4>
+                                <p class="text-slate-400 text-sm mb-2">
+                                    <span class="font-semibold text-slate-300">Fungsi:</span> Rekap sisa tunggakan monitoring staf untuk pencairan tahun 2025
                                 </p>
                                 <p class="text-xs text-slate-500">📅 Update Setiap Hari Nya</p>
                             </div>
@@ -631,11 +645,11 @@
                 </div>
             </section>
 
-            <!-- SUB MENU: MONITORING BY STAF -->
+            <!-- SUB MENU: Monitoring 2026 -->
             <section id="content-db-monitoring-staf" class="tab-content hidden animate-fade-in">
                 <header class="mb-6">
                     <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
-                        <i class="fas fa-binoculars text-amber-400"></i> Monitoring By Staf
+                        <i class="fas fa-binoculars text-amber-400"></i> Monitoring 2026
                     </h2>
                     <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Januari 2026 Sampai Dengan Desember 2026) Hanya Pencairan Umum dan Mikrobisnis Saja</p>
                     <div id="total-keseluruhan-monitoring" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
@@ -647,6 +661,26 @@
                 </header>
 
                 <div id="container-monitoring-staf" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    <p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>
+                </div>
+            </section>
+
+            <!-- SUB MENU: MONITORING 2025 -->
+            <section id="content-db-monitoring-2025" class="tab-content hidden animate-fade-in">
+                <header class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
+                        <i class="fas fa-history text-amber-400"></i> Monitoring 2025
+                    </h2>
+                    <p class="text-slate-400 text-sm">Total tunggakan monitoring per staf (Pencairan Januari 2025 Sampai Dengan Desember 2025) Hanya Pencairan Umum dan Mikrobisnis Saja</p>
+                    <div id="total-keseluruhan-monitoring-2025" class="hidden mt-3 inline-flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2.5">
+                        <i class="fas fa-calculator text-amber-400 text-sm"></i>
+                        <span class="text-sm text-slate-300">Total Keseluruhan Semua Staf:</span>
+                        <span id="angka-total-monitoring-2025" class="font-mono font-extrabold text-amber-400 text-base tracking-wide"></span>
+                        <span class="text-xs text-slate-500">tunggakan</span>
+                    </div>
+                </header>
+
+                <div id="container-monitoring-2025" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     <p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>
                 </div>
             </section>
@@ -950,6 +984,29 @@
         </div>
     </div>
 
+    <!-- MODAL: Data Belum Dimonitoring 2025 Per Staf -->
+    <div id="modal-monitoring-2025" class="hidden fixed inset-0 z-[999] flex items-end sm:items-center justify-center" style="background:rgba(2,6,23,0.80);backdrop-filter:blur(6px);" onclick="tutupModalMonitoring2025(event)">
+        <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-lg max-h-[85vh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-400 flex items-center justify-center"><i class="fas fa-clipboard-list text-sm"></i></div>
+                    <div>
+                        <h3 id="modal-monitoring-2025-judul" class="font-bold text-slate-100 text-sm">Belum Dimonitoring 2025</h3>
+                        <p class="text-[11px] text-slate-500">Daftar anggota yang belum dimonitoring</p>
+                    </div>
+                </div>
+                <button onclick="tutupModalMonitoring2025()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-all cursor-pointer"><i class="fas fa-times text-xs"></i></button>
+            </div>
+            <div class="px-5 pt-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400"><i class="fas fa-search text-xs"></i></span>
+                    <input type="text" id="cari-modal-monitoring-2025" oninput="cariModalMonitoring2025()" placeholder="Cari nama, id, no pinjaman, atau center..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                </div>
+            </div>
+            <div id="modal-monitoring-2025-body" class="overflow-y-auto px-5 py-4 space-y-3 flex-1"></div>
+        </div>
+    </div>
+
     <!-- MODAL: Data Belum Dimonitoring Per Staf -->
     <div id="modal-belum-monitoring-staf" class="hidden fixed inset-0 z-[999] flex items-end sm:items-center justify-center" style="background:rgba(2,6,23,0.80);backdrop-filter:blur(6px);" onclick="tutupModalBelumMonitoringStaf(event)">
         <div class="bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
@@ -1063,6 +1120,10 @@
         // "Belum_Monitoring" milik Anda. Karena ditulis langsung di sini (bukan
         // localStorage), semua user yang membuka dashboard akan otomatis membaca
         // data yang sama tanpa perlu setting apapun di perangkat masing-masing.
+        // ▼ URL Web App GS khusus MONITORING 2025 (mandiri, spreadsheet sendiri).
+        // Ganti dengan URL hasil Deploy dari Code_Monitoring2025.gs
+        const URL_MONITORING_2025 = "https://script.google.com/macros/s/AKfycbzCv9NgNLWidYTH4DAsOHLP7dyg4XuNdOXsbhJ8TBR0nLT0zJGvWPmtrLdEslMklKxSOw/exec";
+
         const URL_BELUM_MONITORING_MANDIRI = "https://script.google.com/macros/s/AKfycbw0TtX3tj3urL7pw_Im5ZCKb4tBxR7ExSMigDzGfs_spBPqnzgMRT3o-0hA3AZ5B0oc/exec";
 
         // GANTI URL DI BAWAH INI dengan URL Web App hasil Deploy dari Google Apps
@@ -2761,7 +2822,8 @@
             'db-progres-cabang': 'Progres Cabang',
             'db-Capaian-staf': 'Capaian Staf',
             'db-laporan-harian': 'Isi Laporan Harian',
-            'db-monitoring-staf': 'Monitoring By Staf',
+            'db-monitoring-staf': 'Monitoring 2026',
+            'db-monitoring-2025': 'Monitoring 2025',
             'db-validasi-anggota': 'Validasi Data Anggota',
             'mis-progres': 'Update Progres Kemarin',
             'mis-ranking': 'Update Ranking',
@@ -3146,6 +3208,10 @@
                 muatMonitoringByStaf();
             }
 
+            if (tabId === 'db-monitoring-2025') {
+                muatMonitoring2025();
+            }
+
             if (tabId === 'db-validasi-anggota') {
                 document.getElementById('validasi-anggota-view-tabel').classList.add('hidden');
                 document.getElementById('validasi-anggota-view-staf').classList.remove('hidden');
@@ -3379,13 +3445,13 @@
 
 
         // =========================================================================
-        // FITUR MANDIRI: SUB MENU MONITORING BY STAF (TOTAL SISA TUNGGAKAN JAN-DES)
+        // FITUR MANDIRI: SUB MENU Monitoring 2026 (TOTAL SISA TUNGGAKAN JAN-DES)
         // =========================================================================
 
         // Diklik dari tombol "Lihat Data Belum Dimonitoring" pada card staf
         // Menampilkan langsung daftar nama anggota dalam modal (data diambil dari
         // URL_BELUM_MONITORING_MANDIRI yang sudah di-hardcode di script)
-        // Data yang sedang ditampilkan pada modal Monitoring By Staf.
+        // Data yang sedang ditampilkan pada modal Monitoring 2026.
         // Disimpan terpisah agar pencarian hanya bekerja pada staf yang sedang dipilih.
         let dataModalBelumMonitoringStaf = [];
 
@@ -3539,7 +3605,7 @@
                         throw new Error(responseMonitoring.message || "Data monitoring gagal dimuat.");
                     }
 
-                    // Data jumlah anggota dibuat opsional supaya fungsi Monitoring By Staf
+                    // Data jumlah anggota dibuat opsional supaya fungsi Monitoring 2026
                     // tetap dapat menampilkan data lama apabila endpoint kedua sedang tidak tersedia.
                     const dataJumlahAnggota = responseJumlahAnggota && responseJumlahAnggota.status === "success"
                         ? (responseJumlahAnggota.data || [])
@@ -3548,8 +3614,8 @@
                     tampilkanMonitoringByStaf(responseMonitoring.data || [], dataJumlahAnggota);
                 })
                 .catch(error => {
-                    console.error("Koneksi Error Monitoring By Staf:", error);
-                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data Monitoring By Staf: ${error.message || 'Terjadi kesalahan koneksi.'}</p>`;
+                    console.error("Koneksi Error Monitoring 2026:", error);
+                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data Monitoring 2026: ${error.message || 'Terjadi kesalahan koneksi.'}</p>`;
                 });
         }
 
@@ -3714,6 +3780,182 @@
             const elAngka = document.getElementById('angka-total-monitoring');
             elAngka.textContent = grandTotal.toLocaleString('id-ID');
             elTotal.classList.remove('hidden');
+        }
+
+
+        // =========================================================================
+        // FITUR MANDIRI: SUB MENU MONITORING 2025
+        // Data 100% dari Google Spreadsheet/GS sendiri (URL_MONITORING_2025),
+        // TIDAK mengambil data dari submenu lain. Satu request berisi:
+        //   rekap  : [{ namaStaf, jumlahAnggota, sisaMonitoring }]
+        //   detail : [{ id, noPinjaman, namaAnggota, kodeCenter, tanggalCair, namaStaf }]
+        // =========================================================================
+        let dataRekapMonitoring2025 = [];
+        let dataDetailMonitoring2025 = [];
+        let dataModalMonitoring2025 = [];
+
+        function _urlMonitoring2025Valid() {
+            return URL_MONITORING_2025 && !URL_MONITORING_2025.includes("GANTI_DENGAN_URL_DEPLOY_ANDA");
+        }
+
+        function _normNamaStaf2025(v) {
+            return String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function ambilDataMonitoring2025() {
+            if (!_urlMonitoring2025Valid()) {
+                return Promise.reject(new Error("URL_MONITORING_2025 belum diisi di dalam script."));
+            }
+            return fetch(`${URL_MONITORING_2025}?action=getMonitoring2025`, { method: "GET", mode: "cors" })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status !== "success") throw new Error(result.message || "Gagal memuat data.");
+                    dataRekapMonitoring2025 = result.rekap || [];
+                    dataDetailMonitoring2025 = result.detail || [];
+                    return result;
+                });
+        }
+
+        function muatMonitoring2025() {
+            const container = document.getElementById('container-monitoring-2025');
+
+            if (!_urlMonitoring2025Valid()) {
+                container.innerHTML = `<p class="text-amber-400 italic text-sm col-span-full text-center py-8">URL_MONITORING_2025 belum diisi di dalam script (hubungi admin/developer).</p>`;
+                return;
+            }
+
+            container.innerHTML = `<p class="text-slate-400 italic text-sm col-span-full text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Menghubungkan ke server cloud...</p>`;
+
+            ambilDataMonitoring2025()
+                .then(() => tampilkanMonitoring2025())
+                .catch(error => {
+                    console.error("Koneksi Error Monitoring 2025:", error);
+                    container.innerHTML = `<p class="text-rose-400 italic text-sm col-span-full text-center py-4">Gagal memuat data Monitoring 2025: ${error.message || 'Terjadi kesalahan koneksi.'}</p>`;
+                });
+        }
+
+        function tampilkanMonitoring2025() {
+            const container = document.getElementById('container-monitoring-2025');
+            let htmlCard = "";
+            let grandTotal = 0;
+
+            const rekapByStaf = {};
+            dataRekapMonitoring2025.forEach(item => {
+                const key = _normNamaStaf2025(item.namaStaf);
+                if (key) rekapByStaf[key] = item;
+            });
+
+            listStaf.forEach(staf => {
+                const key = _normNamaStaf2025(staf);
+                const rekap = rekapByStaf[key] || {};
+
+                const jumlahAnggota = Number(rekap.jumlahAnggota) || 0;
+                const totalTunggakan = Number(rekap.sisaMonitoring) || 0;
+                const maksimalMonitoringTertunggak = Math.ceil(jumlahAnggota * 0.05);
+
+                grandTotal += totalTunggakan;
+
+                htmlCard += `
+                    <div class="bg-slate-950/60 border border-slate-800 hover:border-amber-500/40 p-4 rounded-2xl shadow-md transition-all">
+                        <div class="flex items-center gap-3 mb-3 border-b border-slate-800/60 pb-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+                                <i class="fas fa-user text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-100 text-sm truncate">${staf}</h3>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                                <span class="text-xs text-slate-400 font-medium">Jumlah Anggota:</span>
+                                <span class="font-mono font-bold text-slate-200 bg-slate-800/70 px-2 py-1 rounded border border-slate-700 text-xs">${jumlahAnggota.toLocaleString('id-ID')}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-indigo-500/5 p-2.5 rounded-xl border border-indigo-500/15">
+                                <span class="text-xs text-slate-400 font-medium">Maksimal Monitoring yang Tertunggak:</span>
+                                <span class="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20 text-xs">${maksimalMonitoringTertunggak.toLocaleString('id-ID')}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/50">
+                                <span class="text-xs text-slate-400 font-medium">Total Tunggakan Monitoring:</span>
+                                <span class="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 text-xs">${totalTunggakan}</span>
+                            </div>
+                        </div>
+
+                        <button onclick="bukaModalMonitoring2025(this.dataset.staf)" data-staf="${String(staf).replace(/"/g, '&quot;')}" class="w-full mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 py-2 rounded-lg cursor-pointer transition-all">
+                            <i class="fas fa-eye"></i> Lihat Data Belum Dimonitoring
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlCard || `<p class="text-slate-500 italic text-sm col-span-full text-center py-8">Belum ada data staf.</p>`;
+
+            document.getElementById('angka-total-monitoring-2025').textContent = grandTotal.toLocaleString('id-ID');
+            document.getElementById('total-keseluruhan-monitoring-2025').classList.remove('hidden');
+        }
+
+        function bukaModalMonitoring2025(namaStaf) {
+            const modal = document.getElementById('modal-monitoring-2025');
+            const kolomCari = document.getElementById('cari-modal-monitoring-2025');
+
+            document.getElementById('modal-monitoring-2025-judul').textContent = `Belum Dimonitoring 2025 — ${namaStaf}`;
+            if (kolomCari) kolomCari.value = '';
+
+            const key = _normNamaStaf2025(namaStaf);
+            dataModalMonitoring2025 = dataDetailMonitoring2025.filter(item => _normNamaStaf2025(item.namaStaf) === key);
+            renderModalMonitoring2025(dataModalMonitoring2025);
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderModalMonitoring2025(list) {
+            const body = document.getElementById('modal-monitoring-2025-body');
+
+            if (!list || list.length === 0) {
+                body.innerHTML = `<p class="text-slate-500 italic text-sm text-center py-8">🎉 Tidak ada data belum dimonitoring untuk staf ini.</p>`;
+                return;
+            }
+
+            let html = `<p class="text-xs text-slate-400 mb-3">${list.length} anggota belum dimonitoring:</p><div class="space-y-2">`;
+            list.forEach((item, idx) => {
+                html += `
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+                        <div class="flex items-start justify-between gap-2 mb-1.5">
+                            <span class="font-bold text-slate-100 text-sm">${idx + 1}. ${item.namaAnggota || "-"}</span>
+                            <span class="bg-slate-800 px-2 py-0.5 rounded text-indigo-400 font-mono font-bold text-[11px] shrink-0">${item.kodeCenter || "-"}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-400">
+                            <div>Id: <span class="text-slate-300 font-mono">${item.id || "-"}</span></div>
+                            <div>No Pinjaman: <span class="text-slate-300 font-mono">${item.noPinjaman || "-"}</span></div>
+                            <div class="col-span-2">Tanggal Cair: <span class="text-slate-300">${formatTglCairBelumMonitoring(item.tanggalCair)}</span></div>
+                        </div>
+                    </div>`;
+            });
+            html += `</div>`;
+            body.innerHTML = html;
+        }
+
+        function cariModalMonitoring2025() {
+            const keyword = document.getElementById('cari-modal-monitoring-2025').value.toLowerCase().trim();
+            const hasil = dataModalMonitoring2025.filter(item =>
+                String(item.namaAnggota ?? "").toLowerCase().includes(keyword) ||
+                String(item.id ?? "").toLowerCase().includes(keyword) ||
+                String(item.noPinjaman ?? "").toLowerCase().includes(keyword) ||
+                String(item.kodeCenter ?? "").toLowerCase().includes(keyword)
+            );
+            if (hasil.length === 0) {
+                document.getElementById('modal-monitoring-2025-body').innerHTML =
+                    `<p class="text-slate-500 italic text-sm text-center py-8">Data tidak ditemukan.</p>`;
+                return;
+            }
+            renderModalMonitoring2025(hasil);
+        }
+
+        function tutupModalMonitoring2025(event) {
+            if (event && event.target !== document.getElementById('modal-monitoring-2025')) return;
+            document.getElementById('modal-monitoring-2025').classList.add('hidden');
+            document.body.style.overflow = '';
         }
 
         // =========================================================================
